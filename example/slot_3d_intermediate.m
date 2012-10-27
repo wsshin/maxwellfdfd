@@ -1,5 +1,9 @@
 clear all; close all; clear classes; clc;
 
+%% Set flags.
+isnew = true;
+inspect_only = false;
+
 %% Construct parameters.
 L0 = 1e-9;
 wvlen = 1550;
@@ -25,10 +29,14 @@ src = DistributedSrc(Axis.z, 200, 2.0);
 
 
 %% Solve the system.
-inspect_only = true;
-[E, H, obj_array, err] = ...
-	maxwell_run(osc, domain_silica, [BC.p BC.p; BC.p BC.p; BC.p BC.p], [200 200 200], refined_domain_silica, film1_Ag, film2_Ag, src, inspect_only);
+if isnew
+	[E, H, obj_array, err] = ...
+		maxwell_run(osc, domain_silica, [BC.p BC.p; BC.p BC.p; BC.p BC.p], [200 200 200], refined_domain_silica, film1_Ag, film2_Ag, src, inspect_only);
 
+	save(mfilename, 'E', 'H', 'obj_array');
+else
+	load(mfilename);
+end
 
 %% Visualize the solution.
 if ~inspect_only

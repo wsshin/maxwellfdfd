@@ -1,16 +1,17 @@
 clear all; close all; clear classes; clc;
 
-%% Solve the system.
-isnew = false;
+%% Set flags.
+isnew = true;
 inspect_only = false;
 
+%% Solve the system.
 if isnew
 	[E, H, obj_array] = maxwell_run(1e-9, 100, ...
 		{'vacuum', 'none', 1.0}, [-60, 60; -60, 60; 0, 1], 1, [BC.Et0 BC.Et0 BC.p], [10 10 0], ...
 		PointSrc(Axis.z, [0, 0, 0.5]), inspect_only);
-	save('pointsrc_2d_out', 'E', 'H', 'obj_array');
+	save(mfilename, 'E', 'H', 'obj_array');
 else
-	load('pointsrc_2d_out');
+	load(mfilename);
 end
 
 %% Visualize the solution.

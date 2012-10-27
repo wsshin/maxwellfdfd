@@ -1,5 +1,9 @@
 clear all; close all; clear classes; clc;
 
+%% Set flags.
+isnew = true;
+inspect_only = false;
+
 %% Create shapes.
 a = 420;  % lattice constant
 t = 0.6*a;  % slab thickness
@@ -21,16 +25,20 @@ hole_yp_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp);
 hole_array = [hole_yn_array, hole_yp_array];
 
 %% Solve the system.
+if isnew
 gray = [0.5 0.5 0.5];  % [r g b]
-withuniformgrid = true;
-inspect_only = true;
-[E, H, obj_array, err] = maxwell_run(1e-9, 1550, ...
-	{'vacuum', 'white', 1.0}, [-5.5*a, 5.5*a; -3.5*h, 3.5*h; -3*t, 3*t], [11*a/220, 7*h/71, t/td], BC.p, [2*a 0 t], withuniformgrid, ...
-	{'Palik/Si', gray}, slab, ...
-	{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yn), ...
-	{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp), ...
-	PointSrc(Axis.y, [0, 0, 0]), inspect_only);
+	withuniformgrid = true;
+	[E, H, obj_array, err] = maxwell_run(1e-9, 1550, ...
+		{'vacuum', 'white', 1.0}, [-5.5*a, 5.5*a; -3.5*h, 3.5*h; -3*t, 3*t], [11*a/220, 7*h/71, t/td], BC.p, [2*a 0 t], withuniformgrid, ...
+		{'Palik/Si', gray}, slab, ...
+		{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yn), ...
+		{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp), ...
+		PointSrc(Axis.y, [0, 0, 0]), inspect_only);
 
+	save(mfilename, 'E', 'H', 'obj_array');
+else
+	load(mfilename);
+end
 
 %% Visualize the solution.
 if ~inspect_only

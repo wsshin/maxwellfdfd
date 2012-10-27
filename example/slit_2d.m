@@ -1,9 +1,10 @@
 clear all; close all; clear classes; clc;
 
-%% Solve the system.
+%% Set flags.
+isnew = true;
 inspect_only = false;
-isnew = false;
 
+%% Solve the system.
 if isnew
 	gray = [0.5 0.5 0.5];  % [r g b]
 
@@ -30,9 +31,9 @@ if isnew
 	% 	{'vacuum', 'none', 1.0}, [-1070, 1070; -2500, 2500; 0, 10], 10, [BC.p BC.Et0 BC.p], [100 100 0],...
 	% 	PlaneSrc(Axis.y, -2000, Axis.x), inspect_only);
 	
-	save('slit_2d_out', 'E', 'H', 'obj_array');
+	save(mfilename, 'E', 'H', 'obj_array');
 else
-	load('slit_2d_out');
+	load(mfilename);
 end
 
 %% Visualize the solution.

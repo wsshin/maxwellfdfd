@@ -1,10 +1,18 @@
 clear all; close all; clear classes; clc;
 
-%% Solve the system.
+%% Set flags.
+isnew = true;
 inspect_only = false;
-[E, H, obj_array] = maxwell_run(1e-9, 100, ...
-	{'vacuum', 'none', 1.0}, [-50, 50; -60, 60; 0, 1], 1, [BC.p BC.Et0 BC.p], [0 10 0], ...
-	PlaneSrc(Axis.y, 0, Axis.z), inspect_only);  % PlaneSrc(plane_normal_axis, intercept, polarization_axis)
+
+%% Solve the system.
+if isnew
+	[E, H, obj_array] = maxwell_run(1e-9, 100, ...
+		{'vacuum', 'none', 1.0}, [-50, 50; -60, 60; 0, 1], 1, [BC.p BC.Et0 BC.p], [0 10 0], ...
+		PlaneSrc(Axis.y, 0, Axis.z), inspect_only);  % PlaneSrc(plane_normal_axis, intercept, polarization_axis)
+	save(mfilename, 'E', 'H', 'obj_array');
+else
+	load(mfilename);
+end
 
 %% Visualize the solution.
 figure

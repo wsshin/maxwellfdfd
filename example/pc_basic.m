@@ -1,8 +1,7 @@
 clear all; close all; clear classes; clc;
 
-%%
-isnew = false;
-% inspect_only = true;
+%% Set flags.
+isnew = true;
 inspect_only = false;
 
 %% Create shapes.
@@ -38,10 +37,11 @@ if isnew
 		{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp), ...
 		PointSrc(Axis.y, [0, 0, 0]), solveropts, inspect_only);
 
-	save('EH_PhC_basic.mat', 'E', 'H', 'obj_array');
+	save(mfilename, 'E', 'H', 'obj_array');
 else
-	load('EH_PhC_basic.mat');
+	load(mfilename);
 end
+
 
 %% Visualize the solution.
 if ~inspect_only

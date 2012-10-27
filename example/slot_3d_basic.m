@@ -1,7 +1,8 @@
 clear all; close all; clear classes; clc;
 
+%% Set flags.
 isnew = true;
-inspect_only = true;
+inspect_only = false;
 
 %% Solve the system.
 if isnew
@@ -28,9 +29,9 @@ if isnew
 % 		[Box([ -25, 25; -200, 1700; -700, -25], 20), Box([-25, 25; -200, 1700; 25, 700], 20)], ...
 % 		DistributedSrc(Axis.y, 200, 2.0), 1e-5, inspect_only);
 
-% 	save('EH_slot_basic.mat', 'E', 'H', 'obj_array');
+	save(mfilename, 'E', 'H', 'obj_array');
 else
-	load('EH_slot_basic.mat');
+	load(mfilename);
 end
 
 %% Visualize the solution.
