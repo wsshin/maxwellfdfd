@@ -245,7 +245,8 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	
     flip_array = @(F) flipdim(flipdim(flipdim(F, int(Axis.z)), int(Axis.y)), int(Axis.x));
     flip_vec = @(F_cell) {flip_array(F_cell{Axis.x}), flip_array(F_cell{Axis.y}), flip_array(F_cell{Axis.z})};
-	
+    neg_vec = @(F_cell) {-F_cell{Axis.x}, -F_cell{Axis.y}, -F_cell{Axis.z}};
+		
 % 	d_prim = grid3d.dl(:, GK.prim);
 % 	d_dual = grid3d.dl(:, GK.dual);
 % 	s_prim = s_factor(:, GK.prim);
@@ -254,8 +255,8 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
 	s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
 	s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
-	J = flip_vec(J);
-	E0 = flip_vec(E0);
+	J = neg_vec(flip_vec(J));
+	E0 = neg_vec(flip_vec(E0));
 	mu_edge = flip_vec(mu_edge);
 	eps_face = flip_vec(eps_face);
 	
@@ -285,7 +286,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 						solveropts.maxit, solveropts.tol, 'plot');
 	end
 	
-	E = flip_vec(E);
+	E = neg_vec(flip_vec(E));
 	H = flip_vec(H);
 	
 	pm.mark('solution calculation');
