@@ -21,9 +21,9 @@ classdef PointSrcM < Source
 			l = cell(Axis.count, GK.count);
 			for w = Axis.elems
 				if w == polarization_axis
-					l{w, GK.prim} = location(w);
-				else
 					l{w, GK.dual} = location(w);
+				else
+					l{w, GK.prim} = location(w);
 				end
 			end
 			this = this@Source(l);
@@ -42,9 +42,9 @@ classdef PointSrcM < Source
 				for v = Axis.elems
 					l = this.location(v);
 					if v == p
-						g = GK.prim;
-					else  % v == q or r
 						g = GK.dual;
+					else  % v == q or r
+						g = GK.prim;
 					end
 					iv = ismembc2(l, grid3d.l{v,g});
 					if iv == 0
@@ -56,8 +56,8 @@ classdef PointSrcM < Source
 					end
 					indM(v) = iv;
 				end
-				dq = grid3d.dl{q, GK.dual}(indM(q));
-				dr = grid3d.dl{r, GK.dual}(indM(r));
+				dq = grid3d.dl{q, GK.prim}(indM(q));
+				dr = grid3d.dl{r, GK.prim}(indM(r));
 				I = this.Im / (dq * dr);  % (magnetic dipole) = (electric current) * (area)
 				
 				
@@ -65,23 +65,23 @@ classdef PointSrcM < Source
 					% Assign Jq.
 					index_cell{p} = indM(p);
 					index_cell{q} = indM(q);
-					index_cell{r} = [indM(r), indM(r) + 1];
-					assert(indM(r) + 1 <= grid3d.N(r), ...
-						'PointSrcM should not be in the last primary cell in %s-axis.', char(r));
-					dlp = grid3d.dl{r, GK.prim}(index_cell{p});  % one element
-					dlr = grid3d.dl{r, GK.prim}(index_cell{r});  % two elements
+					index_cell{r} = [indM(r) - 1, indM(r)];
+					assert(indM(r) - 1 >= 1, ...
+						'PointSrcM should not be at boundary of %s-axis.', char(r));
+					dlp = grid3d.dl{r, GK.dual}(index_cell{p});  % one element
+					dlr = grid3d.dl{r, GK.dual}(index_cell{r});  % two elements
 					dS = dlp .* dlr;
 					Jw_patch = [I, -I] ./ dS;
 				else
 					assert(w_axis == r);
 					% Assign Jr.
 					index_cell{p} = indM(p);
-					index_cell{q} = [indM(q), indM(q) + 1];
+					index_cell{q} = [indM(q) - 1, indM(q)];
 					index_cell{r} = indM(r);
-					assert(indM(q) + 1 <= grid3d.N(q), ...
-						'PointSrcM should not be in the last primary cell in %s-axis.', char(q));
-					dlp = grid3d.dl{r, GK.prim}(index_cell{p});  % one element
-					dlq = grid3d.dl{q, GK.prim}(index_cell{q});  % two elements
+					assert(indM(q) - 1 >= 1, ...
+						'PointSrcM should not be at boundary of %s-axis.', char(q));
+					dlp = grid3d.dl{r, GK.dual}(index_cell{p});  % one element
+					dlq = grid3d.dl{q, GK.dual}(index_cell{q});  % two elements
 					dS = dlp .* dlq;
 					Jw_patch = [-I, I] ./ dS;
 				end

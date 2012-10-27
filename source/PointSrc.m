@@ -21,9 +21,9 @@ classdef PointSrc < Source
 			l = cell(Axis.count, GK.count);
 			for w = Axis.elems
 				if w == polarization_axis
-					l{w, GK.dual} = location(w);
-				else
 					l{w, GK.prim} = location(w);
+				else
+					l{w, GK.dual} = location(w);
 				end
 			end
 			this = this@Source(l);
@@ -39,9 +39,9 @@ classdef PointSrc < Source
 				for v = Axis.elems
 					l = this.location(v);
 					if v == p
-						g = GK.dual;
-					else  % v == q or r
 						g = GK.prim;
+					else  % v == q or r
+						g = GK.dual;
 					end
 					iv = ismembc2(l, grid3d.l{v,g});
 					if iv == 0
@@ -53,8 +53,8 @@ classdef PointSrc < Source
 					end
 					index_cell{v} = iv;
 				end
-				dq = grid3d.dl{q, GK.prim}(index_cell{q});
-				dr = grid3d.dl{r, GK.prim}(index_cell{r});
+				dq = grid3d.dl{q, GK.dual}(index_cell{q});
+				dr = grid3d.dl{r, GK.dual}(index_cell{r});
 				Jw_patch = this.I / (dq * dr);  % I = J * (area)
 			else  % w_axis == q or r
 				Jw_patch = [];

@@ -53,7 +53,7 @@ classdef Grid3d < handle
 			Npml = expand2mat(Npml, Axis.count, Sign.count);
 			            
 			if nargin < 4  % no bc
-				bc = BC.Et0;
+				bc = BC.Ht0;
 			end
 			chkarg(istypeof(bc, 'BC'), 'element of "bc" should be integral.');
 			chkarg(isexpandable2mat(bc, Axis.count, Sign.count), ...

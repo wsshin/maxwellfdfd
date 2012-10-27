@@ -2,7 +2,7 @@
 % Run MaxwellFDS.
 
 %%% Syntax
-%  [osc, grid3d, s_factor_cell, eps_edge_cell, mu_face_cell, J_cell, E0_cell] = build_system(FREQ, DOMAIN, OBJ, SRC, [progmark])
+%  [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell] = build_system(FREQ, DOMAIN, OBJ, SRC, [progmark])
 %  [..., obj_array, src_array] = build_system(FREQ, DOMAIN, OBJ, SRC, [pragmark])
 %  [..., eps_node_array, mu_node_array] = build_system(FREQ, DOMAIN, OBJ, SRC, [pragmark])
 
@@ -21,18 +21,18 @@
 % ProgMark>, which outputs the progress of the system build procedure as the
 % standard output.  If it is not given, then it is created internally.
 %
-% |[osc, grid3d, s_factor_cell, eps_edge_cell, mu_face_cell, J_cell, E0_cell] =
+% |[osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell] =
 % build_system(...)| returns
 %
 % * |osc|, an instance of <Oscillation.html Oscillation>
 % * |grid3d|, an instance of <Grid3d.html Grid3d>, 
 % * |s_factor_cell|, a cell array of PML s-factors: |{sx_array, sy_array,
 % sz_array}|
-% * |eps_edge_cell|, a cell array of electric permittivity evaluated at the
-% centers of the finite-difference grid edges: |{eps_xx_array, eps_yy_array,
+% * |eps_face_cell|, a cell array of electric permittivity evaluated at the
+% centers of the finite-difference grid faces: |{eps_xx_array, eps_yy_array,
 % eps_zz_array}|
-% * |mu_face_cell|,  a cell array of magnetic permeability evaluated at the
-% centers of the finite-difference grid faces: |{mu_xx_array, mu_yy_array,
+% * |mu_edge_cell|,  a cell array of magnetic permeability evaluated at the
+% centers of the finite-difference grid edges: |{mu_xx_array, mu_yy_array,
 % mu_zz_array}|
 % * |J_cell|, a cell array of electric current sources: |{Jx_array, Jy_array,
 % Jz_array}|
@@ -58,7 +58,7 @@
 %       PointSrc(Axis.x, [0, 0, 200]), ...  % SRC
 %       );
 
-function [osc, grid3d, s_factor_cell, eps_edge_cell, mu_face_cell, J_cell, E0_cell, obj_array, src_array, eps_node_array, mu_node_array] = build_system(varargin)
+function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell, obj_array, src_array, eps_node_array, mu_node_array] = build_system(varargin)
 % 	fprintf('%s begins.\n', mfilename);
 % 	pm = ProgMark();
 	pm = varargin{end};
@@ -234,8 +234,8 @@ function [osc, grid3d, s_factor_cell, eps_edge_cell, mu_face_cell, J_cell, E0_ce
 	if ~isepsgiven
 		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);
 	end
-	eps_edge_cell = harmonic_mean_eps_node(eps_node_array);
-	mu_face_cell = arithmetic_mean_mu_node(mu_node_array);
+	eps_face_cell = harmonic_mean_eps_node(eps_node_array);
+	mu_edge_cell = arithmetic_mean_mu_node(mu_node_array);
 
 	% Construct PML s-factors.
 	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d);
@@ -245,7 +245,7 @@ function [osc, grid3d, s_factor_cell, eps_edge_cell, mu_face_cell, J_cell, E0_ce
 	for src = src_array
 		if istypesizeof(src, 'DistributedSrc')
 			distsrc = src;
-			prep_distsrc(osc, grid3d, eps_edge_cell, mu_face_cell, s_factor_cell, distsrc);
+			prep_distsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, distsrc);
 
 			[h, v, n] = cycle(distsrc.normal_axis);
 			grid2d = Grid2d(grid3d, n);

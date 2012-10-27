@@ -2,7 +2,7 @@ classdef Source < handle & matlab.mixin.Heterogeneous
 	% Source is a superclass for all electric current sources J.
 	
 	properties (SetAccess = immutable)
-		l  % {x_prim_array, x_dual_array; y_prim_array, y_dual_array; z_prim_array, z_dual_array}
+		l  % {x_prim_array, x_dual_array; y_prim_array, y_dual_array; z_prim_array, z_dual_array}; used to generate grid
 	end
 	
 	methods (Abstract = true)

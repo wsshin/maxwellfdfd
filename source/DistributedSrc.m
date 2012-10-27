@@ -28,7 +28,7 @@ classdef DistributedSrc < Source
 			chkarg(istypesizeof(IL, 'real'), '"IL" should be real.');
 			
 			l = cell(Axis.count, GK.count);
-			l{normal_axis, GK.prim} = intercept;
+			l{normal_axis, GK.dual} = intercept;
 			this = this@Source(l);
 			
 			this.normal_axis = normal_axis;
@@ -47,8 +47,8 @@ classdef DistributedSrc < Source
 			Nh = this.grid2d.N(Dir.h);
 			Nv = this.grid2d.N(Dir.v);
 			
-			assert(istypesizeof(Jh, 'complex', [Nh, Nv]), '"Jh" should be %d-by-%d matrix with complex elements.', Nh, Nv);
-			assert(istypesizeof(Jv, 'complex', [Nh, Nv]), '"Jv" should be %d-by-%d matrix with complex elements.', Nh, Nv);
+			assert(istypesizeof(Jh, 'complex', [Nh Nv]), '"Jh" should be %d-by-%d matrix with complex elements.', Nh, Nv);
+			assert(istypesizeof(Jv, 'complex', [Nh Nv]), '"Jv" should be %d-by-%d matrix with complex elements.', Nh, Nv);
 
 			this.Jh = Jh;
 			this.Jv = Jv;
@@ -68,7 +68,7 @@ classdef DistributedSrc < Source
 				v = this.grid2d.axis(Dir.v);
 				n = this.normal_axis;
 				
-				g = GK.prim;
+				g = GK.dual;
 				ind_n = ismembc2(this.intercept, grid3d.l{n,g});
 				if ind_n == 0
 					[~, ind_n] = min(abs(grid3d.l{n,g} - this.intercept));
@@ -92,8 +92,8 @@ classdef DistributedSrc < Source
 				dv_prim = grid3d.dl{v, GK.prim};
 				dv_dual = grid3d.dl{v, GK.dual};
 				
-				dVh = dn .* (dh_dual.' * dv_prim);
-				dVv = dn .* (dh_prim.' * dv_dual);
+				dVh = dn .* (dh_prim.' * dv_dual);
+				dVv = dn .* (dh_dual.' * dv_prim);
 				
 				IL_curr = abs(this.Jh) .* dVh + abs(this.Jv) .* dVv;
 				IL_curr = sum(IL_curr(:));

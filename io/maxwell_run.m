@@ -218,7 +218,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
-	[osc, grid3d, s_factor, eps_edge, mu_face, J, E0, obj_array, src_array, eps_node] = build_system(varargin{1:iarg}, pm);
+	[osc, grid3d, s_factor, eps_face, mu_edge, J, E0, obj_array, src_array, eps_node] = build_system(varargin{1:iarg}, pm);
 	
 	if inspect_only  % inspect objects and sources
 		figure;
@@ -234,7 +234,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 		return;
 	elseif isequal(solveropts.method, 'inputfile')
 		write_input(filenamebase, osc, grid3d, s_factor, ...
-			eps_node(1:end-1,1:end-1,1:end-1), eps_edge, mu_face, J, tol, maxit);
+			eps_node(1:end-1,1:end-1,1:end-1), eps_face, mu_edge, J, tol, maxit);
 
 		E_cell = {};
 		H_cell = {};
@@ -243,27 +243,51 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 		return;
 	end
 	
+    flip_array = @(F) flipdim(flipdim(flipdim(F, int(Axis.x)), int(Axis.y)), int(Axis.z));
+    flip_vec = @(F_cell) {flip_array(F_cell{Axis.x}), flip_array(F_cell{Axis.y}), flip_array(F_cell{Axis.z})};
+	
+% 	d_prim = grid3d.dl(:, GK.prim);
+% 	d_dual = grid3d.dl(:, GK.dual);
+% 	s_prim = s_factor(:, GK.prim);
+% 	s_dual = s_factor(:, GK.dual);
+	d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
+	d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
+	s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
+	s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
+	J = flip_vec(J);
+	E0 = flip_vec(E0);
+	mu_edge = flip_vec(mu_edge);
+	eps_face = flip_vec(eps_face);
+	
 	if isequal(solveropts.method, 'direct')
-		[E, H] = solve_eq_direct(osc, grid3d, s_factor, mu_face, eps_edge, J, E0);
+		[E, H] = solve_eq_direct(osc.in_omega0(), ...
+						d_prim, d_dual, ...
+						s_prim, s_dual, ...
+						mu_edge, eps_face, ...
+						J, E0);
 	elseif isequal(solveropts.method, 'gpu')
 		figure;
 %		[E, H, err] = solve(cluster, osc.in_omega0(), ...
 		[E, H, err] = fds(osc.in_omega0(), ...
-						grid3d.dl(:, GK.prim), grid3d.dl(:, GK.dual), ...
-						s_factor(:, GK.prim), s_factor(:, GK.dual), ...
-						mu_face, eps_edge, ...
+						d_prim, d_dual, ...
+						s_prim, s_dual, ...
+						mu_edge, eps_face, ...
 						E0, J, ...
 						solveropts.maxit, solveropts.tol, 'plot');
 		%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
 	elseif isequal(solveropts.method, 'aws')
 		[E, H, err] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
 						osc.in_omega0(), ...
-						grid3d.dl(:, GK.prim), grid3d.dl(:, GK.dual), ...
-						s_factor(:, GK.prim), s_factor(:, GK.dual), ...
-						mu_face, eps_edge, ...
+						d_prim, d_dual, ...
+						s_prim, s_dual, ...
+						mu_edge, eps_face, ...
 						E0, J, ...
 						solveropts.maxit, solveropts.tol, 'plot');
 	end
+	
+	E = flip_vec(E);
+	H = flip_vec(H);
+	
 	pm.mark('solution calculation');
 
 	% Construct Scalar3d objects.

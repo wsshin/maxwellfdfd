@@ -46,7 +46,7 @@ for i = 1:length(interval_array)
 end
 bound = reshape(bound, 1, []);
 is_in = (bound > b_min) & (bound < b_max);
-ldual0_array = [ldual0_array, bound(is_in)];
+lprim0_array = [lprim0_array, bound(is_in)];  % boundaries of shapes are aligned with primary gird
 
 
 lprim0_array = unique(lprim0_array, 'sorted');  % duplicate elements are removed

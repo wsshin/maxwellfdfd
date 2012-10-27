@@ -47,7 +47,7 @@ classdef PlaneSrc < Source
 			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
 						
 			l = cell(Axis.count, GK.count);
-			l{normal_axis, GK.prim} = intercept;
+			l{normal_axis, GK.dual} = intercept;
 			this = this@Source(l);
 			
 			this.normal_axis = normal_axis;
@@ -77,7 +77,7 @@ classdef PlaneSrc < Source
 				w = w_axis;
 				v = setdiff(Axis.elems, [n, w]);
 				
-				g = GK.prim;
+				g = GK.dual;
 				ind_n = ismembc2(this.intercept, grid3d.l{n,g});
 				if ind_n == 0
 					[~, ind_n] = min(abs(grid3d.l{n,g} - this.intercept));
@@ -100,8 +100,8 @@ classdef PlaneSrc < Source
 					Jw_patch = [];
 				else
 					%  Set Jw_patch.
-					lw = grid3d.l{w, GK.dual};
-					lv = grid3d.l{v, GK.prim};
+					lw = grid3d.l{w, GK.prim};
+					lv = grid3d.l{v, GK.dual};
 					kw = this.kBloch(w);
 					kv = this.kBloch(v);
 

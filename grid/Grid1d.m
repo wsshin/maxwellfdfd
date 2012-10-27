@@ -64,8 +64,8 @@ classdef Grid1d < handle
 			if this.bc(Sign.n) == BC.p  % this.bc(Sign.p) == BC.p
 				ldual(1) = ldual(end) - (lprim(end)-lprim(1));  % lprim(end) - lprim(1) == ldual(end) - ldual(1)
 				this.ldual_ext = ldual(2) + (lprim(end)-lprim(1));  % lprim(end) - lprim(1) = ldual_ext - ldual(2)
-			else  % this.bc(Sign.p) == BC.Et0
-				ldual(1) = lprim(1) - (ldual(2)-lprim(1));  % lprim(1) - ldual(1) == ldual(2) - ldual(1)
+			else  % this.bc(Sign.p) == BC.Ht0
+				ldual(1) = lprim(1) - (ldual(2)-lprim(1));  % lprim(1) - ldual(1) == ldual(2) - lprim(1)
 				this.ldual_ext = lprim(end) + (lprim(end) - ldual(end));  % ldual_ext - lprim(end) = lprim(end) - ldual(end)
 			end
 			

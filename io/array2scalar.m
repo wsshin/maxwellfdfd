@@ -16,8 +16,8 @@ if is3D
 		'"F_array" should be %d-by-%d-by-%d array with complex elements.', ...
 		grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 
-	l = grid3d.lall(:, alter(gk));
-	l{axis} = grid3d.lall{axis, gk};
+	l = grid3d.lall(:, gk);
+	l{axis} = grid3d.lall{axis, alter(gk)};
 	[X, Y, Z] = meshgrid(l{:});
 
 	V = F_array;
@@ -40,13 +40,13 @@ else  % grid is Grid2d
 	chkarg(istypesizeof(F_array, 'complex', grid2d.N), ...
 		'"F_array" should be %d-by-%d array with complex elements.', grid2d.N(Dir.h), grid2d.N(Dir.v));
 
-	l = grid2d.lall(:, alter(gk));
+	l = grid2d.lall(:, gk);
 	axis_temp = Axis.z;
 	if axis == grid2d.axis(Dir.h)
-		l{Dir.h} = grid2d.lall{Dir.h, gk};
+		l{Dir.h} = grid2d.lall{Dir.h, alter(gk)};
 		axis_temp = Axis.x;
 	elseif axis == grid2d.axis(Dir.v)
-		l{Dir.v} = grid2d.lall{Dir.v, gk};
+		l{Dir.v} = grid2d.lall{Dir.v, alter(gk)};
 		axis_temp = Axis.y;
 	end	
 	[Xh, Yv] = meshgrid(l{:});
@@ -67,7 +67,7 @@ end
 
 function Fw_array = attach_extra_F(Fw_array, gk, w, bc_vn, v)
 % Augment the Fw array with ghost boundary elements in the v-axis.
-% Surprisingly, this function combines attach_extra_E() and attach_extra_F().
+% Surprisingly, this function combines attach_extra_E() and attach_extra_H().
 
 chkarg(istypesizeof(Fw_array, 'complex', [0 0 0]), '"Fw_array" should be 3D array with complex elements.');
 chkarg(istypesizeof(gk, 'GK'), '"physQ" should be instance of GK.');
@@ -80,97 +80,25 @@ ind_p = {':',':',':'};
 Nv = size(Fw_array, int(v));
 if (gk == GK.dual && v == w) || (gk == GK.prim && v ~= w)  % E: gk == GK.dual, H: gk == GK.prim
 	if bc_vn == BC.p
-		ind_n{v} = Nv;
-		ind_p{v} = 1;
-		Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
-	else  % bc_vn == BC.Et0 || BC.En0, bc_vp == BC.Et0
-		ind_n{v} = 1;
-		ind_p{v} = Nv;
-		if bc_vn == BC.Et0
-			Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
-		else  % bc_vn == BC.En0
-			Fw_array = cat(int(v), -Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
-		end
-	end
-else  % (physQ == PhysQ.E && v ~= w) || (physQ == PhysQ.H && v == w)
-	if bc_vn == BC.p
 		ind_p{v} = 1;
 		Fw_array = cat(int(v), Fw_array, Fw_array(ind_p{:}));
-	else  % bc_vn == BC.Et0 or BC.En0, bc_vp == BC.Et0
+	else  % bc_vp == BC.Ht0  (==>  bc_vp == BC.En0)
 		size_extra = size(Fw_array);
 		size_extra(v) = 1;
 		Fw_array = cat(int(v), Fw_array, zeros(size_extra));
 	end
+else  % (gk == GK.dual && v ~= w) || (gk == GK.prim && v == w)
+	if bc_vn == BC.p
+		ind_n{v} = Nv;
+		ind_p{v} = 1;
+		Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
+	else  % bc_vn == BC.Ht0 || BC.Hn0, bc_vp == BC.Ht0  (==>  bc_vp == BC.En0)
+		ind_n{v} = 1;
+		ind_p{v} = Nv;
+		if bc_vn == BC.Hn0
+			Fw_array = cat(int(v), -Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
+		else  % bc_vn == BC.Ht0
+			Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
+		end
+	end
 end
-
-% function Ew_array = attach_extra_E(Ew_array, w, bc_vn, v)
-% % Augment the Ew array with ghost boundary elements in the v-axis.
-% 
-% chkarg(istypesizeof(Ew_array, 'complex', [0 0 0]), '"Ew_array" should be 3D array with complex elements.');
-% chkarg(istypesizeof(w, 'Axis'), '"w" should be instance of Axis.');
-% chkarg(istypesizeof(bc_vn, 'BC'), '"bc_vn" should be instance of BC.');
-% chkarg(istypesizeof(v, 'Axis'), '"v" should be instance of Axis.');
-% 
-% ind_n = {':',':',':'};
-% ind_p = {':',':',':'};
-% Nv = size(Ew_array, int(v));
-% if v == w
-% 	if bc_vn == BC.p
-% 		ind_n{v} = Nv;
-% 		ind_p{v} = 1;
-% 		Ew_array = cat(int(v), Ew_array(ind_n{:}), Ew_array, Ew_array(ind_p{:}));
-% 	else  % bc_vn == BC.Et0 || BC.En0, bc_vp == BC.Et0
-% 		ind_n{v} = 1;
-% 		ind_p{v} = Nv;
-% 		if bc_vn == BC.Et0
-% 			Ew_array = cat(int(v), Ew_array(ind_n{:}), Ew_array, Ew_array(ind_p{:}));
-% 		else  % bc_vn == BC.En0
-% 			Ew_array = cat(int(v), -Ew_array(ind_n{:}), Ew_array, Ew_array(ind_p{:}));
-% 		end
-% 	end
-% else  % v ~= w
-% 	if bc_vn == BC.p
-% 		ind_p{v} = 1;
-% 		Ew_array = cat(int(v), Ew_array, Ew_array(ind_p{:}));
-% 	else  % bc_vn == BC.Et0 or BC.En0, bc_vp == BC.Et0
-% 		size_extra = size(Ew_array);
-% 		size_extra(v) = 1;
-% 		Ew_array = cat(int(v), Ew_array, zeros(size_extra));
-% 	end
-% end
-% 
-% function Hw_array = attach_extra_H(Hw_array, w, bc_vn, v)
-% % Augment the Ew array with ghost boundary elements in the v-axis.
-% 
-% chkarg(istypesizeof(Hw_array, 'complex', [0 0 0]), '"Hw_array" should be 3D array with complex elements.');
-% chkarg(istypesizeof(w, 'Axis'), '"w" should be instance of Axis.');
-% chkarg(istypesizeof(bc_vn, 'BC'), '"bc_vn" should be instance of BC.');
-% chkarg(istypesizeof(v, 'Axis'), '"v" should be instance of Axis.');
-% 
-% ind_p = {':',':',':'};
-% ind_n = {':',':',':'};
-% Nv = size(Hw_array, int(v));
-% if v == w
-% 	if bc_vn == BC.p
-% 		ind_p{v} = 1;
-% 		Hw_array = cat(int(v), Hw_array, Hw_array(ind_p{:}));
-% 	else  % bc_vn == BC.Et0 || BC.En0, bc_vp == BC.Et0
-% 		size_extra = size(Hw_array);
-% 		size_extra(v) = 1;
-% 		Hw_array = cat(int(v), Hw_array, zeros(size_extra));
-% 	end
-% else  % v ~= w
-% 	if bc_vn == BC.p
-% 		ind_n{v} = Nv;
-% 		ind_p{v} = 1;
-% 		Hw_array = cat(int(v), Hw_array(ind_n{:}), Hw_array, Hw_array(ind_p{:}));
-% 	else  % bc_vn == BC.Et0 || BC.En0, bc_vp == BC.Et0
-% 		ind_n{v} = 1;
-% 		ind_p{v} = Nv;
-% 		if bc_vn == BC.Et0
-% 			Hw_array = cat(int(v), Hw_array(ind_n{:}), Hw_array, Hw_array(ind_p{:}));
-% 		else  % bc_vn == BC.En0
-% 			Hw_array = cat(int(v), -Hw_array(ind_n{:}), Hw_array, Hw_array(ind_p{:}));
-% 		end
-% 	end
-% end
