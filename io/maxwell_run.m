@@ -243,7 +243,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 		return;
 	end
 	
-    flip_array = @(F) flipdim(flipdim(flipdim(F, int(Axis.x)), int(Axis.y)), int(Axis.z));
+    flip_array = @(F) flipdim(flipdim(flipdim(F, int(Axis.z)), int(Axis.y)), int(Axis.x));
     flip_vec = @(F_cell) {flip_array(F_cell{Axis.x}), flip_array(F_cell{Axis.y}), flip_array(F_cell{Axis.z})};
 	
 % 	d_prim = grid3d.dl(:, GK.prim);
