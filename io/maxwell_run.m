@@ -243,6 +243,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 		return;
 	end
 	
+	%% Apply spatial inversion.
     flip_array = @(F) flipdim(flipdim(flipdim(F, int(Axis.z)), int(Axis.y)), int(Axis.x));
     flip_vec = @(F_cell) {flip_array(F_cell{Axis.x}), flip_array(F_cell{Axis.y}), flip_array(F_cell{Axis.z})};
     neg_vec = @(F_cell) {-F_cell{Axis.x}, -F_cell{Axis.y}, -F_cell{Axis.z}};
@@ -255,10 +256,10 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
 	s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
 	s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
-	J = neg_vec(flip_vec(J));
-	E0 = neg_vec(flip_vec(E0));
 	mu_edge = flip_vec(mu_edge);
 	eps_face = flip_vec(eps_face);
+	J = neg_vec(flip_vec(J));  % pseudovector
+	E0 = neg_vec(flip_vec(E0));  % pseudovector
 	
 	if isequal(solveropts.method, 'direct')
 		[E, H] = solve_eq_direct(osc.in_omega0(), ...
@@ -286,7 +287,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 						solveropts.maxit, solveropts.tol, 'plot');
 	end
 	
-	E = neg_vec(flip_vec(E));
+	E = neg_vec(flip_vec(E));  % pseudovector
 	H = flip_vec(H);
 	
 	pm.mark('solution calculation');
