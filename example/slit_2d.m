@@ -20,12 +20,18 @@ if isnew
 	% 	{['Hagemann', filesep, 'Ag'], gray}, [Box([-1070, -80; -1500, -500; 0, 10], 10), Box([80, 1070; -1500, -500; 0, 10], 10)], ...  % OBJ2
 	% 	PlaneSrc(Axis.y, -2000, Axis.x), inspect_only);
 
-	% (true PEC)
+% 	% (true PEC)
+% 	[E, H, obj_array] = maxwell_run(1e-9, 1180, ...
+% 		{'vacuum', 'none', 1.0}, [-1070, 1070; -2500, 2500; 0, 10], 10, BC.p, [100 100 0],...
+% 		{'PEC', gray, inf}, [Box([-1070, -80; -1500, -500; 0, 10], 10), Box([80, 1070; -1500, -500; 0, 10], 10)], ...  % OBJ2
+% 		PlaneSrc(Axis.y, -2000, Axis.x), inspect_only);
+
+
 	[E, H, obj_array] = maxwell_run(1e-9, 1180, ...
 		{'vacuum', 'none', 1.0}, [-1070, 1070; -2500, 2500; 0, 10], 10, BC.p, [100 100 0],...
-		{'PEC', gray, inf}, [Box([-1070, -80; -1500, -500; 0, 10], 10), Box([80, 1070; -1500, -500; 0, 10], 10)], ...  % OBJ2
-		PlaneSrc(Axis.y, -2000, Axis.x), inspect_only);
-
+		{['Hagemann', filesep, 'Ag'], gray}, [Box([-1070, -80; -1500, -500; 0, 10], 10), Box([80, 1070; -1500, -500; 0, 10], 10)], ...  % OBJ2
+		DistributedSrc(Axis.y, -1000, 1.0), inspect_only);
+	
 	% % (no metal)
 	% [E, H, obj_array] = maxwell_run(1e-9, 1180, ...
 	% 	{'vacuum', 'none', 1.0}, [-1070, 1070; -2500, 2500; 0, 10], 10, BC.p, [100 100 0],...
