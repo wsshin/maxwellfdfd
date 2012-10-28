@@ -69,13 +69,13 @@
 % |dl|: default grid cell size in the form of |[dx, dy, dz]|.  Can be
 % abbreviated to a scalar |dl| if |dx == dy == dz|.
 %
-% |bc|: boundary conditions in the form of |[bc_xn, bc_xp; bc_yn, bc_yp; bc_zn,
-% bc_zp]|, whose each element specifies the boundary condition at either
-% negative or positive end in one of the x-, y-, z-axes (e.g., |bc_xn| for the
-% negative end in the x-axis.).  Each element of |bc| is an instance of <BC.html
-% |BC|>. Can be abbreviated to |[bc_x, bc_y, bc_z]| if |bc_wn == bc_wp| for |w =
-% x, y, z|.  Can be further abbreviated to a single BC instance if |bc_x == bc_y
-% == bc_z|.
+% |bc|: boundary conditions in the form of |[bc_xn, bc_yn, bc_zn]|, whose each
+% element specifies the boundary condition at the negative end in one of the x-,
+% y-, z-axes (e.g., |bc_xn| for the negative end in the x-axis.).  Each element
+% of |bc| is an instance of <BC.html |BC|>.  The boundary conditions at the
+% positive ends automatically determines by those at the negative ends: |bc_wp
+% == BC.p| for |bc_wn == BC.p| and |bc_wp == BC.m| otherwise.  Can be further
+% abbreviated to a single BC instance if |bc_xn == bc_yn == bc_zn|.
 %
 % |Lpml|: thicknesses of PML in the form of |[Lpml_xn, Lpml_xp; Lpml_yn,
 % Lpml_yp; Lpml_zn, Lpml_zp]|, whose each element specifies the thickness at

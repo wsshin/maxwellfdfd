@@ -53,17 +53,16 @@ classdef Grid3d < handle
 			Npml = expand2mat(Npml, Axis.count, Sign.count);
 			            
 			if nargin < 4  % no bc
-				bc = BC.Ht0;
+				bc = BC.m;
 			end
-			chkarg(istypeof(bc, 'BC'), 'element of "bc" should be integral.');
-			chkarg(isexpandable2mat(bc, Axis.count, Sign.count), ...
-				'"bc" should be scalar, length-%d vector, or %d-by-%d matrix.', Axis.count, Axis.count, Sign.count);
-			bc = expand2mat(bc, Axis.count, Sign.count);
+			chkarg(istypeof(bc, 'BC'), 'elements of "bc" should be instances of BC.');
+			chkarg(isexpandable2row(bc, Axis.count), '"bc" should be scalar or length-%d vector.', Axis.count);
+			bc = expand2row(bc, Axis.count);
 			
 			% Set comp.
 			this.comp = Grid1d.empty();
 			for w = Axis.elems
-				this.comp(w) = Grid1d(w, unit, lprim_cell{w}, Npml(w,:), bc(w,:));
+				this.comp(w) = Grid1d(w, unit, lprim_cell{w}, Npml(w,:), bc(w));
 			end
 		end
 		

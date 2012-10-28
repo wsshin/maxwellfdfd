@@ -33,7 +33,7 @@ classdef Grid1d < handle
 	end
         
     methods
-        function this = Grid1d(axis, unit, lprim_array, Npml_array, bc_array)
+        function this = Grid1d(axis, unit, lprim_array, Npml_array, bc)
 			chkarg(istypesizeof(axis, 'Axis'), '"axis" should be instance of Axis.');
 			this.axis = axis;
 			
@@ -45,9 +45,12 @@ classdef Grid1d < handle
 				'"Npml" should be length-%d row vector with integer elements.', Sign.count);
 			this.Npml = Npml_array;
 			            
-			chkarg(istypesizeof(bc_array, 'BC', [1, Sign.count]), ...
-				'"bc" should be length-%d row vector with integer elements.', Sign.count);
-			this.bc = bc_array;
+			chkarg(istypesizeof(bc, 'BC'), '"bc" should be instance of BC.');
+			if bc == BC.p
+				this.bc = [bc bc];
+			else
+				this.bc = [bc BC.m];
+			end
 			
 			chkarg(istypesizeof(lprim_array, 'real', [1 0]), ...
 				'"lprim_array" should be row vector with real elements.');
@@ -64,7 +67,7 @@ classdef Grid1d < handle
 			if this.bc(Sign.n) == BC.p  % this.bc(Sign.p) == BC.p
 				ldual(1) = ldual(end) - (lprim(end)-lprim(1));  % lprim(end) - lprim(1) == ldual(end) - ldual(1)
 				this.ldual_ext = ldual(2) + (lprim(end)-lprim(1));  % lprim(end) - lprim(1) = ldual_ext - ldual(2)
-			else  % this.bc(Sign.p) == BC.Ht0
+			else  % this.bc(Sign.p) == BC.m
 				ldual(1) = lprim(1) - (ldual(2)-lprim(1));  % lprim(1) - ldual(1) == ldual(2) - lprim(1)
 				this.ldual_ext = lprim(end) + (lprim(end) - ldual(end));  % ldual_ext - lprim(end) = lprim(end) - ldual(end)
 			end

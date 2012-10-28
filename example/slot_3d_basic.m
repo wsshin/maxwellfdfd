@@ -2,7 +2,7 @@ clear all; close all; clear classes; clc;
 
 %% Set flags.
 isnew = true;
-inspect_only = false;
+inspect_only = true;
 
 %% Solve the system.
 if isnew

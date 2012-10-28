@@ -6,59 +6,62 @@ chkarg(istypesizeof(p, 'Dir'), '"p" should be instance of Dir.');
 N = Nh*Nv;
 DpEr = sparse(N,N);
 
-% Every Er component participates in two p-derivatives.
+% Every Er component participates in two x-derivatives.
 % In one curl loop it is substracted (-Er), and in the other loop it is added (+Er).
 
-% -Er
-negEr = -ones(Nh,Nv);
+% +Er
+posEr = ones(Nh,Nv);  
 
 % On p = 0 plane
 %
-% Do not handle bc(Pp, Sign.n) == BC.p here.  That case is handled by bc(Pp,
-% Sign.p) == BC.p. Note that bc(Pp, Sign.n) == BC.p implies bc(Pp, Sign.p) ==
+% Do not handle bc(p, Sign.n) == BC.p here.  That case is handled by
+% bc(p,Sign.p) == BC.p. Note that bc(p,Sign.n) == BC.p implies bc(p,Sign.p) ==
 % BC.p.
-if bc(p, Sign.n) == BC.Et0
+if bc(p, Sign.n) == BC.e
     if p == Dir.h
-        negEr(1,:) = 0;
-    else 
+        posEr(1,:) = 2;
+    else
         assert(p == Dir.v);
-        negEr(:,1) = 0;
+        posEr(:,1) = 2;
     end
 end
 
-DpEr = spdiags(negEr(:), 0, DpEr);  % 0 means -Er(x,y) is used to calculate Hr(x+-0,y).
-
-% +Er
-posEr = ones(Nh,Nv);
-
-% On p = Np plane
-if bc(p, Sign.p) == BC.Et0 || bc(p, Sign.p) == BC.p  % Note that actually there are no other cases, since bc(Pp, Sign.p) cannot be BC.En0.
+if bc(p, Sign.n) == BC.m
     if p == Dir.h
         posEr(1,:) = 0;
     else
-        assert(p == Dir.v)
+        assert(p == Dir.v);
         posEr(:,1) = 0;
     end
 end
 
+DpEr = spdiags(posEr(:), 0, DpEr);  % 0 means +Er(x,y) is used to calculate Hq(x,y).
+
+% -Er
+negEr = -ones(Nh,Nv);  
+
+% On p = Np plane
+% Er in the last cell in the p-axis is not used for -Er.
 if p == Dir.h
-    DpEr = spdiags(posEr(:), 1, DpEr);  % 1 means +Er(x,y) is used to calculate Hr(x-1,y).
+    negEr(Nh,:) = 0;
+    DpEr = spdiags(negEr(:), -1, DpEr);  % -1 means -Er(x,y) is used to calculate Hq(x+1,y).
 else
-    assert(p == Dir.v)
-    DpEr = spdiags(posEr(:), Nh, DpEr);  % Nx means +Er(x,y) is used to calculate Hr(x,y-1).
-end
-    
+    assert(p == Dir.v);
+    negEr(:,Nv) = 0;
+    DpEr = spdiags(negEr(:), -Nh, DpEr);  % -Nh means -Er(x,y) is used to calculate Hq(x,y+1).
+end 
 
 if bc(p, Sign.p) == BC.p
     if p == Dir.h
-        for j = 1:Nv
-            DpEr(j*Nh,(j-1)*Nh+1) = DpEr(j*Nh,(j-1)*Nh+1) + 1;
+        for j = 0:Nv-1
+            DpEr(j*Nh+1,(j+1)*Nh) = DpEr(j*Nh+1,(j+1)*Nh) - 1;
         end
     else
+        assert(p == Dir.v);
         for i = 1:Nh
-            DpEr((Nv-1)*Nh+i,i) = DpEr((Nv-1)*Nh+i,i) + 1;
+            DpEr(i,(Nv-1)*Nh+i) = DpEr(i,(Nv-1)*Nh+i) - 1;
         end
     end
 end
 
-DpEr = spdiags(dp_prim(:), 0, N, N) \ DpEr;  % To calculate the curl, Ep shuold be divided by the primary edge lengths, which are centered at dual grid vertices.
+DpEr = spdiags(dp_prim(:), 0, N, N) \ DpEr;  % To calculate the curl, Er shuold be divided by the edge lengths centered at primary grid vertices.

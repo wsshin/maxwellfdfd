@@ -1,13 +1,13 @@
 % PML is the enumeration class for the kinds of PML
 classdef PML < Enumerated	
 	enumeration
-		SC('stretched-coordinate')
-		U('uniaxial')
+		sc('stretched-coordinate')
+		u('uniaxial')
 	end
 
 	methods (Static)
 		function elems = elems(ind)
-			elems = [PML.SC, PML.U];
+			elems = [PML.sc, PML.u];
 			if nargin > 0  % ind
 				elems = elems(ind);
 			end

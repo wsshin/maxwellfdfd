@@ -6,51 +6,60 @@ chkarg(istypesizeof(p, 'Dir'), '"p" should be instance of Dir.');
 N = Nh*Nv;
 DpHr = sparse(N,N);
 
-% Every Hr component participates in two x-derivatives.
+% Every Hr component participates in two p-derivatives.
 % In one curl loop it is substracted (-Hr), and in the other loop it is added (+Hr).
 
-% +Hr
-posHr = ones(Nh,Nv);  
+% -Hr
+negHr = -ones(Nh,Nv);
 
 % On p = 0 plane
 %
-% Do not handle bc(Pp, Sign.n) == BC.p here.  That case is handled by bc(Pp,Pos)
-% == BC.p. Note that bc(Pp, Sign.n) == BC.p implies bc(Pp,Pos) == BC.p.
-if bc(p, Sign.n) == BC.En0
+% Do not handle bc(p, Sign.n) == BC.p here.  That case is handled by bc(p,
+% Sign.p) == BC.p. Note that bc(p, Sign.n) == BC.p implies bc(p, Sign.p) ==
+% BC.p.
+if bc(p, Sign.n) == BC.m
     if p == Dir.h
-        posHr(1,:) = 2;
-    else
+        negHr(1,:) = 0;
+    else 
         assert(p == Dir.v);
-        posHr(:,1) = 2;
+        negHr(:,1) = 0;
     end
 end
 
-DpHr = spdiags(posHr(:), 0, DpHr);  % 0 means +Hr(x,y) is used to calculate Er(x,y).
+DpHr = spdiags(negHr(:), 0, DpHr);  % 0 means -Hr(x,y) is used to calculate Eq(x+-0,y).
 
-% -Hr
-negHr = -ones(Nh,Nv);  
+% +Hr
+posHr = ones(Nh,Nv);
 
 % On p = Np plane
+% Hr in the first cell in the p-axis is not used for +Hr.
+if bc(p, Sign.p) == BC.m || bc(p, Sign.p) == BC.p  % Note that actually there are no other cases: bc(p, Sign.p) cannot be BC.e.
+    if p == Dir.h
+        posHr(1,:) = 0;
+    else
+        assert(p == Dir.v)
+        posHr(:,1) = 0;
+    end
+end
+
 if p == Dir.h
-    negHr(Nh,:) = 0;
-    DpHr = spdiags(negHr(:), -1, DpHr);  % -1 means -Hr(x,y) is used to calculate Er(x+1,y).
+    DpHr = spdiags(posHr(:), 1, DpHr);  % 1 means +Hr(x,y) is used to calculate Eq(x-1,y).
 else
-    assert(p == Dir.v);
-    negHr(:,Nv) = 0;
-    DpHr = spdiags(negHr(:), -Nh, DpHr);  % -Nx means -Hr(x,y) is used to calculate Ex(x,y+1).
-end 
+    assert(p == Dir.v)
+    DpHr = spdiags(posHr(:), Nh, DpHr);  % Nh means +Hr(x,y) is used to calculate Eq(x,y-1).
+end
+    
 
 if bc(p, Sign.p) == BC.p
     if p == Dir.h
-        for j = 0:Nv-1
-            DpHr(j*Nh+1,(j+1)*Nh) = DpHr(j*Nh+1,(j+1)*Nh) - 1;
+        for j = 1:Nv
+            DpHr(j*Nh,(j-1)*Nh+1) = DpHr(j*Nh,(j-1)*Nh+1) + 1;
         end
     else
-        assert(p == Dir.v);
         for i = 1:Nh
-            DpHr(i,(Nv-1)*Nh+i) = DpHr(i,(Nv-1)*Nh+i) - 1;
+            DpHr((Nv-1)*Nh+i,i) = DpHr((Nv-1)*Nh+i,i) + 1;
         end
     end
 end
 
-DpHr = spdiags(dp_dual(:), 0, N, N) \ DpHr;  % To calculate the curl, Hr shuold be divided by the edge lengths centered at primary grid vertices.
+DpHr = spdiags(dp_dual(:), 0, N, N) \ DpHr;  % To calculate the curl, Hr shuold be divided by the primary edge lengths, which are centered at dual grid vertices.

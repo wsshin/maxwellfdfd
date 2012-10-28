@@ -1,4 +1,4 @@
-function A = wgmode_matrix(omega, eps_edge_cell, mu_face_cell, s_factor_cell, grid3d, normal_axis, intercept, pml_kind)
+function A = wgmode_matrix(omega, eps_face_cell, mu_edge_cell, s_factor_cell, grid3d, normal_axis, intercept, pml_kind)
 % The operator A acts on H fields, not E fields.  Therefore, A x = lambda x
 % solves for H fields of an eigenmode of the system. For the eigenvalue
 % equation, see Sec II of G. Veronis and S. Fan, Journal of Lightwave
@@ -6,11 +6,11 @@ function A = wgmode_matrix(omega, eps_edge_cell, mu_face_cell, s_factor_cell, gr
 
 chkarg(istypesizeof(omega, 'real') && omega > 0, '"omega" should be positive.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
-chkarg(istypesizeof(eps_edge_cell, 'complexcell', [1, Axis.count], grid3d.N), ...
-	'"eps_edge_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
+chkarg(istypesizeof(eps_face_cell, 'complexcell', [1, Axis.count], grid3d.N), ...
+	'"eps_face_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
 	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
-chkarg(istypesizeof(mu_face_cell, 'complexcell', [1, Axis.count], grid3d.N), ...
-	'"mu_face_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
+chkarg(istypesizeof(mu_edge_cell, 'complexcell', [1, Axis.count], grid3d.N), ...
+	'"mu_edge_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
 	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 chkarg(istypesizeof(s_factor_cell, 'complexcell', [Axis.count, GK.count], [1 0]), ...
 	'"s_factor_cell" should be %d-by-%d cell array whose each element is row vector with real elements.', Axis.count, GK.count);
@@ -18,7 +18,7 @@ chkarg(istypesizeof(s_factor_cell, 'complexcell', [Axis.count, GK.count], [1 0])
 chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 
 chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
-g = GK.prim;
+g = GK.dual;
 ind_n = ismembc2(intercept, grid3d.l{normal_axis, g});  % ind_n == 0 if intercept is not in grid3d.l{normal_axis, g}
 assert(ind_n ~= 0, ...
 	'%s grid in %s-axis of "grid3d" does not have "intercept" as an element.', g, normal_axis);
@@ -33,31 +33,31 @@ v = grid2d.axis(Dir.v);
 n = grid2d.normal_axis;
 
 dims = int([h, v, n]);
-eps_edge_cell{Axis.x} = permute(eps_edge_cell{Axis.x}, dims);
-eps_edge_cell{Axis.y} = permute(eps_edge_cell{Axis.y}, dims);
-eps_edge_cell{Axis.z} = permute(eps_edge_cell{Axis.z}, dims);
+eps_face_cell{Axis.x} = permute(eps_face_cell{Axis.x}, dims);
+eps_face_cell{Axis.y} = permute(eps_face_cell{Axis.y}, dims);
+eps_face_cell{Axis.z} = permute(eps_face_cell{Axis.z}, dims);
 
-mu_face_cell{Axis.x} = permute(mu_face_cell{Axis.x}, dims);
-mu_face_cell{Axis.y} = permute(mu_face_cell{Axis.y}, dims);
-mu_face_cell{Axis.z} = permute(mu_face_cell{Axis.z}, dims);
+mu_edge_cell{Axis.x} = permute(mu_edge_cell{Axis.x}, dims);
+mu_edge_cell{Axis.y} = permute(mu_edge_cell{Axis.y}, dims);
+mu_edge_cell{Axis.z} = permute(mu_edge_cell{Axis.z}, dims);
 
 % Get eps and mu at the intercept.
-eps_hh = eps_edge_cell{h}(:,:,ind_n);
-eps_vv = eps_edge_cell{v}(:,:,ind_n);
-eps_nn = eps_edge_cell{n}(:,:,ind_n);
+eps_hh = eps_face_cell{h}(:,:,ind_n);
+eps_vv = eps_face_cell{v}(:,:,ind_n);
+eps_nn = eps_face_cell{n}(:,:,ind_n);
 
-mu_hh = mu_face_cell{h}(:,:,ind_n);
-mu_vv = mu_face_cell{v}(:,:,ind_n);
-mu_nn = mu_face_cell{n}(:,:,ind_n);
+mu_hh = mu_edge_cell{h}(:,:,ind_n);
+mu_vv = mu_edge_cell{v}(:,:,ind_n);
+mu_nn = mu_edge_cell{n}(:,:,ind_n);
 
 % Check the homogeneity of eps and mu at "intercept" in the "normal_axis" direction.
 assert(ind_n >= 2);
-eps_nn_prev = eps_edge_cell{n}(:,:,ind_n-1);
+eps_nn_prev = eps_face_cell{n}(:,:,ind_n-1);
 chkarg(all(all(eps_nn == eps_nn_prev)), ...
 	'"eps_edge_cell" is not homogeneous in the "normal_axis" direction at "intercept".')
 
-mu_hh_prev = mu_face_cell{h}(:,:,ind_n-1);
-mu_vv_prev = mu_face_cell{v}(:,:,ind_n-1);
+mu_hh_prev = mu_edge_cell{h}(:,:,ind_n-1);
+mu_vv_prev = mu_edge_cell{v}(:,:,ind_n-1);
 chkarg(all(all(mu_hh == mu_hh_prev)) && all(all(mu_vv == mu_vv_prev)), ...
 	'"mu_face_cell" is not homogeneous in the "normal_axis" direction at "intercept".')
 
@@ -100,15 +100,15 @@ end
 
 % Create eps and mu matrices.  Note that each of eps_pp, eps_qq, mu_rr can be
 % either a scalar or matrix. 
-if pml_kind == PML.U
-	eps_hh = eps_hh .* sv_prim ./ sh_dual;  % eps_hh is multiplied to Eh, which is at dual grid location in h and at primary grid location in v.
-	eps_vv = eps_vv .* sh_prim ./ sv_dual;  % eps_vv is multiplied to Ev, which is at primary grid location in h and at dual grip location in v.
-	eps_nn = eps_nn .* sh_prim .* sv_prim;  % eps_nn is multiplied to En, which is at primary grid location in both h and v.
-	mu_hh = mu_hh .* sv_dual ./ sh_prim;  % mu_hh is multiplied to Hh, which is at primary grid location in h and at dual grid location in v.
-	mu_vv = mu_vv .* sh_dual ./ sv_prim;  % mu_vv is multiplied to Hv, which is at dual grid location in h and at primary grid location in v.
-	mu_nn = mu_nn .* sh_dual .* sv_dual;  % mu_nn is multiplied to Hn, which is at dual grid location in both h and v.
+if pml_kind == PML.u
+	eps_hh = eps_hh .* sv_dual ./ sh_prim;  % eps_hh is multiplied to Eh, which is at primary grid location in h and at dual grid location in v.
+	eps_vv = eps_vv .* sh_dual ./ sv_prim;  % eps_vv is multiplied to Ev, which is at dual grid location in h and at primary grip location in v.
+	eps_nn = eps_nn .* sh_dual .* sv_dual;  % eps_nn is multiplied to En, which is at dual grid location in both h and v.
+	mu_hh = mu_hh .* sv_prim ./ sh_dual;  % mu_hh is multiplied to Hh, which is at dual grid location in h and at primary grid location in v.
+	mu_vv = mu_vv .* sh_prim ./ sv_dual;  % mu_vv is multiplied to Hv, which is at primary grid location in h and at dual grid location in v.
+	mu_nn = mu_nn .* sh_prim .* sv_prim;  % mu_nn is multiplied to Hn, which is at primary grid location in both h and v.
 else
-	assert(pml_kind == PML.SC);
+	assert(pml_kind == PML.sc);
 	dh_prim = dh_prim .* sh_prim;
 	dh_dual = dh_dual .* sh_dual;
 	dv_prim = dv_prim .* sv_prim;
@@ -116,17 +116,17 @@ else
 end
 
 % Create differential operators.
-DhHv = generate_DpHq(Dir.h, bc, dh_prim);
-DvHh = generate_DpHq(Dir.v, bc, dv_prim);
+DhHv = generate_DpHq(Dir.h, bc, dh_dual);
+DvHh = generate_DpHq(Dir.v, bc, dv_dual);
 
-DhHh = generate_DpHp(Dir.h, bc, dh_dual);
-DvHv = generate_DpHp(Dir.v, bc, dv_dual);
+DhHh = generate_DpHp(Dir.h, bc, dh_prim);
+DvHv = generate_DpHp(Dir.v, bc, dv_prim);
 
-DhEn = generate_DpEr(Dir.h, bc, dh_dual);
-DvEn = generate_DpEr(Dir.v, bc, dv_dual);
+DhEn = generate_DpEr(Dir.h, bc, dh_prim);
+DvEn = generate_DpEr(Dir.v, bc, dv_prim);
 
-DhHn = generate_DpHr(Dir.h, bc, dh_prim);
-DvHn = generate_DpHr(Dir.v, bc, dv_prim);
+DhHn = generate_DpHr(Dir.h, bc, dh_dual);
+DvHn = generate_DpHr(Dir.v, bc, dv_dual);
 
 % Create the operator.
 %
@@ -141,21 +141,21 @@ A = -omega^2 * EPS_vv_hh * MU_hh_vv ...
     + EPS_vv_hh * [DvEn; -DhEn] * (EPS_nn \ [-DvHh, DhHv]) ...
     - [DhHn; DvHn] * (MU_nn \ ([DhHh, DvHv] * MU_hh_vv));
 
-% To force the H field components normal to the Et = 0 boundary to be 0, mask
-% the matrix appropriately.
-mask_hx = ones(Nh,Nv);
-mask_hy = ones(Nh,Nv);
-
-if bc(Dir.h, Sign.n) == BC.Et0
-    mask_hx(1,:) = 0;
-end
-
-if bc(Dir.v, Sign.n) == BC.Et0
-    mask_hy(:,1) = 0;
-end
-
-Mask = spdiags([mask_hx(:); mask_hy(:)], 0, 2*N, 2*N);
-A = Mask*A;
+% % To force the H field components normal to the Et = 0 boundary to be 0, mask
+% % the matrix appropriately.
+% mask_hx = ones(Nh,Nv);
+% mask_hy = ones(Nh,Nv);
+% 
+% if bc(Dir.h, Sign.n) == BC.e
+%     mask_hx(1,:) = 0;
+% end
+% 
+% if bc(Dir.v, Sign.n) == BC.e
+%     mask_hy(:,1) = 0;
+% end
+% 
+% Mask = spdiags([mask_hx(:); mask_hy(:)], 0, 2*N, 2*N);
+% A = Mask*A;
 
 % Reorder the indices of the elements of A to reduce the bandwidth of A.
 r = 1:2*Nh*Nv;  % 2*Nh*Nv == length(A)

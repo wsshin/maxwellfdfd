@@ -82,7 +82,7 @@ if (gk == GK.dual && v == w) || (gk == GK.prim && v ~= w)  % E: gk == GK.dual, H
 	if bc_vn == BC.p
 		ind_p{v} = 1;
 		Fw_array = cat(int(v), Fw_array, Fw_array(ind_p{:}));
-	else  % bc_vp == BC.Ht0  (==>  bc_vp == BC.En0)
+	else  % bc_vp == BC.m
 		size_extra = size(Fw_array);
 		size_extra(v) = 1;
 		Fw_array = cat(int(v), Fw_array, zeros(size_extra));
@@ -92,12 +92,12 @@ else  % (gk == GK.dual && v ~= w) || (gk == GK.prim && v == w)
 		ind_n{v} = Nv;
 		ind_p{v} = 1;
 		Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
-	else  % bc_vn == BC.Ht0 || BC.Hn0, bc_vp == BC.Ht0  (==>  bc_vp == BC.En0)
+	else  % bc_vn == BC.m || BC.e, bc_vp == BC.m
 		ind_n{v} = 1;
 		ind_p{v} = Nv;
-		if bc_vn == BC.Hn0
+		if bc_vn == BC.e
 			Fw_array = cat(int(v), -Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
-		else  % bc_vn == BC.Ht0
+		else  % bc_vn == BC.m
 			Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
 		end
 	end
