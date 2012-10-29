@@ -311,7 +311,12 @@ classdef Painter2d < handle
 				color = obj.material.color;
 				shape = obj.shape;
 				if ~isequal(color, 'none')  && shape.interval(n).contains(intercept);
-					lsf = shape.lsf;
+					if ~istypesizeof(shape, 'Plane')
+						lsf = shape.lsf;
+					else
+						lsf = @(r) shape.lsf(r, true);
+					end
+					
 					if n == Axis.x
 						lsf2d_temp = @(h,v) lsf([intercept(ones(size(h))), h, v]);
 					elseif n == Axis.y
