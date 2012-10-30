@@ -37,7 +37,7 @@ classdef Painter2d < handle
 		obj_array
 		src_array
 		cscale
-		cmax  % if cmax ~= inf, use cmax in crange and ignore maxamp and cscale
+		cmax  % if cmax ~= Inf, use cmax in crange and ignore maxamp and cscale
         withgrid
 		withcolorbar
 	end
@@ -53,7 +53,7 @@ classdef Painter2d < handle
 			this.obj_array = [];
 			this.src_array = [];
 			this.cscale = 1.0;
-			this.cmax = inf;
+			this.cmax = Inf;
 			this.withgrid = false;
 			this.withcolorbar = false;
 						

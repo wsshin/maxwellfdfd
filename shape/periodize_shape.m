@@ -12,7 +12,6 @@ lsf0 = shape0.lsf;  % level set function
 box0 = shape0.bound;  % circumbox
 c0 = shape0.cb_center;  % center of circumbox
 dl_max0 = shape0.dl_max;  % dl_max
-dl_boundary0 = shape0.dl_boundary;  %dl_boundary
 
 box_bound = boundshape.bound;  % circumbox of boundshape
 n_corners = Sign.count^Axis.count;  % 8
@@ -52,7 +51,7 @@ for nz = nmin(Axis.z):nmax(Axis.z)
 				if isnan(dl_max0)
 					shape = Shape(circumbox, lsf);
 				else
-					shape = Shape(circumbox, lsf, dl_max0, dl_boundary0);
+					shape = Shape(circumbox, lsf, dl_max0);
 				end
 				shape_array = [shape_array(1:end), shape];
 			end

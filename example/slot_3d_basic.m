@@ -29,7 +29,9 @@ if isnew
 % 		[Box([ -25, 25; -200, 1700; -700, -25], 20), Box([-25, 25; -200, 1700; 25, 700], 20)], ...
 % 		DistributedSrc(Axis.y, 200, 2.0), 1e-5, inspect_only);
 
-	save(mfilename, 'E', 'H', 'obj_array');
+	if ~inspect_only
+		save(mfilename, 'E', 'H', 'obj_array');
+	end
 else
 	load(mfilename);
 end

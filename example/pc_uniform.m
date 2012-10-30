@@ -35,7 +35,9 @@ gray = [0.5 0.5 0.5];  % [r g b]
 		{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp), ...
 		PointSrc(Axis.y, [0, 0, 0]), inspect_only);
 
-	save(mfilename, 'E', 'H', 'obj_array');
+	if ~inspect_only
+		save(mfilename, 'E', 'H', 'obj_array');
+	end
 else
 	load(mfilename);
 end

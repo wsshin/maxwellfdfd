@@ -10,25 +10,24 @@
 %
 % |lprim_part_cell| is a cell, whose element is either a number |dl| (grid cell
 % size) or an array |[l_i, ..., l_f]| (_subgrid_, which is a complete grid
-% between |l_i| and |l_f|).  A real number |dl| describes the target grid cell
-% size between two subgrids, and it comes always between two subgrids in
-% |lprim_part_cell|.  However, two neighboring subgrids may not have |dl| in
-% between.
+% between |l_i| and |l_f|).  A real number |dl|, which comes between two
+% neighboring subgrids, describes the target grid cell size between two
+% subgrids.
 %
 % An example of |lprim_part_cell| is
 %
-%  {[0 0.5], 1, [10 11 12], [20.5, 21], 2, [30, 31]}
+%  {[0 0.5], 1, [10 11 12], 1.5, [20.5, 21], 2, [30, 31]}
 %
 % where |[0.0 0.5]|, |[10 11 12]|, |[20.5, 21]|, |[30, 31]| are subgrids; |1| is
-% the target |dl| between |0.5| and |10|; |2| is the target |dl| between |21|
-% and |30|.  Then, |complete_lprim1d(lprim_part_cell)| generates a grid between
-% |0| and |31|.  An error is generated when the function fails to
-% generate a primary grid.
+% the target |dl| between |0.5| and |10|; |1.5| is the target |dl| between |12|
+% and |20.5|; |2| is the target |dl| between |21| and |30|.  Then,
+% |complete_lprim1d(lprim_part_cell)| generates a grid between |0| and |31|.  An
+% error is generated when the function fails to generate a primary grid.
 
 %%% Example
 %   % Complete a primary grid.
-%   lprim_part_cell = {[0 0.5], 1, [10 11 12], [20.5, 21], 2, [30, 31]};
-%   grid = complete_lprim1d(lprim_part_cell);
+%   lprim_part_cell = {[0 0.5], 1, [10 11 12], 1.5, [20.5, 21], 2, [30, 31]};
+%   lprim_array = complete_lprim1d(lprim_part_cell);
 %
 %   % Test the quality of the completed grid.
 %   deltas = diff(grid);
@@ -44,45 +43,33 @@
 function lprim_array = complete_lprim1d(lprim_part_cell)
 
 % Check inputs.
+chkarg(istypesizeof(lprim_part_cell, 'realcell', [1 0], [1 0]), '"lprim_part_cell" should be row cell array with real row vectors as elements.');
 numelems = length(lprim_part_cell);
-chkarg(numelems >= 1, '"lprim_part_cell" should be nonempty cell array.');
+chkarg(mod(numelems, 2) == 1, '"lprim_part_cell" should have odd number of elements.');
 
-curr = lprim_part_cell{1};
-chkarg(istypesizeof(curr, 'real', [1 0]) && length(curr)>=2 && issorted(curr), ...
-	'first element of "lprim_part_cell" should be length-2 or longer row vector with real elements in ascending order.');
-
-if numelems == 1
-	lprim_array = curr;
-	return
-end
-
-assert(numelems >= 2)
-ds = {};  % data structure whose element is {subgrid} or {subgrid, dl_target}
-prev = curr;
-for i = 2:numelems
-	curr = lprim_part_cell{i};
-	chkarg(istypesizeof(curr, 'real', [1 0]) && issorted(curr), ...
-		'subgrid in "lprim_part_cell" should be row vector with real elements in ascending order.');
-	if length(curr) == 1  % curr == dl_target
-		chkarg(length(prev) >= 2, ...
-			'"lprim_part_cell" should have at most one real number as an element between two row vectors.');  % if length(curr) == 1, length(prev) should be >= 2
-		chkarg(isempty(ds) || ds{end}{1}(end) < prev(1), ...
-			'subgrids in "lprim_part_cell" should be sorted in ascending order.');
-		ds = {ds{1:end}, {prev, curr}};
-	elseif length(prev) >= 2  % curr == subgrid and prev == subgrid
-		chkarg(isempty(ds) || ds{end}{1}(end) < prev(1), ...
-			'subgrids in "lprim_part_cell" should be sorted in ascending order.');
-		ds = {ds{1:end}, {prev}};
+ds = {};  % cell array whose element is {subgrid, dl_target}, except for last element being {subgrid}
+for i = 1:(numelems+1)/2
+	if i == (numelems+1)/2
+		curr = lprim_part_cell(2*i-1);
+	else
+		curr = lprim_part_cell([2*i-1, 2*i]);
+		chkarg(istypesizeof(curr{2}, 'real'), 'element #%d of "lprim_part_cell" should be real.', 2*i);
 	end
+	chkarg(length(curr{1})>=2 && issorted(curr{1}), ...
+		'element #%d of "lprim_part_cell" should be length-2 or longer row vector with real elements in ascending order.', 2*i-1);
+
+	if i >= 2
+		chkarg(prev{1}(end) < curr{1}(1), 'subgrids in "lprim_part_cell" should be sorted in ascending order.');
+	end
+	ds = {ds{1:end}, curr};
 	prev = curr;
 end
 
-chkarg(length(prev) >= 2, ...
-	'last element of "subgrid_cell" should be length-2 or longer row vector with real elements in ascending order.');
-chkarg(ds{end}{1}(end) < prev(1), ...
-	'subgrids in "subgrid_cell" should be sorted in ascending order.');
-ds = {ds{1:end}, {prev}};
-	
+if numelems == 1
+	lprim_array = ds{1}{1};
+	return
+end
+
 % Fill gaps between neighboring subgrids.
 rt = 1.5;  % target ratio of geometric sequence; rt = 1.2 to be more strict
 rmax = 2.0;  % maximum ratio of geometric sequence; rmax = 1.3 to be more strict
@@ -95,25 +82,13 @@ for i = 2:numgrids
 	next = ds{i};  %  next == {subgrid, dl_target} or next == {subgrid}
 	dl_p = next{1}(2) - next{1}(1);  % dl of next subgrid
 	gap = [lprim_array(end), next{1}(1)];  % == [curr(end), next{1}(1)]; gap between neighboring subgrids
-
-	if length(curr) == 1
-		try
-			filler = fill_geometric2(dl_n, gap, dl_p, rt, rmax);
-		catch err
-			exception = MException('FDS:gridGen', ['grid generation failed between subgrids ', ...
-				mat2str(curr{1}), ' and ', mat2str(next{1}), ': %s'], err.message);
-			throw(exception);
-		end
-	else
-		assert(length(curr) == 2);
-		dl_target = curr{2};
-		try
-			filler = fill_targeted_geometric(dl_n, gap, dl_target, dl_p, rt, rmax);
-		catch err
-			exception = MException('FDS:gridGen', ['grid generation failed between subgrids ', ...
-				mat2str(curr{1}), ' and ', mat2str(next{1}), 'with target dl = %f', curr{2}, ': %s'], err.message);
-			throw(exception);
-		end
+	dl_target = curr{2};
+	try
+		filler = fill_targeted_geometric(dl_n, gap, dl_target, dl_p, rt, rmax);
+	catch err
+		exception = MException('FDS:gridGen', ['grid generation failed between subgrids ', ...
+			mat2str(curr{1}), ' and ', mat2str(next{1}), 'with target dl = %f', curr{2}, ': %s'], err.message);
+		throw(exception);
 	end
 	
 	% Below, note that the provided subgrids are preserved in spite of roundoff
@@ -151,55 +126,6 @@ function truth = is_smooth(dl_array, rt)
 truth = isempty(find_stiff_ddl(dl_array, rt));
 
 
-function filler = fill_geometric(dl_n, gap, dl_p, rt, rmax)
-% Generate a filler subgrid whose grid vertex separations varies geometrically
-% from one end to the other end.
-
-% gap: length-2 row vector whose elements are the locations of the beginning and
-% ending grid vertices of the gap
-% dl_n, dl_p: dl of the subgrids before and after the gap
-% rt: target ratio of geometric sequence
-% rmax: maximum ratio of geometric sequence
-
-L = gap(2) - gap(1);
-chkarg(L > 0, 'second element of "gap" should be greater than the first element.');
-
-if dl_n == dl_p
-	numcells = round(L/dl_p);  % number of grid cells
-	dl = L/numcells;
-	assert(dl_p/dl <= rmax, 'dl = %e is too large for gap size = %e.');
-% 	filler = gap(1):dl:gap(end);  % this may not include gap(end) due to roundoff error
-	filler = linspace(gap(1), gap(2), numcells+1);
-else  % dl_n < dl_p or dl_n > dl_p
-	dl_max = max(dl_n, dl_p);  
-	dl_min = min(dl_n, dl_p);
-	
-	% Guess graded dl's.
-	n = ceil(log(dl_max/dl_min)/log(rt));  % smallest n for (dl_max/dl_min)^(1/n) < rt
-	r = (dl_max/dl_min)^(1/n);  % ratio of geometric sequence
-	dl_array = dl_min * (r.^(1:n));
-	
-	% Slightly over-fill the gap except for the graded interval with dl_max.
-	L_graded = sum(dl_array);
-	assert(L_graded <= L, 'dl = %e is too small or dl = %e is too large for gap size = %e.', dl_min, dl_max, L);
-	n_dl_max = ceil((L - L_graded)/dl_max);  % use ceil() to over-fill
-	dl_max_array = dl_max(ones(1, n_dl_max));  % [dl_max, ..., dl_max]
-	
-	% Update the graded dl's.
-	L_dl_max = sum(dl_max_array);
-	L_graded = L - L_dl_max;
-	r = fzero(@(s) dl_min*s * (s^n - 1) / (s-1) - L_graded, r);  % dl_min * (r^1 + ... + r^n) == L_graded
-	dl_array = dl_min * (r.^(1:n));
-
-	% Construct filler.
-	dl_filler = [dl_array, dl_max_array];
-	if dl_n > dl_p
-		dl_filler = wrev(dl_filler);
-	end
-	filler = cumsum([gap(1), dl_filler]);  % last element of filler is gap(2)
-end
-
-
 function filler = fill_constant(dl_min, dl_max, gap, rt, rmax)
 chkarg(dl_min <= dl_max, '"dl_min" should not be greater than "dl_max".');
 chkarg(is_smooth([dl_min, dl_max], rt), '"dl_min" and "dl_max" should be similar.');
@@ -221,59 +147,6 @@ else
 end
 % 	filler = gap(1):dl:gap(end);  % this may not include gap(end) due to roundoff error
 filler = linspace(gap(1), gap(2), numcells+1);
-
-
-function filler = fill_geometric2(dl_n, gap, dl_p, rt, rmax)
-% Generate a filler subgrid whose grid vertex separations varies geometrically
-% from one end to the other end. Generate a more smoothly graded filler than
-% fill_geometric().
-
-% gap: length-2 row vector whose elements are the locations of the beginning and
-% ending grid vertices of the gap
-% dl_n, dl_p: dl of the subgrids before and after the gap
-% rt: target ratio of geometric sequence
-% rmax: maximum ratio of geometric sequence
-
-L = gap(2) - gap(1);
-chkarg(L > 0, 'second element of "gap" should be greater than the first element.');
-
-dl_min = min(dl_n, dl_p);
-dl_max = max(dl_n, dl_p);  
-if is_smooth([dl_min, dl_max], rt)
-	filler = fill_constant(dl_min, dl_max, gap, rt, rmax);
-else  % dl_n < dl_p or dl_n > dl_p
-	% Guess graded dl's.
-	n = ceil(log(dl_max/dl_min)/log(rt));  % smallest n satisfying (dl_max/dl_min)^(1/n) <= rt
-	r = (dl_max/dl_min)^(1/n);  % ratio of geometric sequence
-	dl_array = dl_min * (r.^(1:n));
-	
-	% Slightly under-fill the gap with dl_max and the above generated graded
-	% dl's.
-	L_graded = sum(dl_array);
-	assert(L_graded <= L, 'dl = %e is too small or dl = %e is too large for gap size = %e.', dl_min, dl_max, L);
-	n_dl_max = floor((L - L_graded)/dl_max);  % use floor() to under-fill
-	dl_max_array = dl_max(ones(1, n_dl_max));  % [dl_max, ..., dl_max]
-	L_dl_max = sum(dl_max_array);
-	
-	% Slightly over-fill the gap with dl_min, graded dl's, and the above
-	% generated L_dl_max.
-	assert(L_graded + L_dl_max <= L);
-	n_dl_min = ceil((L - L_graded - L_dl_max)/dl_min);  % use ceil() to over-fill
-	dl_min_array = dl_min(ones(1, n_dl_min));  % [dl_min, ..., dl_min]
-	L_dl_min = sum(dl_min_array);
-	
-	% Update the graded dl's.
-	L_graded = L - L_dl_max - L_dl_min;
-	r = fzero(@(s) dl_min*s * (s^n - 1) / (s-1) - L_graded, r);  % dl_min * (r^1 + ... + r^n) == L_graded
-	dl_array = dl_min * (r.^(1:n));
-
-	% Construct filler.
-	dl_filler = [dl_min_array, dl_array, dl_max_array];
-	if dl_n > dl_p
-		dl_filler = wrev(dl_filler);
-	end
-	filler = cumsum([gap(1), dl_filler]);  % last element of filler is gap(2)
-end
 
 
 function filler = fill_targeted_geometric_sym(dl_sym, gap, dl_t, rt, rmax)

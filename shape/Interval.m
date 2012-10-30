@@ -4,11 +4,10 @@ classdef Interval
 	properties (SetAccess = immutable)
 		bound  % [min max];
 		dl_max  % maximum dl
-		dl_boundary  % dl at boundaries; [dl_n dl_p];
 	end
 	
 	methods
-		function this = Interval(bound, dl_max, dl_boundary)
+		function this = Interval(bound, dl_max)
 			% bounds
 			chkarg(istypesizeof(bound, 'real', [1, Sign.count]), '"bound" should be [min max].');
 			chkarg(bound(Sign.n) <= bound(Sign.p), ...
@@ -18,24 +17,9 @@ classdef Interval
 			% dl_max
 			if nargin < 2  % no dl_max
 				this.dl_max = NaN;
-				this.dl_boundary = NaN(1, Sign.count);
 			else  % dl_max
 				chkarg(istypesizeof(dl_max, 'real') && dl_max > 0, '"dl_max" should be postive and real.');
 				this.dl_max = dl_max;
-
-				% dl_boundary
-				if nargin < 3  % no dl_boundary
-					dl_boundary = this.dl_max;
-				end
-				chkarg(istypesizeof(dl_boundary, 'real', [1 0]) && all(dl_boundary > 0), 'elements of "dl_boundary" should be positive.');
-				chkarg(isexpandable2row(dl_boundary, Sign.count), ...
-					'"dl_boundary" should be scalar or length-%d vector.', Sign.count);
-				dl_boundary = expand2row(dl_boundary, Sign.count);
-				for s = Sign.elems
-					chkarg(dl_boundary(s) <= this.dl_max, ...
-						'elements of "dl_boundary" should be smaller than "dl_max".');
-				end
-				this.dl_boundary = dl_boundary;
 			end
 		end
 						

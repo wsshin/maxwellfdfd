@@ -2,7 +2,7 @@ classdef Box < Shape
 	% Box is a Shape for a box.
 		
 	methods
-        function this = Box(bound, dl_max, dl_boundary)
+        function this = Box(bound, dl_max)
 			% bound
 			chkarg(istypesizeof(bound, 'real', [Axis.count, Sign.count]), ...
 				'"bound" should be [xmin xmax; ymin ymax; zmin zmax].');
@@ -26,10 +26,8 @@ classdef Box < Shape
 			
 			if nargin < 2  % no dl_max
 				super_args = {bound, @lsf};
-			elseif nargin < 3  % no dl_boundary
-				super_args = {bound, @lsf, dl_max};
 			else
-				super_args = {bound, @lsf, dl_max, dl_boundary};
+				super_args = {bound, @lsf, dl_max};
 			end
 
 			this = this@Shape(super_args{:});

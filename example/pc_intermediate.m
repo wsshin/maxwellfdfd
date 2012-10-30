@@ -48,7 +48,9 @@ if isnew
 	gray = [0.5 0.5 0.5];  % [r g b]
 	[E, H, obj_array, err] = maxwell_run(osc, domain_vac, BC.p, [2*a 0 t], slab_Si, hole_array_vac, src, inspect_only);
 
-	save(mfilename, 'E', 'H', 'obj_array');
+	if ~inspect_only
+		save(mfilename, 'E', 'H', 'obj_array');
+	end
 else
 	load(mfilename);
 end

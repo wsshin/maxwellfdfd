@@ -3,7 +3,7 @@ classdef Domain < Box
 	
 	methods
         function this = Domain(bound, dl)
-			super_args = {bound, dl, dl};
+			super_args = {bound, dl};
 			this = this@Box(super_args{:});
 		end
 	end

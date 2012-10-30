@@ -41,7 +41,7 @@ classdef PlaneSrc < Source
 			if nargin < 6  % no wvlen
 				assert(nargin < 5);  % no theta
 				theta = 0;
-				wvlen = inf;
+				wvlen = Inf;
 			end
 			chkarg(istypesizeof(theta, 'real'), '"theta" should be polar angle in radian.');
 			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');

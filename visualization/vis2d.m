@@ -100,7 +100,7 @@ if no_opts || ~isfield(opts, 'cscale')
 	opts.cscale = 1.0;
 end
 if no_opts || ~isfield(opts, 'cmax')
-	opts.cmax = inf;
+	opts.cmax = Inf;
 end
 if no_opts || ~isfield(opts, 'withcolorbar')
 	opts.withcolorbar = true;

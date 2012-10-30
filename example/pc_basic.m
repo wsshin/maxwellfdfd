@@ -37,7 +37,9 @@ if isnew
 		{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp), ...
 		PointSrc(Axis.y, [0, 0, 0]), solveropts, inspect_only);
 
-	save(mfilename, 'E', 'H', 'obj_array');
+	if ~inspect_only
+		save(mfilename, 'E', 'H', 'obj_array');
+	end
 else
 	load(mfilename);
 end

@@ -36,7 +36,7 @@ classdef Painter3d < handle
 		obj_array
 		src_array
 		cscale
-		cmax  % if cmax ~= inf, use cmax in crange and ignore maxamp and cscale
+		cmax  % if cmax ~= Inf, use cmax in crange and ignore maxamp and cscale
         isopaque
         opacity
         withgrid
@@ -52,7 +52,7 @@ classdef Painter3d < handle
 			this.obj_array = [];
 			this.src_array = [];
 			this.cscale = 1.0;
-			this.cmax = inf;
+			this.cmax = Inf;
 			this.isopaque = false;
 			this.opacity = 0.1;
 			this.withgrid = false;

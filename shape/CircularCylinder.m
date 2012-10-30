@@ -3,15 +3,13 @@ classdef CircularCylinder < EllipticCylinder
 	% circle.
 
 	methods
-        function this = CircularCylinder(normal_axis, center, radius, height, dl_max, dl_boundary)
+        function this = CircularCylinder(normal_axis, center, radius, height, dl_max)
 			chkarg(istypesizeof(radius, 'real') && radius > 0, '"radius" should be positive.');
 			
 			if nargin < 5
 				super_args = {normal_axis, center, [radius radius], height};
-			elseif nargin < 6
-				super_args = {normal_axis, center, [radius radius], height, dl_max};
 			else
-				super_args = {normal_axis, center, [radius radius], height, dl_max, dl_boundary};
+				super_args = {normal_axis, center, [radius radius], height, dl_max};
 			end
 			
 			this = this@EllipticCylinder(super_args{:});

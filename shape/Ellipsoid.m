@@ -2,7 +2,7 @@ classdef Ellipsoid < Shape
 	% Ellipsoid is a Shape for an ellipsoid.
 
 	methods
-        function this = Ellipsoid(center, semiaxes, dl_max, dl_boundary)
+        function this = Ellipsoid(center, semiaxes, dl_max)
 			chkarg(istypesizeof(center, 'real', [1, Axis.count]), ...
 				'"center" should be length-%d row vector with real elements.', Axis.count);
 
@@ -25,12 +25,10 @@ classdef Ellipsoid < Shape
 				level = 1 - sqrt(sum(x.*x, 2));
 			end
 
-			if nargin < 3
+			if nargin < 3  % no dl_max
 				super_args = {bound, @lsf};
-			elseif nargin < 4
-				super_args = {bound, @lsf, dl_max};
 			else
-				super_args = {bound, @lsf, dl_max, dl_boundary};
+				super_args = {bound, @lsf, dl_max};
 			end
 			
 			this = this@Shape(super_args);

@@ -9,7 +9,10 @@ if isnew
 	[E, H, obj_array] = maxwell_run(1e-9, 100, ...
 		{'vacuum', 'none', 1.0}, [-60, 60; -60, 60; 0, 1], 1, BC.p, [10 10 0], ...
 		PointSrc(Axis.z, [0, 0, 0]), inspect_only);
-	save(mfilename, 'E', 'H', 'obj_array');
+
+	if ~inspect_only
+		save(mfilename, 'E', 'H', 'obj_array');
+	end
 else
 	load(mfilename);
 end

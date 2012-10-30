@@ -24,7 +24,9 @@ if isnew
 		[Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...
 		DistributedSrc(Axis.z, 200, 2.0), solveropts, inspect_only);
 
-	save(mfilename, 'E', 'H', 'obj_array');
+	if ~inspect_only
+		save(mfilename, 'E', 'H', 'obj_array');
+	end
 else
 	load(mfilename);
 end

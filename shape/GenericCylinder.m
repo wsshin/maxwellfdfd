@@ -3,7 +3,7 @@ classdef GenericCylinder < Shape
 	% shape.
 
 	methods
-        function this = GenericCylinder(normal_axis, lsf2d, bound, dl_max, dl_boundary)
+        function this = GenericCylinder(normal_axis, lsf2d, bound, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			
 			% lsf2d is a level set function defined in 2D.  It takes an argument
@@ -37,10 +37,8 @@ classdef GenericCylinder < Shape
 			
 			if nargin < 4  % no dl_max
 				super_args = {bound, @lsf};
-			elseif nargin < 5  % no dl_boundary
-				super_args = {bound, @lsf, dl_max};
 			else
-				super_args = {bound, @lsf, dl_max, dl_boundary};
+				super_args = {bound, @lsf, dl_max};
 			end
 			
 			this = this@Shape(super_args{:});

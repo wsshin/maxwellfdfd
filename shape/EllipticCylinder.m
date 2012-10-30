@@ -3,7 +3,7 @@ classdef EllipticCylinder < GenericCylinder
 	% ellipse.
 
 	methods
-        function this = EllipticCylinder(normal_axis, center, semiaxes, height, dl_max, dl_boundary)
+        function this = EllipticCylinder(normal_axis, center, semiaxes, height, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(center, 'real', [1, Axis.count]), ...
 				'"center" should be length-%d row vector with real elements.', Axis.count);
@@ -11,7 +11,7 @@ classdef EllipticCylinder < GenericCylinder
 				'"semiaxes" should be length-%d row vector with positive elements.', Axis.count);
 			chkarg(istypesizeof(height, 'real') && height > 0, '"height" should be positive.');
 
-			[h v n] = cycle(normal_axis);
+			[h, v, n] = cycle(normal_axis);
 			s = NaN(1, Axis.count);  % semisides
 			s(h) = semiaxes(Dir.h);
 			s(v) = semiaxes(Dir.v);
@@ -35,10 +35,8 @@ classdef EllipticCylinder < GenericCylinder
 			
 			if nargin < 5  % no dl_max
 				super_args = {normal_axis, @lsf2d, bound};
-			elseif nargin < 6  % no dl_boundary
-				super_args = {normal_axis, @lsf2d, bound, dl_max};
 			else
-				super_args = {normal_axis, @lsf2d, bound, dl_max, dl_boundary};
+				super_args = {normal_axis, @lsf2d, bound, dl_max};
 			end
 			
 			this = this@GenericCylinder(super_args{:});

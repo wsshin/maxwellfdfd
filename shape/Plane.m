@@ -7,7 +7,7 @@ classdef Plane < Shape
 	end
 		
 	methods
-        function this = Plane(normal_axis, intercept, dl_max, dl_boundary)
+        function this = Plane(normal_axis, intercept, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
 			
@@ -33,10 +33,8 @@ classdef Plane < Shape
 			
 			if nargin < 3  % no dl_max
 				super_args = {bound, @lsf};
-			elseif nargin < 4  % no dl_boundary
-				super_args = {bound, @lsf, dl_max};
 			else
-				super_args = {bound, @lsf, dl_max, dl_boundary};
+				super_args = {bound, @lsf, dl_max};
 			end
 
 			this = this@Shape(super_args{:});

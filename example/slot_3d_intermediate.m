@@ -33,7 +33,9 @@ if isnew
 	[E, H, obj_array, err] = ...
 		maxwell_run(osc, domain_silica, [BC.p BC.p; BC.p BC.p; BC.p BC.p], [200 200 200], refined_domain_silica, film1_Ag, film2_Ag, src, inspect_only);
 
-	save(mfilename, 'E', 'H', 'obj_array');
+	if ~inspect_only
+		save(mfilename, 'E', 'H', 'obj_array');
+	end
 else
 	load(mfilename);
 end

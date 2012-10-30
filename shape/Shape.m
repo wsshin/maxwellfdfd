@@ -17,8 +17,7 @@ classdef Shape < matlab.mixin.Heterogeneous
 		bound  % [xmin xmax; ymin ymax; zmin zmax]: circumbox of this shape
 		cb_center  % center of circumbox
 		L  % [Lx, Ly, Lz]: range of circumbox
-		dl_max  % [dx_max, dy_max, dz_max]: maximu in this shape
-		dl_boundary  % [dx_n dx_p; dy_n dy_p; dz_n dz_p]: dl at boundaries
+		dl_max  % [dx_max, dy_max, dz_max]: maximum grid cell size in this shape
 	end		
 	
 % 	methods (Abstract)  % no abstract methods allowed for periodize_object()
@@ -26,7 +25,7 @@ classdef Shape < matlab.mixin.Heterogeneous
 % 	end
 	
 	methods
-		function this = Shape(circumbox, lsf, dl_max, dl_boundary)
+		function this = Shape(circumbox, lsf, dl_max)
 			% circumbox
 			chkarg(istypesizeof(circumbox, 'real', [Axis.count, Sign.count]), ...
 				'"circumbox" should be [xmin xmax; ymin ymax; zmin zmax].');
@@ -39,7 +38,7 @@ classdef Shape < matlab.mixin.Heterogeneous
 			chkarg(istypeof(lsf, 'function_handle'), '"lsf" should be function handle.');
 			this.lsf = lsf;
 			
-			% dl_max, dl_boundary
+			% dl_max
 			this.interval = Interval.empty();
 			if nargin < 3  % no dl_max
 				for w = Axis.elems
@@ -50,23 +49,9 @@ classdef Shape < matlab.mixin.Heterogeneous
 				chkarg(isexpandable2row(dl_max, Axis.count), ...
 					'"dl_max" should be scalar or length-%d vector.', Axis.count);
 				dl_max = expand2row(dl_max, Axis.count);
-
-				if nargin < 4  % no dl_boundary
-					dl_boundary = dl_max;
-				end
-				chkarg(istypesizeof(dl_boundary, 'real', [0 0]) && all(dl_boundary(:) > 0), 'element of "dl_boundary" should be positive.');
-				chkarg(isexpandable2mat(dl_boundary, Axis.count, Sign.count), ...
-					'"dl_boundary" should be scalar, length-%d vector, or %d-by-%d matrix.', Axis.count, Axis.count, Sign.count);
-				dl_boundary = expand2mat(dl_boundary, Axis.count, Sign.count);
-				for w = Axis.elems
-					for s = Sign.elems
-						chkarg(dl_boundary(w,s) <= dl_max(w), ...
-							'in the %s-axis, elements of "dl_boundary" should be smaller than "dl_max".', char(w));
-					end
-				end
 				
 				for w = Axis.elems
-					this.interval(w) = Interval(circumbox(w,:), dl_max(w), dl_boundary(w,:));
+					this.interval(w) = Interval(circumbox(w,:), dl_max(w));
 				end
 			end
 		end
@@ -94,13 +79,6 @@ classdef Shape < matlab.mixin.Heterogeneous
 			dl_max = NaN(1, Axis.count);
 			for w = Axis.elems
 				dl_max(w) = this.interval(w).dl_max;
-			end
-		end
-		
-		function dl_boundary = get.dl_boundary(this)
-			dl_boundary = NaN(Axis.count, Sign.count);
-			for w = Axis.elems
-				dl_boundary(w,:) = this.interval(w).dl_boundary;
 			end
 		end
 		

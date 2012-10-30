@@ -99,7 +99,7 @@ else
 end
 
 lambda = norm(vmax);
-relerr = inf;
+relerr = Inf;
 while relerr >= tol
 	vmax = vmax/lambda;
 	vmax = A*vmax;
