@@ -108,6 +108,9 @@ end
 if no_opts || ~isfield(opts, 'withobj')
 	opts.withobj = true;
 end
+if no_opts || ~isfield(opts, 'phase')
+	opts.phase = 0;
+end
 
 p = Painter2d();
 p.scalar2d = scalar2d;
@@ -119,7 +122,7 @@ p.withabs = opts.withabs;
 p.cscale = opts.cscale;
 p.cmax = opts.cmax;
 p.withcolorbar = opts.withcolorbar;
-% p.withobj = opts.withobj;
+p.phase_angle = opts.phase;
 
 p.init_display();
 p.draw_slice();

@@ -19,10 +19,10 @@ pec_mask = ones(size(ind_pec));
 pec_mask(ind_pec) = 0;
 PM = spdiags(pec_mask, 0, length(pec_mask), length(pec_mask));
 
-MU = spdiags(mu, 0, length(mu), length(mu));
+INV_MU = spdiags(1./mu, 0, length(mu), length(mu));  % when mu has Inf, "MU \ Mat" complains about singularity
 EPS = spdiags(eps, 0, length(eps), length(eps));
 
-HfromE = (MU \ A2);
+HfromE = (INV_MU * A2);
 A = PM * A1 * HfromE * PM - omega^2 * EPS;
 HfromE = (1i/omega) * HfromE;
 x0 = [E0{Axis.x}(:); E0{Axis.y}(:); E0{Axis.z}(:)];

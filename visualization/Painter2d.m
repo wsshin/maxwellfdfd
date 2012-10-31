@@ -252,6 +252,8 @@ classdef Painter2d < handle
 			if this.withabs
 				str = ['|', str, '|'];
 			end
+			str = [str, ' for \lambda_0 = ', num2str(this.scalar2d.osc.in_L0())];
+			
 			if ~isnan(this.scalar2d.intercept)
 				str = [str, '  at  ', char(this.scalar2d.grid2d.normal_axis), ' = '];
 				intercept = this.scalar2d.intercept;

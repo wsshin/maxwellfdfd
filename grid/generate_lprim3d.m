@@ -74,13 +74,13 @@ else  % withuniform == false: use dynamic grid generation algorithm
 	end
 
 	for w = Axis.elems
-% 		try
+		try
 			lprim_part = generate_lprim1d_part(domain.interval(w), Lpml(w,:), intervals{w}, lprim0{w}, ldual0{w});
 			lprim = complete_lprim1d(lprim_part);
-% 		catch err
-% 			exception = MException('FDS:gridGen', '%s-axis %s', char(w), err.message);
-% 			throw(exception);
-% 		end
+		catch err
+			exception = MException('FDS:gridGen', '%s-axis grid generation failed.', char(w));
+			throw(addCause(exception, err));
+		end
 		Npml(w,Sign.n) = length(find(lprim < lprim(1) + Lpml(w,Sign.n)));
 		Npml(w,Sign.p) = length(find(lprim > lprim(end) - Lpml(w,Sign.p)));
 		lprim_cell{w} = lprim;

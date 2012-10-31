@@ -132,14 +132,32 @@ DvHn = generate_DpHr(Dir.v, bc, dv_dual);
 %
 % See Sec. II of G. Veronis and S. Fan, Journal of Lightwave Technology, vol.
 % 25, no. 9, pp.2511--2521.
-EPS_vv_hh = spdiags([eps_vv(:); eps_hh(:)], 0, 2*N, 2*N);
-EPS_nn = spdiags(eps_nn(:), 0, N, N);
+eps_vv_hh = [eps_vv(:); eps_hh(:)];
+EPS_vv_hh = spdiags(eps_vv_hh, 0, 2*N, 2*N);
+INV_EPS_nn = spdiags(1./eps_nn(:), 0, N, N);  % when eps_nn has Inf, "EPS_nn \ Mat" complains about singularity
 MU_hh_vv = spdiags([mu_hh(:); mu_vv(:)], 0, 2*N, 2*N);
 MU_nn = spdiags(mu_nn(:), 0, N, N);
 
 A = -omega^2 * EPS_vv_hh * MU_hh_vv ...
-    + EPS_vv_hh * [DvEn; -DhEn] * (EPS_nn \ [-DvHh, DhHv]) ...
+    + EPS_vv_hh * [DvEn; -DhEn] * (INV_EPS_nn * [-DvHh, DhHv]) ...
     - [DhHn; DvHn] * (MU_nn \ ([DhHh, DvHv] * MU_hh_vv));
+
+% We should make sure that eigenvectors' elements corresponding to infinitely
+% large elements of eps_vv_hh are zero.  If the corresponding rows and columns
+% are zeros except for the diagonal elements, and if the diagonal elements are
+% not equal to the eigenvalue, then the relevant elements of the eigenvectors
+% are zeros.  The eigenvalue is gamma^2 = (1/L + 1i*beta)^2 = (1/L)^2 - beta^2 +
+% 2i*beta.  Should it be real, beta = 0 and the eigenvalue (1/L)^2 cannot be
+% negative.
+ind_pec = isinf(abs(eps_vv_hh));
+pec_mask = ones(size(ind_pec));
+pec_mask(ind_pec) = 0;
+PM = spdiags(pec_mask, 0, length(pec_mask), length(pec_mask));
+
+diagvec = full(diag(A));
+diagvec(ind_pec) = -1;
+A = PM * A * PM;
+A = spdiags(diagvec, 0, A);
 
 % % To force the H field components normal to the Et = 0 boundary to be 0, mask
 % % the matrix appropriately.

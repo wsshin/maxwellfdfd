@@ -43,6 +43,13 @@ if isnew
 % 		{['Hagemann', filesep, 'Ag'], gray}, Box([-1070, -80; -1500, -500; 0, 10], 10), Box([80, 1070; -1500, -500; 0, 10], 10), ...  % metal slit
 % 		DistributedSrc(Axis.y, -1000, 1.0), inspect_only);
 
+% 	% (point source)
+% 	[E, H, obj_array] = maxwell_run(1e-9, 1180, ...
+% 		{'vacuum', 'none', 1.0}, [-1070, 1070; -2500, 2500; 0, 10], 10, BC.p, [100 100 0],...
+% 		{'vacuum', 'b', 1.0}, Plane(Axis.y, y_flux_loc, 10), ...
+% 		{['Hagemann', filesep, 'Ag'], gray}, Box([-1070, -80; -1500, -500; 0, 10], 10), Box([80, 1070; -1500, -500; 0, 10], 10), ...  % metal slit
+% 		PointSrc(Axis.x, [0, -2000, 5]), inspect_only);
+
 	if ~inspect_only
 		save(mfilename, 'E', 'H', 'obj_array');
 	end
@@ -55,7 +62,7 @@ figure
 clear opts
 opts.withabs = true;  % true: abs(solution), false: real(solution)
 opts.withpml = false;  % true: show PML, false: do not show PML
-opts.withgrid = true;
+opts.withgrid = false;
 z_location = 0;
 vis2d(E{Axis.x}, Axis.z, z_location, obj_array, opts)
 

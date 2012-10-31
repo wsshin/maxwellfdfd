@@ -58,13 +58,15 @@
 %       PointSrc(Axis.x, [0, 0, 200]), ...  % SRC
 %       );
 
-function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell, obj_array, src_array, eps_node_array, mu_node_array] = build_system(varargin)
-% 	fprintf('%s begins.\n', mfilename);
-% 	pm = ProgMark();
-	pm = varargin{end};
-	if ~istypesizeof(pm, 'ProgMark')
-		pm = ProgMark();
+function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell, ...
+	obj_array, src_array, eps_node_array, mu_node_array] = build_system(varargin)
+	iarg = nargin; arg = varargin{iarg};
+	if ~istypesizeof(arg, 'ProgMark')
+		pm = arg;
+	else
+	 	pm = ProgMark();
 	end
+		
 	iarg = 0;
 	
 	% Set up a length unit and wavelength.
@@ -246,26 +248,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 		if istypesizeof(src, 'DistributedSrc')
 			distsrc = src;
 			prep_distsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, distsrc);
-
-			[h, v, n] = cycle(distsrc.normal_axis);
-			grid2d = Grid2d(grid3d, n);
-
-			Jh2d = array2scalar(distsrc.Jh, PhysQ.J, grid2d, h, GK.dual, osc, distsrc.intercept);
-			Jv2d = array2scalar(distsrc.Jv, PhysQ.J, grid2d, v, GK.dual, osc, distsrc.intercept);
-			cmax = max(abs([Jh2d.array(:); Jv2d.array(:)]));
 			
-			opts.withabs = true;
-			opts.cmax = cmax;
-			figure;
-			set(gcf, 'units','normalized','position',[0 0.5 0.5 0.5]);			
-			vis2d(Jh2d, obj_array, opts);
-			drawnow;
-
-			figure;
-			set(gcf, 'units','normalized','position',[0.5 0.5 0.5 0.5]);			
-			vis2d(Jv2d, obj_array, opts);
-			drawnow;
-
 			neff = distsrc.neff;
 			beta = 2*pi*neff / osc.in_L0();
 			pm.mark('mode calculation');

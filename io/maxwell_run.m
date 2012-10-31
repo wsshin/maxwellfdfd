@@ -175,18 +175,18 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	pm = ProgMark();
 	
 	% Set solver options.
-	iarg = nargin;
+	iarg = nargin; arg = varargin{iarg};
 	inspect_only = false;
-	if istypesizeof(varargin{iarg}, 'logical')
-		inspect_only = varargin{iarg};
-		iarg = iarg - 1;
+	if istypesizeof(arg, 'logical')
+		inspect_only = arg;
+		iarg = iarg - 1; arg = varargin{iarg};
 	end
 
 	is_solveropts = false;
-	if istypesizeof(varargin{iarg}, 'struct')
-		solveropts = varargin{iarg};
+	if istypesizeof(arg, 'struct')
+		solveropts = arg;
 		is_solveropts = true;
-		iarg = iarg - 1;
+		iarg = iarg - 1;  % arg = varargin{iarg};
 	end
 		
 	if ~is_solveropts || ~isfield(solveropts, 'method')
@@ -218,7 +218,8 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
-	[osc, grid3d, s_factor, eps_face, mu_edge, J, E0, obj_array, src_array, eps_node] = build_system(varargin{1:iarg}, pm);
+	[osc, grid3d, s_factor, eps_face, mu_edge, J, E0, obj_array, src_array, eps_node] = ...
+		build_system(varargin{1:iarg}, pm);
 	
 	if inspect_only  % inspect objects and sources
 		figure;
@@ -228,6 +229,37 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 		drawnow
 		pm.mark('domain visualization');
 		
+		% Solve for modes.
+		is_distsrc = false;
+		for src = src_array
+			if istypesizeof(src, 'DistributedSrc')
+				is_distsrc = true;
+				distsrc = src;
+				[h, v, n] = cycle(distsrc.normal_axis);
+				grid2d = Grid2d(grid3d, n);
+
+				Jh2d = array2scalar(distsrc.Jh, PhysQ.J, grid2d, h, GK.dual, osc, distsrc.intercept);
+				Jv2d = array2scalar(distsrc.Jv, PhysQ.J, grid2d, v, GK.dual, osc, distsrc.intercept);
+
+				cmax = max(abs([Jh2d.array(:); Jv2d.array(:)]));
+				opts.withabs = true;
+				opts.cmax = cmax;
+				figure;
+				set(gcf, 'units','normalized','position',[0 0.5 0.5 0.5]);			
+				vis2d(Jh2d, obj_array, opts);
+				drawnow;
+
+				figure;
+				set(gcf, 'units','normalized','position',[0.5 0.5 0.5 0.5]);			
+				vis2d(Jv2d, obj_array, opts);
+				drawnow;
+			end
+		end
+		
+		if is_distsrc
+			pm.mark('distributed source visualization');
+		end
+	
 		E_cell = {};
 		H_cell = {};
 		fprintf('%s finishes. (inspection only)\n', mfilename);

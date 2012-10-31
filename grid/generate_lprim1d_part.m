@@ -49,7 +49,10 @@ assert(lprim0_array(1) == b_min && lprim0_array(end) == b_max);
 
 ldual0_array = unique(ldual0_array, 'sorted');  % duplicate elements are removed
 common = intersect(lprim0_array, ldual0_array);
-assert(isempty(common), 'primary and dual grid share %s.', mat2str(common));
+if ~isempty(common)
+	exception = MException('FDS:gridGen', 'primary and dual grid share %s.', mat2str(common));
+	throw(exception);
+end
 
 % [l_array, ind] = sort([lprim0_array, ldual0_array]);
 % g_array = [GK.prim(ones(size(lprim0_array))), GK.dual(ones(size(ldual0_array)))];
