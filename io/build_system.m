@@ -54,7 +54,7 @@
 %   [E, H, obj_array, err] = build_system(1e-9, 1550, ...  % FREQ
 %       {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...  % DOMAIN
 %       {['Palik', filesep, 'SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
-%       {['Hagemann', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
+%       {['CRC', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
 %       PointSrc(Axis.x, [0, 0, 200]), ...  % SRC
 %       );
 
@@ -230,7 +230,9 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 		pm.mark('uniform grid generation');
 	else
 		pm.mark('dynamic grid generation');
-	end		
+	end
+	fprintf('\t[Nx Ny Nz] = %s\n', mat2str(grid3d.N));
+
 
 	% Construct material parameters.
 	if ~isepsgiven

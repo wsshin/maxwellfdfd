@@ -20,7 +20,7 @@ t = 0.6*a;  % slab thickness
 r = 0.29*a;  % hole radius
 h = sqrt(3)/2*a;  % distance between rows of holes
 
-ad = 20;  % divider for a
+ad = 25;  % divider for a
 td = 10;  % divider for t
 dd = 10;  % divider for d = 2*r
 

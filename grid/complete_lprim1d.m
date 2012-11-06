@@ -59,7 +59,7 @@ for i = 1:(numelems+1)/2
 		'element #%d of "lprim_part_cell" should be length-2 or longer row vector with real elements in ascending order.', 2*i-1);
 
 	if i >= 2
-		chkarg(prev{1}(end) < curr{1}(1), 'subgrids in "lprim_part_cell" should be sorted in ascending order.');
+		chkarg(prev{1}(end) < curr{1}(1), 'subgrids %s and %s in "lprim_part_cell" should be sorted in ascending order.', mat2str(prev{1}), mat2str(curr{1}));
 	end
 	ds = {ds{1:end}, curr};
 	prev = curr;
@@ -87,7 +87,7 @@ for i = 2:numgrids
 		filler = fill_targeted_geometric(dl_n, gap, dl_target, dl_p, rt, rmax);
 	catch err
 		exception = MException('FDS:gridGen', ['grid generation failed between subgrids ', ...
-			mat2str(curr{1}), ' and ', mat2str(next{1}), 'with target dl = %f', curr{2}, ': %s'], err.message);
+			mat2str(curr{1}), ' and ', mat2str(next{1}), ' with target dl = %f: %s'], curr{2}, err.message);
 		throw(exception);
 	end
 	
@@ -122,12 +122,17 @@ else
 end
 
 
+function truth = isequal_approx(a, b)
+d = abs(a-b);
+truth = d < min([a b]) * 1e-8;
+
 function truth = is_smooth(dl_array, rt)
 truth = isempty(find_stiff_ddl(dl_array, rt));
 
 
 function filler = fill_constant(dl_min, dl_max, gap, rt, rmax)
-chkarg(dl_min <= dl_max, '"dl_min" should not be greater than "dl_max".');
+chkarg(dl_min <= dl_max || isequal_approx(dl_min, dl_max), ...
+	'"dl_min = %f" should not be greater than "dl_max = %f".', dl_min, dl_max);
 chkarg(is_smooth([dl_min, dl_max], rt), '"dl_min" and "dl_max" should be similar.');
 
 L = gap(2) - gap(1);
@@ -161,7 +166,8 @@ function filler = fill_targeted_geometric_sym(dl_sym, gap, dl_t, rt, rmax)
 % rt: target ratio of geometric sequence
 % rmax: maximum ratio of geometric sequence
 
-chkarg(dl_t >= dl_sym, '"dl_t" should be equal to or greater than "dl_sym".');
+chkarg(dl_t >= dl_sym || isequal_approx(dl_t, dl_sym), ...
+	'"dl_t = %f" should be equal to or greater than "dl_sym = %f".', dl_t, dl_sym);
 
 L = gap(2) - gap(1);
 chkarg(L > 0, 'second element of "gap" should be greater than the first element.');
@@ -236,8 +242,8 @@ function filler = fill_targeted_geometric(dl_n, gap, dl_t, dl_p, rt, rmax)
 % rt: target ratio of geometric sequence
 % rmax: maximum ratio of geometric sequence
 
-chkarg(dl_t >= dl_n && dl_t >= dl_p, ...
-	'"dl_t" should be equal to or greater than "dl_n" and "dl_p".');
+chkarg((dl_t >= dl_n || isequal_approx(dl_t, dl_n)) && (dl_t >= dl_p || isequal_approx(dl_t, dl_p)), ...
+	'"dl_t = %f" should be equal to or greater than "dl_n = %f" and "dl_p = %f".', dl_t, dl_n, dl_p);
 
 L = gap(2) - gap(1);
 chkarg(L > 0, 'second element of "gap" should be greater than the first element.');

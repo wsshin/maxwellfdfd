@@ -84,7 +84,9 @@ classdef PointSrcM < Source
 					dlq = grid3d.dl{q, GK.dual}(index_cell{q});  % two elements
 					dS = dlp .* dlq;
 					Jw_patch = [-I, I] ./ dS;
+					Jw_patch = Jw_patch.';
 				end
+				Jw_patch = ipermute(Jw_patch, int([q r p]));
 			end
 		end		
 	end

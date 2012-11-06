@@ -163,17 +163,14 @@
 %   [E, H, obj_array, err] = maxwell_run(1e-9, 1550, ...  % FREQ
 %       {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...  % DOMAIN
 %       {['Palik', filesep, 'SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
-%       {['Hagemann', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
+%       {['CRC', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
 %       PointSrc(Axis.x, [0, 0, 200]), ...  % SRC
 %       inspect_only ...
 %       );
 
 function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	DEFAULT_METHOD = 'direct';  % 'direct', 'gpu', 'aws', 'inputfile'
-	
-	fprintf('%s begins.\n', mfilename);
-	pm = ProgMark();
-	
+		
 	% Set solver options.
 	iarg = nargin; arg = varargin{iarg};
 	inspect_only = false;
@@ -198,23 +195,33 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 			'"solveropts" should have "cluster" and "nodes" fields.');
 	end
 
+	if is_solveropts && isequal(solveropts.method, 'inputfile')
+		chkarg(isfield(solveropts, 'filenamebase'), '"solveropts" should have "filenamebase" field.');
+	end
+	
 	if ~is_solveropts || ~isfield(solveropts, 'maxit')
 		solveropts.maxit = 1e5;
 	else
 		chkarg(istypesizeof(solveropts.maxit, 'real') && solveropts.maxit > 0, ...
-			'solveropts.maxit should be "max_niter" (positive).');	
+			'solveropts.maxit should be positive.');	
 	end
 
 	if ~is_solveropts || ~isfield(solveropts, 'tol')
 		solveropts.tol = 1e-6;
 	else
 		chkarg(istypesizeof(solveropts.tol, 'real') && solveropts.tol > 0, ...
-			'solveropts.tol should be "tol_iter" (positive).');
+			'solveropts.tol should be positive.');
 	end
 
 	chkarg(iarg > 0, 'first argument is not correct.');
-	pm.mark('initialization of solver options');
 
+	if inspect_only
+		fprintf('%s begins (inspection only).\n', mfilename);
+	else
+		fprintf('%s begins.\n', mfilename);
+	end
+	pm = ProgMark();
+	
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
@@ -262,11 +269,11 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	
 		E_cell = {};
 		H_cell = {};
-		fprintf('%s finishes. (inspection only)\n', mfilename);
+		fprintf('%s finishes (inspection only).\n', mfilename);
 		return;
 	elseif isequal(solveropts.method, 'inputfile')
-		write_input(filenamebase, osc, grid3d, s_factor, ...
-			eps_node(1:end-1,1:end-1,1:end-1), eps_face, mu_edge, J, tol, maxit);
+		write_input(solveropts.filenamebase, osc, grid3d, s_factor, ...
+			eps_node(1:end-1,1:end-1,1:end-1), eps_face, mu_edge, J, solveropts.tol, solveropts.maxit);
 
 		E_cell = {};
 		H_cell = {};

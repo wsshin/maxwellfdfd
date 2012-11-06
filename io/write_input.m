@@ -37,7 +37,7 @@ end
 % Make all cells use the same write-out function.
 
 % Choose a filename. TODO: Randomize filename to allow for parallelization.
-filename = [filenamebase, '.h5'];
+filename = ['./', filenamebase, '.h5'];
 if exist(filename, 'file')
 	delete(filename);
 end
@@ -57,11 +57,17 @@ h5write(filename, '/omega', double(osc.in_omega0()));
 h5create(filename, '/lambda', 1);
 h5write(filename, '/lambda', double(osc.in_L0()));
 
+h5create(filename, '/L0', 1);
+h5write(filename, '/L0', double(osc.unit.value(PhysQ.L)));
+
 h5create(filename, '/N', Axis.count, 'Datatype', 'int64');
 h5write(filename, '/N', int64(grid3d.N.'));
 
 h5create(filename, '/bc', [Sign.count Axis.count], 'Datatype', 'int64');
-h5write(filename, '/bc', int64(subsindex(grid3d.bc.')));
+h5write(filename, '/bc', int64(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
+
+h5create(filename, '/Npml', [Sign.count Axis.count], 'Datatype', 'int64');
+h5write(filename, '/Npml', int64(grid3d.Npml.'));
 
 h5create(filename, '/tol', 1);
 h5write(filename, '/tol', double(tol));
@@ -75,6 +81,11 @@ h5create(filename, '/e_ikL', [2 Axis.count]);
 h5write(filename, '/e_ikL', expand_complex(e_ikL.'));
 
 for w = Axis.elems
+	datasetname = ['/', char(w), '_prim'];
+	real_array = grid3d.lall{w,GK.prim}.';
+	h5create(filename, datasetname, length(real_array));
+	h5write(filename, datasetname, real_array);
+	
 	for g = GK.elems
 		g_str = char(g);
 		datasetname = ['/d', char(w)', '_', g_str(1:4)];

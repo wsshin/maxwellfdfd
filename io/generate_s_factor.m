@@ -35,8 +35,14 @@ for w = Axis.elems
 			li = l(i);
 			if li < lpml_n
 				s_factor(i) = calc_s_factor(lpml_n - li, Lpml_n, omega, m, lnR);
+% 				if w == Axis.y
+% 					s_factor(i) = -s_factor(i);
+% 				end
 			elseif li > lpml_p
 				s_factor(i) = calc_s_factor(li - lpml_p, Lpml_p, omega, m, lnR);
+% 				if w == Axis.y
+% 					s_factor(i) = -s_factor(i);
+% 				end
 			end
 		end
 		

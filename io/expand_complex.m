@@ -7,4 +7,4 @@ function expanded_array = expand_complex(complex_array)
 chkarg(istypeof(complex_array, 'complex'), '"complex_array" shuold be array with complex elements.');
 nD = ndims(complex_array);
 expanded_array = cat(nD+1, real(complex_array), imag(complex_array));
-expanded_array = permute(expanded_array, [nD+1, 1:nD])
+expanded_array = permute(expanded_array, [nD+1, 1:nD]);

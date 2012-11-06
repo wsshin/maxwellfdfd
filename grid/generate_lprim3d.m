@@ -34,7 +34,7 @@ if withuniform
 		assert(length(lprim) >= 2);
 		dl_generated = lprim(2) - lprim(1);
 		if dl_generated ~= dl_intended
-			warning('GridGen', 'grid vertex separation %e in generated uniform grid differs from intended separation %e by %e percent.', ...
+			warning('FDS:gridGen', 'grid vertex separation %e in generated uniform grid differs from intended separation %e by %e percent.', ...
 				dl_generated, dl_intended, (dl_generated-dl_intended)/dl_intended * 100);
 		end
 		Npml(w,Sign.n) = length(find(lprim < lprim(1) + Lpml(w,Sign.n)));

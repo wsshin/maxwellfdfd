@@ -133,10 +133,13 @@ for j = 2:n_prim0
 		curr = [val-dl, val, val+dl];
 	end
 	
-	if curr(1) == prev(end-1) && curr(2) == prev(end)
+	isequal_approx = @(a, b) abs(a-b) < dl_max * 1e-8;
+	if isequal_approx(curr(1), prev(end-1)) && isequal_approx(curr(2), prev(end))
+% 	if curr(1) == prev(end-1) && curr(2) == prev(end)
 		curr = [prev, curr(3:end)];
 		lprim_part_cell = [lprim_part_cell(1:end-1), {curr}];
-	elseif curr(1) == prev(end)
+	elseif isequal_approx(curr(1), prev(end))
+% 	elseif curr(1) == prev(end)
 		curr = [prev, curr(2:end)];
 		lprim_part_cell = [lprim_part_cell(1:end-1), {curr}];
 	else

@@ -1,7 +1,7 @@
 function scalar = array2scalar(F_array, physQ, grid, axis, gk, osc, intercept)
 chkarg(istypesizeof(physQ, 'PhysQ'), '"physQ" should be instance of PhysQ.');
 chkarg(istypesizeof(gk, 'GK'), '"gk" should be instance of GK.');  % GK.dual for E-like field; GK.prim for H-like field
-chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instancef of Oscillation.');
+chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 
 chkarg(istypesizeof(grid, 'Grid2d') || istypesizeof(grid, 'Grid3d'), ...
 	'"grid" should be instance of Grid2d or Grid3d.');

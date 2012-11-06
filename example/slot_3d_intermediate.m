@@ -11,7 +11,7 @@ unit = PhysUnit(L0);
 osc = Oscillation(wvlen, unit);
 
 silica = Material.create(['Palik', filesep, 'SiO2'], 'none', osc);
-Ag = Material.create(['Hagemann', filesep, 'Ag'], [0.5 0.5 0.5], osc);  % [0.5 0.5 0.5]: gray in RGB
+Ag = Material.create(['CRC', filesep, 'Ag'], [0.5 0.5 0.5], osc);  % [0.5 0.5 0.5]: gray in RGB
 
 domain = Domain([-700, 700; -600, 600; -200, 1700], 20);
 domain_silica = Object(domain, silica);
