@@ -34,8 +34,8 @@ classdef Plane < Shape
 			if nargin < 3  % no dl_max
 				super_args = {bound, @lsf};
 			else
-				dl_max = dl_max(ones(1, Axis.count));
-				dl_max(normal_axis) = Inf;  % dl_max is not defined in normal direction
+				dl_max = expand2row(dl_max, Axis.count);
+				dl_max(normal_axis) = Inf;  % dl_max is meaningless in normal direction
 				super_args = {bound, @lsf, dl_max};
 			end
 
