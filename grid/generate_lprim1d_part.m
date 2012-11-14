@@ -74,7 +74,7 @@ for j = 1:n_dual0
 		inter = interval_array(i);
 		if inter.contains(val)
 			dl = inter.dl_max;
-			if dl < dl_min  % false if dl == NaN
+			if dl < dl_min
 				dl_min = dl;
 			end
 		end
@@ -108,7 +108,7 @@ for j = 1:n_prim0-1
 		inter = interval_array(i);
 		if inter.contains(val)
 			dl = inter.dl_max;
-			if dl < dl_min  % false if dl == NaN
+			if dl < dl_min
 				dl_min = dl;
 			end
 		end

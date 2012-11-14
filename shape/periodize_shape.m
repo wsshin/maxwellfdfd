@@ -48,11 +48,7 @@ for nz = nmin(Axis.z):nmax(Axis.z)
 			if boundshape.contains(c0 + R)
 				circumbox = box0 + [R; R].';
 				lsf = @(r) lsf0(r - repmat(R, [size(r,1), 1]));
-				if isnan(dl_max0)
-					shape = Shape(circumbox, lsf);
-				else
-					shape = Shape(circumbox, lsf, dl_max0);
-				end
+				shape = Shape(circumbox, lsf, dl_max0);
 				shape_array = [shape_array(1:end), shape];
 			end
 		end

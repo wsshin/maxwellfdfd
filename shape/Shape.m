@@ -41,18 +41,16 @@ classdef Shape < matlab.mixin.Heterogeneous
 			% dl_max
 			this.interval = Interval.empty();
 			if nargin < 3  % no dl_max
-				for w = Axis.elems
-					this.interval(w) = Interval(circumbox(w,:));
-				end
-			else  % dl_max
-				chkarg(istypeof(dl_max, 'real') && all(dl_max > 0), 'element of "dl_max" should be positive.');
-				chkarg(isexpandable2row(dl_max, Axis.count), ...
-					'"dl_max" should be scalar or length-%d vector.', Axis.count);
-				dl_max = expand2row(dl_max, Axis.count);
-				
-				for w = Axis.elems
-					this.interval(w) = Interval(circumbox(w,:), dl_max(w));
-				end
+				dl_max = Inf;
+			end
+			
+			chkarg(istypeof(dl_max, 'real') && all(dl_max > 0), 'element of "dl_max" should be positive.');
+			chkarg(isexpandable2row(dl_max, Axis.count), ...
+				'"dl_max" should be scalar or length-%d vector.', Axis.count);
+			dl_max = expand2row(dl_max, Axis.count);
+
+			for w = Axis.elems
+				this.interval(w) = Interval(circumbox(w,:), dl_max(w));
 			end
 		end
 		

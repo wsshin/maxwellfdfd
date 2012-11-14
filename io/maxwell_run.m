@@ -269,7 +269,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	
 		E_cell = {};
 		H_cell = {};
-		fprintf('%s finishes (inspection only).\n', mfilename);
+		fprintf('%s finishes (inspection only).\n\n', mfilename);
 		return;
 	elseif isequal(solveropts.method, 'inputfile')
 		write_input(solveropts.filenamebase, osc, grid3d, s_factor, ...
@@ -278,7 +278,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 		E_cell = {};
 		H_cell = {};
 		pm.mark('input file creation');		
-		fprintf('%s finishes. (input file created)\n', mfilename);
+		fprintf('%s finishes. (input file created)\n\n', mfilename);
 		return;
 	end
 	
@@ -340,5 +340,5 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	end
 	pm.mark('solution preparation');
 		
-	fprintf('%s finishes.\n', mfilename);
+	fprintf('%s finishes.\n\n', mfilename);
 end

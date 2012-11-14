@@ -91,7 +91,7 @@ classdef Scalar2d
 			chkarg(istypesizeof(point, 'real', [0, Dir.count]), ...
 				'"point" should be 2D array with %d columns.', Dir.count);
 			chkarg(this.grid2d.contains(point), '"point" should be inside grid.');
-			[C, X, Y] = this.data_for_pcolor(true);
+			[C, X, Y] = this.data_for_pcolor(true, true);
 			val = interp2(X, Y, C, point(Dir.h), point(Dir.v));
 		end
 	end		

@@ -89,7 +89,7 @@ classdef Scalar3d
 			chkarg(istypesizeof(point, 'real', [0, Axis.count]), ...
 				'"point" should be 2D array with %d columns.', Axis.count);
 			chkarg(this.grid3d.contains(point), '"point" should be inside grid.');
-			[V, X, Y, Z] = this.data_for_slice(true);
+			[V, X, Y, Z] = this.data_for_slice(true, true);
 			val = interp3(X, Y, Z, V, point(Axis.x), point(Axis.y), point(Axis.z));
 		end
 	end		

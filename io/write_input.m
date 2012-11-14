@@ -100,7 +100,7 @@ for w = Axis.elems
 	end
 end
 
-cl = 5;  % compression level;
+cl = 5;  % compression level
 dims = [2 Axis.count grid3d.N];
 
 h5create(filename, '/eps_node', dims, 'Deflate', cl, 'ChunkSize', dims);

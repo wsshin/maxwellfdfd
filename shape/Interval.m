@@ -15,12 +15,8 @@ classdef Interval
 			this.bound = bound;
 						
 			% dl_max
-			if nargin < 2  % no dl_max
-				this.dl_max = NaN;
-			else  % dl_max
-				chkarg(istypesizeof(dl_max, 'real') && dl_max > 0, '"dl_max" should be postive and real.');
-				this.dl_max = dl_max;
-			end
+			chkarg(istypesizeof(dl_max, 'real') && dl_max > 0, '"dl_max" should be postive and real.');
+			this.dl_max = dl_max;
 		end
 						
 		function L = L(this)

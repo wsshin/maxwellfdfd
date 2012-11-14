@@ -106,7 +106,7 @@ if length(size_obj) < length(dims)
 	size_obj(1:length(temp)) = temp;
 end
 
-if isempty(obj)
+if isempty(obj) && ~all(dims)  % if some element of "dims" is zero, allow empty "obj"
 	truth = true;
 elseif length(size_obj) ~= length(dims)
 	truth = false;
@@ -122,10 +122,16 @@ else
 		obj = obj(:);		
 		if nargin < 4  % no dimselem
 			for i = 1:length(obj)
+				if ~truth
+					break
+				end
 				truth = truth && istypeof(obj{i}, typename);
 			end
 		else
 			for i = 1:length(obj)
+				if ~truth
+					break
+				end
 				truth = truth && istypesizeof(obj{i}, typename, dimselem);
 			end			
 		end
