@@ -21,10 +21,6 @@ if isnew
 
 	hole = CircularCylinder(Axis.z, [0 0 0], r, t, [2*r/dd, 2*r/dd, t/td]);
 
-	hole_yn_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yn);
-	hole_yp_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp);
-	hole_array = [hole_yn_array, hole_yp_array];
-
 	%% Solve the system.
 	gray = [0.5 0.5 0.5];  % [r g  b]
 	solveropts.method = 'gpu';
