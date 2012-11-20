@@ -77,13 +77,19 @@ else  % withuniform == false: use dynamic grid generation algorithm
 		try
 			lprim_part = generate_lprim1d_part(domain.interval(w), Lpml(w,:), intervals{w}, lprim0{w}, ldual0{w});
 			lprim = complete_lprim1d(lprim_part);
-		catch err
-			lprim_part = generate_lprim1d_part(domain.interval(w), Lpml(w,:), intervals{w}, lprim0{w}, []);
-			lprim = complete_lprim1d(lprim_part);
-			ldual = mean([lprim(1:end-1); lprim(2:end)]);  % take average in column
+		catch err1
+			try
+				lprim_part = generate_lprim1d_part(domain.interval(w), Lpml(w,:), intervals{w}, lprim0{w}, []);
+				lprim = complete_lprim1d(lprim_part);
+				ldual = mean([lprim(1:end-1); lprim(2:end)]);  % take average in column
+			catch err2
+				exception = MException('FDS:gridGen', '%s-axis grid generation failed.', char(w));
+				throw(addCause(exception, err2));
+			end
+			
 			if ~isempty(setdiff(ldual0{w}, ldual))
 				exception = MException('FDS:gridGen', '%s-axis grid generation failed.', char(w));
-				throw(addCause(exception, err));
+				throw(addCause(exception, err1));
 			end
 		end
 		Npml(w,Sign.n) = length(find(lprim < lprim(1) + Lpml(w,Sign.n)));

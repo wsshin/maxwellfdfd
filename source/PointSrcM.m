@@ -26,7 +26,8 @@ classdef PointSrcM < Source
 					l{w, GK.prim} = location(w);
 				end
 			end
-			this = this@Source(l);
+			point = Point(location);
+			this = this@Source(l, point);
 			this.polarization = polarization_axis;
 			this.location = location;
 			this.Im = Im;

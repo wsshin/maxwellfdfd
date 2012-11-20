@@ -21,6 +21,7 @@ classdef Grid3d < handle
         l  % {x_prim, x_dual; y_prim, y_dual; z_prim, z_dual}
 		lg  %  {x_prim with ghost, x_dual with ghost; y_prim with ghost, y_dual with ghost; z_prim with ghost, z_dual with ghost};
 		lall  %  {x_prim with ghost, x_dual with extra vertices; y_prim with ghost, y_dual with extra vertices; z_prim with ghost, z_dual with extra vertices};
+		bound  %  {xall_prim(1), xall_prim(end); yall_prim(1), yall_prim(end); zall_prim(1), zall_prim(end)]
         dl  % {diff(x_prim), diff(x_dual); diff(y_prim), diff(y_dual); diff(z_prim), diff(z_dual)}
         bc  % [bc_xn, bc_xp; bc_yn, bc_yp; bc_zn, bc_zp]
         N  % [Nx, Ny, Nz]: # of grid cells in the x, y, z directions
@@ -101,6 +102,13 @@ classdef Grid3d < handle
 			end
 		end
 
+		function bound = get.bound(this)
+			bound = NaN(Axis.count, Sign.count);
+			for w = Axis.elems
+				bound(w,:) = this.comp(w).bound;
+			end
+		end
+		
 		function dl = get.dl(this)
 			dl = cell(Axis.count, GK.count);
 			for w = Axis.elems
@@ -194,7 +202,7 @@ classdef Grid3d < handle
 		end
 		
 		function lplot_cell = lplot(this, gk, withpml)
-			chkarg(istypesizeof(gk, 'GK') , '"gk" should be empty or instance of GK');
+			chkarg(istypesizeof(gk, 'GK') , '"gk" should be instance of GK');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 			
 			lplot_cell = cell(1, Axis.count);

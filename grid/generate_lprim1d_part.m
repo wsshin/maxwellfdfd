@@ -59,6 +59,8 @@ end
 % g_array = g_array(ind);
 % n = length(l_array);
 
+
+% Generates primary grid points around dual grid points.
 dl_prim0_array = diff(lprim0_array);
 dl_dual0_array = diff(ldual0_array);
 dl_dual0_array = min([dl_dual0_array, Inf; Inf, dl_dual0_array]);  % min along columns
@@ -94,7 +96,7 @@ end
 lprim0_array = [lprim0_array, lprim_by_ldual0];
 lprim0_array = unique(lprim0_array, 'sorted');  % duplicate elements are removed
 
-% For each interval, find the smallest dl suggested by intervals.
+% For each interval between primary grid points, find the smallest dl suggested by intervals.
 lprim0_mid_array = (lprim0_array(1:end-1) + lprim0_array(2:end)) / 2;
 dl_prim0_array = diff(lprim0_array);
 
@@ -119,7 +121,7 @@ end
 
 dl_boundary_array = min([Inf, dl_mid_array; dl_mid_array, Inf]);  % min along columns
 
-% Create subgrids.
+% Create subgrids.  (This is the part that needs to be improved.)
 val = lprim0_array(1);
 dl = dl_boundary_array(1);
 prev = [val, val+dl];
@@ -130,16 +132,14 @@ for j = 2:n_prim0
 	if val == b_max
 		curr = [val-dl, val];
 	else  % val ~= b_min or b_max
-		curr = [val-dl, val, val+dl];
+		curr = [val-dl, val, val+dl];  %  same cell size on both sides of primary node; important for eps = 2/(1/eps1 + 1/eps2)
 	end
 	
 	isequal_approx = @(a, b) abs(a-b) < dl_max * 1e-8;
-	if isequal_approx(curr(1), prev(end-1)) && isequal_approx(curr(2), prev(end))
-% 	if curr(1) == prev(end-1) && curr(2) == prev(end)
+	if isequal_approx(curr(1), prev(end-1)) && isequal_approx(curr(2), prev(end))  % curr(1) == prev(end-1) && curr(2) == prev(end)
 		curr = [prev, curr(3:end)];
 		lprim_part_cell = [lprim_part_cell(1:end-1), {curr}];
-	elseif isequal_approx(curr(1), prev(end))
-% 	elseif curr(1) == prev(end)
+	elseif isequal_approx(curr(1), prev(end))  % curr(1) == prev(end)
 		curr = [prev, curr(2:end)];
 		lprim_part_cell = [lprim_part_cell(1:end-1), {curr}];
 	else

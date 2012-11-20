@@ -15,6 +15,7 @@ classdef Grid2d < handle
         l  % {h_prim, h_dual; v_prim, v_dual}
 		lg  %  {h_prim with ghost, h_dual with ghost; v_prim with ghost, v_dual with ghost}
 		lall  % {h_prim with ghost, h_dual with extra vertices; v_prim with ghos, v_dual with extra vertices}
+		bound  % [hall_prim(1), hall_prim(end); vall_prim(1), vall_prim(end)]
         dl  % {diff(h_dual), diff(h_prim); diff(v_dual), diff(v_prim)}
         bc  % [bc_hn, bc_hp; bc_vn, bc_vp]
         N  % [Nh, Nv]: # of grid cells in the horizontal and vertical directions
@@ -80,6 +81,13 @@ classdef Grid2d < handle
 				for g = GK.elems
 					lall{d, g} = this.comp(d).lall{g};
 				end
+			end
+		end
+		
+		function bound = get.bound(this)
+			bound = NaN(Dir.count, Sign.count);
+			for d = Dir.elems
+				bound(d,:) = this.comp(d).bound;
 			end
 		end
 		
@@ -170,7 +178,7 @@ classdef Grid2d < handle
 		end
 		
 		function lplot_cell = lplot(this, gk, withpml)
-			chkarg(istypesizeof(gk, 'GK') , '"gk" should be empty or instance of GK');
+			chkarg(istypesizeof(gk, 'GK') , '"gk" should be instance of GK');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 			
 			lplot_cell = cell(1, Dir.count);

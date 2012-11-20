@@ -26,7 +26,8 @@ classdef PointSrc < Source
 					l{w, GK.dual} = location(w);
 				end
 			end
-			this = this@Source(l);
+			point = Point(location);
+			this = this@Source(l, point);
 			this.polarization = polarization_axis;
 			this.location = location;
 			this.I = I;

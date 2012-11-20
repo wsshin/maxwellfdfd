@@ -1,23 +1,23 @@
-function patch_handle_array = draw_objsrc(objec_array, grid3d, withinterp, withpml)
+function patch_handle_array = draw_objsrc(obj_array, grid3d, withinterp, withpml)
 
-chkarg(istypesizeof(objec_array, 'Object', [1 0]), ...
+chkarg(istypesizeof(obj_array, 'Object', [1 0]), ...
 	'"object_array" should be row vector with Object as elements.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 
-patch_handle_array = [];
 if withinterp
 	lplot = grid3d.lplot(GK.prim, withpml);
 else
 	lplot = grid3d.lplot(GK.dual, withpml);
 end
 
+patch_handle_array = [];
 ind = cell(1, Axis.count);  % indices
-for obj = objec_array
+for obj = obj_array
+	shape = obj.shape;
 	color = obj.material.color;
-	if ~isequal(color, 'none')
-		shape = obj.shape;
+	if ~isequal(color, 'none') && ~istypesizeof(shape, 'Domain')
 		for w = Axis.elems
 			bn = shape.bound(w, Sign.n);
 			bp = shape.bound(w, Sign.p);

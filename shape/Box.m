@@ -8,7 +8,7 @@ classdef Box < Shape
 				'"bound" should be [xmin xmax; ymin ymax; zmin zmax].');
 			s = diff(bound, 1, 2) ./ 2;  % semisides
 			s = s.';  % row vector
-			chkarg(all(s > 0), '"bound" should have smaller lower bound than upper bound in all axes.');
+			chkarg(all(s >= 0), '"bound" should have smaller lower bound than upper bound in all axes.');
 			c = mean(bound, 2);  % center
 			c = c.';  % row vector
 			

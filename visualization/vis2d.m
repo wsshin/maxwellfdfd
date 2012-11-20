@@ -5,6 +5,7 @@
 %  vis2d(scalar3d, normal_axis, intercept)
 %  vis2d(scalar2d)
 %  vis2d(..., obj_array)
+%  vis2d(..., src_array)
 %  vis2d(..., [opts])
 
 %%% Description
@@ -18,6 +19,9 @@
 % <Scalar2d.html |Scalar2d|>.
 %
 % |vis2d(..., obj_array)| visualizes the objects in |obj_array| with a slice of
+% a field.  The elements of |obj_array| are instances of <Object.html Object>.
+%
+% |vis2d(..., src_array)| visualizes the sources in |src_array| with a slice of
 % a field.  The elements of |obj_array| are instances of <Object.html Object>.
 %
 % The optional argument |opts| is an options structure that controls the
@@ -73,6 +77,14 @@ if iarg <= nargin && ~istypesizeof(varargin{iarg}, 'struct')
 	iarg = iarg + 1;
 end
 
+src_array = [];
+if iarg <= nargin && ~istypesizeof(varargin{iarg}, 'struct')
+	src_array = varargin{iarg};
+	chkarg(istypesizeof(src_array, 'Source', [1 0]), ...
+		'argument %d should be "src_array" (row vector with Source as elements).', iarg);
+	iarg = iarg + 1;
+end
+
 no_opts = true;
 if iarg <= nargin
 	opts = varargin{iarg};
@@ -106,7 +118,13 @@ if no_opts || ~isfield(opts, 'withcolorbar')
 	opts.withcolorbar = true;
 end
 if no_opts || ~isfield(opts, 'withobj')
-	opts.withobj = true;
+	if length(obj_array) <= 20
+		opts.withobj = true;
+	else
+		opts.withobj = false;
+		warning('FDS:vis', ['for fast plotting, more than 20 objects are not drawn by default.\n', ...
+			'Suggestion: set "opts.withobj = true" to draw objects.']);
+	end
 end
 if no_opts || ~isfield(opts, 'phase')
 	opts.phase = 0;
@@ -115,6 +133,7 @@ end
 p = Painter2d();
 p.scalar2d = scalar2d;
 p.obj_array = obj_array;	
+p.src_array = src_array;
 p.withgrid = opts.withgrid;
 p.withinterp = opts.withinterp;
 p.withpml = opts.withpml;

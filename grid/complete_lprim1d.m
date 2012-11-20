@@ -261,7 +261,7 @@ else  % dl_n < dl_p or dl_n > dl_p
 	
 	% Slightly under-fill the gap with dl_max and the above generated graded
 	% dl's.
-	L_graded = sum(dl_array);
+	L_graded = sum(dl_array);  % dl_min * (r^1 + ... + r^n)
 	assert(L_graded <= L, 'dl = %e is too small or dl = %e is too large for gap size = %e.', dl_min, dl_max, L);
 	if dl_n < dl_p
 		filler_n = cumsum([gap(1), dl_array]);

@@ -48,7 +48,8 @@ classdef PlaneSrc < Source
 						
 			l = cell(Axis.count, GK.count);
 			l{normal_axis, GK.dual} = intercept;
-			this = this@Source(l);
+			plane = Plane(normal_axis, intercept);
+			this = this@Source(l, plane);
 			
 			this.normal_axis = normal_axis;
 			this.intercept = intercept;
@@ -88,7 +89,7 @@ classdef PlaneSrc < Source
 				end
 
 				dn = grid3d.dl{n,g}(ind_n);
-				J = this.K / dn;  % for t normal to n and K, K*dt = (current through dn*dt) = J * (dn*dt)
+				J = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
 				
 				if w == cycle(this.normal_axis)
 					Jw = J * cos(this.phi);

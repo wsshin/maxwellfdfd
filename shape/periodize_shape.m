@@ -39,7 +39,21 @@ n_ext = (corners - repmat(c0, [n_corners, 1])) / A;  % n * A + c0 = corner
 nmax = floor(max(n_ext-eps, [], 1));
 nmin = ceil(min(n_ext+eps, [], 1));
 
-shape_array = [];
+nshape = prod((nmax-nmin)+1);  % tentative number of shapes
+% for nz = nmin(Axis.z):nmax(Axis.z)
+% 	for ny = nmin(Axis.y):nmax(Axis.y)
+% 		for nx = nmin(Axis.x):nmax(Axis.x)
+% 			n = [nx ny nz];
+% 			R = n * A;  % lattice vector
+% 			if boundshape.contains(c0 + R)
+% 				nshape = nshape + 1;
+% 			end
+% 		end
+% 	end
+% end
+shape_array = Shape.empty(0, nshape);
+
+ishape = 0;
 for nz = nmin(Axis.z):nmax(Axis.z)
 	for ny = nmin(Axis.y):nmax(Axis.y)
 		for nx = nmin(Axis.x):nmax(Axis.x)
@@ -49,7 +63,8 @@ for nz = nmin(Axis.z):nmax(Axis.z)
 				circumbox = box0 + [R; R].';
 				lsf = @(r) lsf0(r - repmat(R, [size(r,1), 1]));
 				shape = Shape(circumbox, lsf, dl_max0);
-				shape_array = [shape_array(1:end), shape];
+				ishape = ishape + 1;
+				shape_array(ishape) = shape;
 			end
 		end
 	end

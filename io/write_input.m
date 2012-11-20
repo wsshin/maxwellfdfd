@@ -100,18 +100,18 @@ for w = Axis.elems
 	end
 end
 
-cl = 5;  % compression level
+cl = 5;  % compression level (0-9, where 0 means no compression)
 dims = [2 Axis.count grid3d.N];
 
-h5create(filename, '/eps_node', dims, 'Deflate', cl, 'ChunkSize', dims);
-h5write(filename, '/eps_node', ...
-	expand_complex(cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count)));
+% h5create(filename, '/eps_node', dims, 'Deflate', cl, 'ChunkSize', dims);
+% h5write(filename, '/eps_node', ...
+% 	expand_complex(cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count)));
 
 h5create(filename, '/eps', dims, 'Deflate', cl, 'ChunkSize', dims);
 h5write(filename, '/eps', expand_complex(cell2array(eps_cell, Axis.count)));
 
-h5create(filename, '/mu', dims, 'Deflate', cl, 'ChunkSize', dims);
-h5write(filename, '/mu', expand_complex(cell2array(mu_cell, Axis.count)));
+% h5create(filename, '/mu', dims, 'Deflate', cl, 'ChunkSize', dims);
+% h5write(filename, '/mu', expand_complex(cell2array(mu_cell, Axis.count)));
 
 h5create(filename, '/J', dims, 'Deflate', cl, 'ChunkSize', dims);
 h5write(filename, '/J', expand_complex(cell2array(J_cell, Axis.count)));

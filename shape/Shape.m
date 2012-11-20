@@ -30,8 +30,10 @@ classdef Shape < matlab.mixin.Heterogeneous
 			chkarg(istypesizeof(circumbox, 'real', [Axis.count, Sign.count]), ...
 				'"circumbox" should be [xmin xmax; ymin ymax; zmin zmax].');
 			for w = Axis.elems
-				chkarg(circumbox(w,Sign.n) <= circumbox(w,Sign.p), ...
-					'in the %s-axis, lower bound should be smaller than upper bound of "circumbox".', char(w));
+				wn = circumbox(w,Sign.n);
+				wp = circumbox(w,Sign.p);
+				chkarg(wn <= wp, ...
+					'in the %s-axis, lower bound %f should be smaller than upper bound %f of "circumbox".', char(w), wn, wp);
 			end
 			
 			% level set function
@@ -100,7 +102,7 @@ classdef Shape < matlab.mixin.Heterogeneous
 		function truth = contains(this, point)
 			chkarg(istypesizeof(point, 'real', [0 Axis.count]), ...
 				'"point" should be matrix with %d columns with real elements.', Axis.count);
-			truth = this.lsf(point) > 0;
+			truth = this.lsf(point) >= 0;
 			
 % 			% Check if circumbox is correctly set.
 % 			if truth

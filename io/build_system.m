@@ -61,7 +61,7 @@
 function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell, ...
 	obj_array, src_array, eps_node_array, mu_node_array] = build_system(varargin)
 	iarg = nargin; arg = varargin{iarg};
-	if ~istypesizeof(arg, 'ProgMark')
+	if istypesizeof(arg, 'ProgMark')
 		pm = arg;
 	else
 	 	pm = ProgMark();
@@ -189,7 +189,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 % 	iarg = iarg + 1; arg = varargin{iarg};
 	src_array = [];
 	if ~istypesizeof(varargin{iarg}, 'Source', [1 0])
-		warning('FDS:buildSys', 'No source is given.');
+		warning('FDS:buildSys', 'no source is given.');
 	end
 	
 	while iarg <= nargin && istypesizeof(varargin{iarg}, 'Source', [1 0])

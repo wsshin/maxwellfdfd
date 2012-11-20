@@ -3,6 +3,7 @@ classdef Source < handle & matlab.mixin.Heterogeneous
 	
 	properties (SetAccess = immutable)
 		l  % {x_prim_array, x_dual_array; y_prim_array, y_dual_array; z_prim_array, z_dual_array}; used to generate grid
+		shape  % shape of source
 	end
 	
 	methods (Abstract = true)
@@ -10,10 +11,12 @@ classdef Source < handle & matlab.mixin.Heterogeneous
 	end
 	
 	methods
-		function this = Source(l_cell)
+		function this = Source(l_cell, shape)
 			chkarg(istypesizeof(l_cell, 'realcell', [Axis.count, GK.count], [1 0]), ...
 				'"l_cell" should be %d-by-%d cell array whose each element is row vector with real elements.', Axis.count, GK.count);
+			chkarg(istypesizeof(shape, 'Shape'), '"shape" should be instance of Shape.');
 			this.l = l_cell;
+			this.shape = shape;
 		end
 		
 		function [index_cell, Jw_patch] = generate(this, w_axis, grid3d)

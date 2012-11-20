@@ -26,6 +26,7 @@ classdef Grid1d < handle
 	properties (Dependent, SetAccess = immutable)
 		lg  % {l_prim with ghost, l_dual with ghost}: l with ghost vertex (beyond boundary)
 		lall  % {l_prim with ghost, l_dual with extra vertices}: l with vertices to interpolate fields at corners of simulation domain
+		bound  % [lall_prim(1), lall_prim(end)]
 	end
 	
 	properties (SetAccess = private)
@@ -93,6 +94,10 @@ classdef Grid1d < handle
 			lall = {this.lg{GK.prim}, [this.lg{GK.dual}, this.ldual_ext]};
 		end
 		
+		function bound = get.bound(this)
+			bound = this.lall{GK.prim}([1 end]);
+		end
+		
 		function set_kBloch(this, plane_src)
 			chkarg(istypesizeof(plane_src, 'PlaneSrc'), '"plane_src" should be instance of PlaneSrc.');
 			this.kBloch = plane_src.kBloch(this.axis);
@@ -110,7 +115,7 @@ classdef Grid1d < handle
 		end
 		
 		function lplot = lplot(this, gk, withpml)
-			chkarg(istypesizeof(gk, 'GK') , '"gk" should be empty or instance of GK');
+			chkarg(istypesizeof(gk, 'GK') , '"gk" should be instance of GK');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 			
 			lplot = this.lall{gk};

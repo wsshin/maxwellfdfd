@@ -296,7 +296,12 @@ classdef Painter2d < handle
 			xlabel_curr = get(get(axes_handle, 'Xlabel'), 'String');
 			ylabel_curr = get(get(axes_handle, 'Ylabel'), 'String');
 			
-			n = this.scalar2d.grid2d.normal_axis;
+			grid2d = this.scalar2d.grid2d;
+			n_axis = grid2d.normal_axis;
+			h_axis = grid2d.axis(Dir.h);
+			v_axis = grid2d.axis(Dir.v);
+			dh = min(grid2d.dl{Dir.h, GK.prim});
+			dv = min(grid2d.dl{Dir.v, GK.prim});
 			intercept = this.scalar2d.intercept;
 			if this.withinterp
 				l_bound = this.scalar2d.l_data(this.withpml);
@@ -305,23 +310,43 @@ classdef Painter2d < handle
 			end
 
 			if this.isswapped
-				l_bound = wrev(l_bound);
+				l_bound = wrev(l_bound);  % l_bound is cell.
+
+				temp = h_axis;
+				h_axis = v_axis;
+				v_axis = temp;
+				
+				temp = dh;
+				dh = dv;
+				dv = temp;
 			end
 			
+			bound_g = [l_bound{Dir.h}([1 end]); l_bound{Dir.v}([1 end])];
+						
 			plot_handle_array = [];
-			for obj = this.obj_array
-				color = obj.material.color;
-				shape = obj.shape;
-				if ~isequal(color, 'none')  && shape.interval(n).contains(intercept);
-					if ~istypesizeof(shape, 'Plane')
+			nobj = length(this.obj_array);
+			nsrc = length(this.src_array);
+			for i = 1:nobj+nsrc
+				if i <= nobj
+					obj = this.obj_array(i);
+					color = obj.material.color;
+					shape = obj.shape;
+				else
+					src = this.src_array(i-nobj);
+					color = 'c';  % cyan
+					shape = src.shape;
+				end
+				
+				if ~isequal(color, 'none')  && shape.interval(n_axis).contains(intercept);
+					if ~istypesizeof(shape, 'ZeroVolShape')
 						lsf = shape.lsf;
 					else
 						lsf = @(r) shape.lsf(r, true);
 					end
 					
-					if n == Axis.x
+					if n_axis == Axis.x
 						lsf2d_temp = @(h,v) lsf([intercept(ones(size(h))), h, v]);
-					elseif n == Axis.y
+					elseif n_axis == Axis.y
 						lsf2d_temp = @(h,v) lsf([v, intercept(ones(size(h))), h]);
 					else  % n == Axis.z
 						lsf2d_temp = @(h,v) lsf([h, v, intercept(ones(size(h)))]);
@@ -333,11 +358,32 @@ classdef Painter2d < handle
 						lsf2d = @(h, v) lsf2d_temp(v, h);
 					end
 
+					bound = shape.bound([h_axis v_axis],:);
+					bound(Dir.h,:) = bound(Dir.h,:) + [-dh dh];
+					bound(Dir.v,:) = bound(Dir.v,:) + [-dv dv];
+					
+					bound(:,Sign.n) = max([bound(:,Sign.n), bound_g(:,Sign.n)], [], 2);  % prevent -Inf bound
+					bound(:,Sign.p) = min([bound(:,Sign.p), bound_g(:,Sign.p)], [], 2);  % prevent +Inf bound
+
 					warning('off', 'MATLAB:contour:ConstantData');
 % 					h = ezplot(axes_handle, lsf2d, [this.databound(axis_h,:), this.databound(axis_v,:)]);
-					h = ezplot(axes_handle, lsf2d, [l_bound{Dir.h}([1 end]), l_bound{Dir.v}([1 end])]);
+% 					h = ezplot(axes_handle, lsf2d, [l_bound{Dir.h}([1 end]), l_bound{Dir.v}([1 end])]);
+					h = ezplot(axes_handle, lsf2d, [bound(Dir.h,:), bound(Dir.v,:)]);
 					warning('on', 'MATLAB:contour:ConstantData');
-					set(h, 'Color', obj.material.color);
+					set(h, 'Color', color);
+% 					if i > nobj  % source
+% 						if istypesizeof(shape, 'Point')
+% 							set(h, 'LineWidth', 3);
+% 						elseif istypesizeof(shape, 'Line')
+% 							if n_axis == shape.axis
+% 								set(h, 'LineWidth', 3);
+% 							else
+% 								set(h, 'LineStyle', ':');
+% 							end
+% 						elseif istypesizeof(shape, 'Plane')
+% 							set(h, 'LineStyle', ':');
+% 						end
+% 					end
 					plot_handle_array = [plot_handle_array(1:end), h];
 				end
 			end

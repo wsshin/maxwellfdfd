@@ -29,7 +29,8 @@ classdef DistributedSrc < Source
 			
 			l = cell(Axis.count, GK.count);
 			l{normal_axis, GK.dual} = intercept;
-			this = this@Source(l);
+			plane = Plane(normal_axis, intercept);
+			this = this@Source(l, plane);
 			
 			this.normal_axis = normal_axis;
 			this.intercept = intercept;
