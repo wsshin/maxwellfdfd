@@ -371,9 +371,9 @@ classdef Painter2d < handle
 					h = ezplot(axes_handle, lsf2d, [bound(Dir.h,:), bound(Dir.v,:)]);
 					warning('on', 'MATLAB:contour:ConstantData');
 					set(h, 'Color', color);
-% 					if i > nobj  % source
-% 						if istypesizeof(shape, 'Point')
-% 							set(h, 'LineWidth', 3);
+					if i > nobj  % source
+						if istypesizeof(shape, 'Point')
+							set(h, 'LineWidth', 3);
 % 						elseif istypesizeof(shape, 'Line')
 % 							if n_axis == shape.axis
 % 								set(h, 'LineWidth', 3);
@@ -382,8 +382,8 @@ classdef Painter2d < handle
 % 							end
 % 						elseif istypesizeof(shape, 'Plane')
 % 							set(h, 'LineStyle', ':');
-% 						end
-% 					end
+						end
+					end
 					plot_handle_array = [plot_handle_array(1:end), h];
 				end
 			end

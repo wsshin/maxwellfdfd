@@ -27,6 +27,7 @@ end
 figure
 clear opts
 opts.withinterp = false;
+opts.withobj = true;
 % opts.cscale = 1e-3;
 vis2d(E{Axis.z}, Axis.z, z_location, obj_array, src_array, opts)
 % vis2d(H{Axis.z}, Axis.z, z_location, obj_array, src_array, opts)

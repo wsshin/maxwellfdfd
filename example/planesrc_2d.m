@@ -32,7 +32,9 @@ end
 
 %% Visualize the solution.
 figure
-vis2d(E{Axis.z}, Axis.z, 0, obj_array, src_array)
+clear opts;
+opts.withobj = false;
+vis2d(E{Axis.z}, Axis.z, 0, obj_array, src_array, opts)
 % vis2d(E{Axis.x}, Axis.x, 0, obj_array, src_array)
 
 %% Calculate the power emanating from the source.
