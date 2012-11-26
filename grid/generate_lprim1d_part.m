@@ -44,10 +44,10 @@ bound = reshape(bound, 1, []);
 is_in = (bound > b_min) & (bound < b_max);
 lprim0_array = [lprim0_array, bound(is_in)];  % boundaries of shapes are aligned with primary gird
 
-lprim0_array = unique(lprim0_array, 'sorted');  % duplicate elements are removed
+lprim0_array = unique(lprim0_array);  % sorted and duplicate elements are removed
 assert(lprim0_array(1) == b_min && lprim0_array(end) == b_max);
 
-ldual0_array = unique(ldual0_array, 'sorted');  % duplicate elements are removed
+ldual0_array = unique(ldual0_array);  % sorted and duplicate elements are removed
 common = intersect(lprim0_array, ldual0_array);
 if ~isempty(common)
 	exception = MException('FDS:gridGen', 'primary and dual grid share %s.', mat2str(common));
@@ -57,7 +57,7 @@ end
 % [l_array, ind] = sort([lprim0_array, ldual0_array]);
 % g_array = [GK.prim(ones(size(lprim0_array))), GK.dual(ones(size(ldual0_array)))];
 % g_array = g_array(ind);
-% n = length(l_array);
+% n = length(l_array);s
 
 
 % Generates primary grid points around dual grid points.
@@ -94,7 +94,7 @@ for j = 1:n_dual0
 end
 
 lprim0_array = [lprim0_array, lprim_by_ldual0];
-lprim0_array = unique(lprim0_array, 'sorted');  % duplicate elements are removed
+lprim0_array = unique(lprim0_array);  % sorted and duplicate elements are removed
 
 % For each interval between primary grid points, find the smallest dl suggested by intervals.
 lprim0_mid_array = (lprim0_array(1:end-1) + lprim0_array(2:end)) / 2;
