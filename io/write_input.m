@@ -60,24 +60,24 @@ h5write(filename, '/lambda', double(osc.in_L0()));
 h5create(filename, '/L0', 1);
 h5write(filename, '/L0', double(osc.unit.value(PhysQ.L)));
 
-% h5create(filename, '/N', Axis.count, 'Datatype', 'int32');
-h5create(filename, '/N', Axis.count);
-h5write(filename, '/N', double(grid3d.N.'));
+h5create(filename, '/N', Axis.count, 'Datatype', 'int32');
+% h5create(filename, '/N', Axis.count);
+h5write(filename, '/N', int32(grid3d.N.'));
 
-% h5create(filename, '/bc', [Sign.count Axis.count], 'Datatype', 'int32');
-h5create(filename, '/bc', [Sign.count Axis.count]);
-h5write(filename, '/bc', double(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
+h5create(filename, '/bc', [Sign.count Axis.count], 'Datatype', 'int32');
+% h5create(filename, '/bc', [Sign.count Axis.count]);
+h5write(filename, '/bc', int32(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
 
-% h5create(filename, '/Npml', [Sign.count Axis.count], 'Datatype', 'int32');
-h5create(filename, '/Npml', [Sign.count Axis.count]);
-h5write(filename, '/Npml', double(grid3d.Npml.'));
+h5create(filename, '/Npml', [Sign.count Axis.count], 'Datatype', 'int32');
+% h5create(filename, '/Npml', [Sign.count Axis.count]);
+h5write(filename, '/Npml', int32(grid3d.Npml.'));
 
 h5create(filename, '/tol', 1);
 h5write(filename, '/tol', double(tol));
 
-% h5create(filename, '/maxit', 1, 'Datatype', 'int32');
-h5create(filename, '/maxit', 1);
-h5write(filename, '/maxit', double(maxit));
+h5create(filename, '/maxit', 1, 'Datatype', 'int32');
+% h5create(filename, '/maxit', 1);
+h5write(filename, '/maxit', int32(maxit));
 
 % Write complex values.
 e_ikL = exp(-1i * (grid3d.kBloch .* grid3d.L));
