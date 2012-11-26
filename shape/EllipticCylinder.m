@@ -3,13 +3,13 @@ classdef EllipticCylinder < GenericCylinder
 	% ellipse.
 
 	methods
-        function this = EllipticCylinder(normal_axis, center, semiaxes, height, dl_max)
+        function this = EllipticCylinder(normal_axis, height, center, semiaxes, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
+			chkarg(istypesizeof(height, 'real') && height > 0, '"height" should be positive.');
 			chkarg(istypesizeof(center, 'real', [1, Axis.count]), ...
 				'"center" should be length-%d row vector with real elements.', Axis.count);
 			chkarg(istypesizeof(semiaxes, 'real', [1, Dir.count]) && all(semiaxes > 0), ...
 				'"semiaxes" should be length-%d row vector with positive elements.', Axis.count);
-			chkarg(istypesizeof(height, 'real') && height > 0, '"height" should be positive.');
 
 			[h, v, n] = cycle(normal_axis);
 			s = NaN(1, Axis.count);  % semisides

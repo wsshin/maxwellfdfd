@@ -20,7 +20,7 @@ if isnew
 	slab_yn = Box([-mx*a mx*a; -my*a -0.5*a; 0 t], [a/ad, a/ad, t]);
 	slab_yp = Box([-mx*a mx*a; 0.5*a my*a; 0 t], [a/ad, a/ad, t]);
 
-	rod = CircularCylinder(Axis.z, [0 0 t/2], r, t, [2*r/dd, 2*r/dd, t]);
+	rod = CircularCylinder(Axis.z, t, [0 0 t/2], r, [2*r/dd, 2*r/dd, t]);
 
 	%% Solve the system.
 	gray = [0.5 0.5 0.5];  % [r g  b]
@@ -42,6 +42,7 @@ end
 if ~inspect_only
 	figure;
 	clear opts
+% 	opts.withgrid = true;
 % 	opts.withobj = true;
 	opts.withabs = true;
 	opts.withpml = false;
