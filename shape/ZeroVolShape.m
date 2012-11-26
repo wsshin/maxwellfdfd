@@ -7,7 +7,7 @@ classdef ZeroVolShape < Shape
 % 	end
 	
 	methods
-		function this = ZeroVolShape(circumbox, lsf, dl_max)
+		function this = ZeroVolShape(lprim_cell, lsf, dl_max)
 			function level = lsf_zv(r, force_draw)
 				if nargin < 2  % no force_draw
 					force_draw = false;
@@ -23,9 +23,9 @@ classdef ZeroVolShape < Shape
 			end
 
 			if nargin < 3  % no dl_max
-				super_args = {circumbox, @lsf_zv};
+				super_args = {lprim_cell, @lsf_zv};
 			else
-				super_args = {circumbox, @lsf_zv, dl_max};
+				super_args = {lprim_cell, @lsf_zv, dl_max};
 			end
 			this = this@Shape(super_args{:});
 		end

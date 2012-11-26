@@ -9,7 +9,7 @@ a = primitive_vec_cell;  % "a" is conventional symbol for primitive vectors
 shape0 = shape;
 
 lsf0 = shape0.lsf;  % level set function
-box0 = shape0.bound;  % circumbox
+lprim0 = shape0.lprim;  % primary grid planes
 c0 = shape0.cb_center;  % center of circumbox
 dl_max0 = shape0.dl_max;  % dl_max
 
@@ -60,9 +60,12 @@ for nz = nmin(Axis.z):nmax(Axis.z)
 			n = [nx ny nz];
 			R = n * A;  % lattice vector
 			if boundshape.contains(c0 + R)
-				circumbox = box0 + [R; R].';
+				lprim = cell(1, Axis.count);
+				for w = Axis.elems
+					lprim{w} = lprim0{w} + R(w);
+				end
 				lsf = @(r) lsf0(r - repmat(R, [size(r,1), 1]));
-				shape = Shape(circumbox, lsf, dl_max0);
+				shape = Shape(lprim, lsf, dl_max0);
 				ishape = ishape + 1;
 				shape_array(ishape) = shape;
 			end

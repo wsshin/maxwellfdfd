@@ -28,12 +28,17 @@ classdef Rectangle < ZeroVolShape
 				level = box.lsf(r) - abs(r_normal - intercept);
 			end
 			
+			lprim = cell(1, Axis.count);
+			for w = Axis.elems
+				lprim{w} = box.bound(w,:);
+			end
+					
 			if nargin < 4  % no dl_max
-				super_args = {box.bound, @lsf};
+				super_args = {lprim, @lsf};
 			else
 				dl_max = expand2row(dl_max, Axis.count);
 				dl_max(normal_axis) = Inf;  % dl_max is meaningless in normal direction
-				super_args = {box.bound, @lsf, dl_max};
+				super_args = {lprim, @lsf, dl_max};
 			end
 
 			this = this@ZeroVolShape(super_args{:});

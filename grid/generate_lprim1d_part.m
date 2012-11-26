@@ -36,13 +36,12 @@ lprim0_array = [lprim0_array, b_min, b_pml_min, b_pml_max, b_max];  % possible d
 % 		end
 % 	end
 % end
-bound = NaN(length(interval_array), Sign.count);
+lprim_inter = [];
 for i = 1:length(interval_array)
-	bound(i,:) = interval_array(i).bound;
+	lprim_inter = [lprim_inter(1:end), interval_array(i).lprim];
 end
-bound = reshape(bound, 1, []);
-is_in = (bound > b_min) & (bound < b_max);
-lprim0_array = [lprim0_array, bound(is_in)];  % boundaries of shapes are aligned with primary gird
+is_in = (lprim_inter > b_min) & (lprim_inter < b_max);
+lprim0_array = [lprim0_array, lprim_inter(is_in)];  % boundaries of shapes are aligned with primary gird
 
 lprim0_array = unique(lprim0_array);  % sorted and duplicate elements are removed
 assert(lprim0_array(1) == b_min && lprim0_array(end) == b_max);

@@ -11,9 +11,6 @@ classdef Plane < ZeroVolShape
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
 			
-			bound = [-Inf Inf; -Inf Inf; -Inf Inf];
-			bound(normal_axis, :) = [intercept intercept];
-			
 			function level = lsf(r)
 				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
 					'"r" should be matrix with %d columns with real elements.', Axis.count);
@@ -21,12 +18,21 @@ classdef Plane < ZeroVolShape
 				level = -abs(r_normal - intercept);				
 			end
 			
+			lprim = cell(1, Axis.count);
+			for w = Axis.elems
+				if w == normal_axis
+					lprim{w} = intercept;
+				else
+					lprim{w} = [-Inf Inf];
+				end
+			end
+			
 			if nargin < 3  % no dl_max
-				super_args = {bound, @lsf};
+				super_args = {lprim, @lsf};
 			else
 				dl_max = expand2row(dl_max, Axis.count);
 				dl_max(normal_axis) = Inf;  % dl_max is meaningless in normal direction
-				super_args = {bound, @lsf, dl_max};
+				super_args = {lprim, @lsf, dl_max};
 			end
 
 			this = this@ZeroVolShape(super_args{:});

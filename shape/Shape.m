@@ -14,6 +14,7 @@ classdef Shape < matlab.mixin.Heterogeneous
 	end
 	
 	properties (Dependent, SetAccess = immutable)
+		lprim  % {xprim_array, yprim_array, zprim_array}: primary grid plane that this shape defines
 		bound  % [xmin xmax; ymin ymax; zmin zmax]: circumbox of this shape
 		cb_center  % center of circumbox
 		L  % [Lx, Ly, Lz]: range of circumbox
@@ -25,34 +26,34 @@ classdef Shape < matlab.mixin.Heterogeneous
 % 	end
 	
 	methods
-		function this = Shape(circumbox, lsf, dl_max)
-			% circumbox
-			chkarg(istypesizeof(circumbox, 'real', [Axis.count, Sign.count]), ...
-				'"circumbox" should be [xmin xmax; ymin ymax; zmin zmax].');
-			for w = Axis.elems
-				wn = circumbox(w,Sign.n);
-				wp = circumbox(w,Sign.p);
-				chkarg(wn <= wp, ...
-					'in the %s-axis, lower bound %f should be smaller than upper bound %f of "circumbox".', char(w), wn, wp);
-			end
+		function this = Shape(lprim_cell, lsf, dl_max)
+			% lprim_cell
+			chkarg(istypesizeof(lprim_cell, 'realcell', [1 Axis.count], [1 0]), ...
+				'"lprim_cell" is length-%d row cell array whose each element is row vector with real elements.', Axis.count);
 			
 			% level set function
 			chkarg(istypeof(lsf, 'function_handle'), '"lsf" should be function handle.');
 			this.lsf = lsf;
 			
 			% dl_max
-			this.interval = Interval.empty();
 			if nargin < 3  % no dl_max
 				dl_max = Inf;
 			end
-			
 			chkarg(istypeof(dl_max, 'real') && all(dl_max > 0), 'element of "dl_max" should be positive.');
 			chkarg(isexpandable2row(dl_max, Axis.count), ...
 				'"dl_max" should be scalar or length-%d vector.', Axis.count);
 			dl_max = expand2row(dl_max, Axis.count);
 
+			this.interval = Interval.empty();
 			for w = Axis.elems
-				this.interval(w) = Interval(circumbox(w,:), dl_max(w));
+				this.interval(w) = Interval(lprim_cell{w}, dl_max(w));
+			end
+		end
+		
+		function lprim = get.lprim(this)
+			lprim = cell(1, Axis.count);
+			for w = Axis.elems
+				lprim{w} = this.interval(w).lprim;
 			end
 		end
 		

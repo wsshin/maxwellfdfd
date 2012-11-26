@@ -3,22 +3,20 @@ classdef GenericCylinder < Shape
 	% shape.
 
 	methods
-        function this = GenericCylinder(normal_axis, lsf2d, bound, dl_max)
+        function this = GenericCylinder(normal_axis, lsf2d, lprim_cell, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			
 			% lsf2d is a level set function defined in 2D.  It takes an argument
 			% r = [h, v], where, e.g., (h, v) is (x, y) for narmal_axis: z.
 			chkarg(istypeof(lsf2d, 'function_handle'), '"lsf2d" should be function handle.');
 
-			chkarg(istypesizeof(bound, 'real', [Axis.count, Sign.count]), ...
-				'"bound" should be [xmin xmax; ymin ymax; zmin zmax].');
+			chkarg(istypesizeof(lprim_cell, 'realcell', [1 Axis.count], [1 0]), ...
+				'"lprim_cell" should be length-%d row cell array whose each element is row vector with real elements.', Axis.count);
 			
 			[h, v, n] = cycle(normal_axis);
-			s = diff(bound, 1, 2) ./ 2;  % semisides
-			chkarg(all(s > 0), '"bound" should have smaller lower bound than upper bound in all axes.');
-			sn = s(n);  % semiside in normal axis
-			c = mean(bound, 2);  % center
-			cn = c(n);  % "normal_axis" coordinate of center
+			bound_n = [min(lprim_cell{n}), max(lprim_cell{n})];
+			sn = diff(bound_n);
+			cn = mean(bound_n);
 
 			% For rhv = r([h, v]), and rn = r(n), the level set
 			% function is basically min(lsf2d(rhv), 1 - abs(rn-cn)./sn, [], 2),
@@ -36,9 +34,9 @@ classdef GenericCylinder < Shape
 			end
 			
 			if nargin < 4  % no dl_max
-				super_args = {bound, @lsf};
+				super_args = {lprim_cell, @lsf};
 			else
-				super_args = {bound, @lsf, dl_max};
+				super_args = {lprim_cell, @lsf, dl_max};
 			end
 			
 			this = this@Shape(super_args{:});

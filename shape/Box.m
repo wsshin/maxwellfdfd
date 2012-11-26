@@ -24,10 +24,15 @@ classdef Box < Shape
 				level = 1 - max(abs(r - c_vec) ./ s_vec, [], 2);
 			end
 			
+			lprim = cell(1, Axis.count);
+			for w = Axis.elems
+				lprim{w} = bound(w,:);
+			end
+			
 			if nargin < 2  % no dl_max
-				super_args = {bound, @lsf};
+				super_args = {lprim, @lsf};
 			else
-				super_args = {bound, @lsf, dl_max};
+				super_args = {lprim, @lsf, dl_max};
 			end
 
 			this = this@Shape(super_args{:});

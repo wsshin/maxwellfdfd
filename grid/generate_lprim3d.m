@@ -42,6 +42,11 @@ if withuniform
 		lprim_cell{w} = lprim;
 	end
 else  % withuniform == false: use dynamic grid generation algorithm
+	% Below, all for loops over Axis.elems could be merged into a single for
+	% loop.  However, that is less efficient because, for example, it makes a
+	% shape retrieved three times instead of once from shape_array.  When
+	% shape_array is long, this turns out to be actually quite a large penalty.
+	
 	intervals = cell(1, Axis.count);
 	for j = 1:length(shape_array)
 		shape = shape_array(j);

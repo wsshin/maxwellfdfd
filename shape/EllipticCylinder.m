@@ -33,10 +33,15 @@ classdef EllipticCylinder < GenericCylinder
 				level = 1 - sqrt(sum(x.*x, 2));
 			end
 			
+			lprim = cell(1, Axis.count);
+			for w = Axis.elems
+				lprim{w} = bound(w,:);
+			end
+			
 			if nargin < 5  % no dl_max
-				super_args = {normal_axis, @lsf2d, bound};
+				super_args = {normal_axis, @lsf2d, lprim};
 			else
-				super_args = {normal_axis, @lsf2d, bound, dl_max};
+				super_args = {normal_axis, @lsf2d, lprim, dl_max};
 			end
 			
 			this = this@GenericCylinder(super_args{:});

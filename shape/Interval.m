@@ -2,17 +2,20 @@ classdef Interval
 	% Interval is a 1D version of Shape.  It is a concrete class.
 	
 	properties (SetAccess = immutable)
+		lprim  % lprim_array that is used to generate grid
 		bound  % [min max];
 		dl_max  % maximum dl
 	end
 	
 	methods
-		function this = Interval(bound, dl_max)
+		function this = Interval(lprim_array, dl_max)
+			% lprim
+			chkarg(istypesizeof(lprim_array, 'real', [1 0]) && ~isempty(lprim_array), ...
+				'"lprim_array" should be nonempty row vector with real elements.');
+			this.lprim = unique(lprim_array);  % sorted and duplicate elements are removed
+			
 			% bounds
-			chkarg(istypesizeof(bound, 'real', [1, Sign.count]), '"bound" should be [min max].');
-			chkarg(bound(Sign.n) <= bound(Sign.p), ...
-				'lower bound should be smaller than upper bound of "bound".');
-			this.bound = bound;
+			this.bound = [min(lprim_array), max(lprim_array)];
 						
 			% dl_max
 			chkarg(istypesizeof(dl_max, 'real') && dl_max > 0, '"dl_max" should be postive and real.');
