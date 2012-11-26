@@ -23,7 +23,7 @@ chkarg(istypesizeof(J_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 	'"J_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
 	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 chkarg(istypesizeof(tol, 'real') && tol > 0, '"tol" should be positive.');
-chkarg(istypesizeof(maxit, 'int') && maxit > 0, '"maxit" should be positive.');
+chkarg(istypesizeof(maxit, 'int') && maxit > 0, '"maxit" should be positive integer.');
 
 % Make sure hdf5 compression is available.
 if ~H5Z.filter_avail('H5Z_FILTER_DEFLATE') || ...
@@ -60,20 +60,24 @@ h5write(filename, '/lambda', double(osc.in_L0()));
 h5create(filename, '/L0', 1);
 h5write(filename, '/L0', double(osc.unit.value(PhysQ.L)));
 
-h5create(filename, '/N', Axis.count, 'Datatype', 'int64');
-h5write(filename, '/N', int64(grid3d.N.'));
+% h5create(filename, '/N', Axis.count, 'Datatype', 'int32');
+h5create(filename, '/N', Axis.count);
+h5write(filename, '/N', double(grid3d.N.'));
 
-h5create(filename, '/bc', [Sign.count Axis.count], 'Datatype', 'int64');
-h5write(filename, '/bc', int64(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
+% h5create(filename, '/bc', [Sign.count Axis.count], 'Datatype', 'int32');
+h5create(filename, '/bc', [Sign.count Axis.count]);
+h5write(filename, '/bc', double(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
 
-h5create(filename, '/Npml', [Sign.count Axis.count], 'Datatype', 'int64');
-h5write(filename, '/Npml', int64(grid3d.Npml.'));
+% h5create(filename, '/Npml', [Sign.count Axis.count], 'Datatype', 'int32');
+h5create(filename, '/Npml', [Sign.count Axis.count]);
+h5write(filename, '/Npml', double(grid3d.Npml.'));
 
 h5create(filename, '/tol', 1);
 h5write(filename, '/tol', double(tol));
 
-h5create(filename, '/maxit', 1, 'Datatype', 'int64');
-h5write(filename, '/maxit', int64(maxit));
+% h5create(filename, '/maxit', 1, 'Datatype', 'int32');
+h5create(filename, '/maxit', 1);
+h5write(filename, '/maxit', double(maxit));
 
 % Write complex values.
 e_ikL = exp(-1i * (grid3d.kBloch .* grid3d.L));
@@ -100,21 +104,39 @@ for w = Axis.elems
 	end
 end
 
-cl = 5;  % compression level (0-9, where 0 means no compression)
-dims = [2 Axis.count grid3d.N];
+use_petsc = false;
+if use_petsc
+	eps_array = cell2array(eps_cell, Axis.count);
+% 	PetscBinaryWrite([filenamebase, '.eps'], eps_array(:), 'indices', 'int32', 'precision', 'float64');
+	PetscBinaryWrite([filenamebase, '.eps'], eps_array(:) + 1i*eps(ones(size(eps_array(:)))));
+	J_array = cell2array(J_cell, Axis.count);
+% 	PetscBinaryWrite([filenamebase, '.J'], 1i*J_array(:), 'indices', 'int32', 'precision', 'float64');
+	PetscBinaryWrite([filenamebase, '.J'], J_array(:) + 1i*eps(ones(size(eps_array(:)))));
 
-% h5create(filename, '/eps_node', dims, 'Deflate', cl, 'ChunkSize', dims);
-% h5write(filename, '/eps_node', ...
-% 	expand_complex(cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count)));
+% 	J_array2 = PetscBinaryRead([filenamebase, '.J'], 'complex', true);
+% 	norm(1i*J_array(:)-J_array2)
+% 	eps_array2 = PetscBinaryRead([filenamebase, '.eps'], 'complex', true);
+% 	eps_array2 = PetscBinaryRead([filenamebase, '.eps'], true);
+% 	norm(eps_array-eps_array2);
+else
+	cl = 5;  % compression level (0-9, where 0 means no compression)
+	dims = [2 Axis.count grid3d.N];
 
-h5create(filename, '/eps', dims, 'Deflate', cl, 'ChunkSize', dims);
-h5write(filename, '/eps', expand_complex(cell2array(eps_cell, Axis.count)));
+	% h5create(filename, '/eps_node', dims, 'Deflate', cl, 'ChunkSize', dims);
+	% h5write(filename, '/eps_node', ...
+	% 	expand_complex(cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count)));
 
-% h5create(filename, '/mu', dims, 'Deflate', cl, 'ChunkSize', dims);
-% h5write(filename, '/mu', expand_complex(cell2array(mu_cell, Axis.count)));
+	h5create(filename, '/eps', dims, 'Deflate', cl, 'ChunkSize', dims);
+% 	h5create(filename, '/eps', dims);
+	h5write(filename, '/eps', expand_complex(cell2array(eps_cell, Axis.count)));
 
-h5create(filename, '/J', dims, 'Deflate', cl, 'ChunkSize', dims);
-h5write(filename, '/J', expand_complex(cell2array(J_cell, Axis.count)));
+	% h5create(filename, '/mu', dims, 'Deflate', cl, 'ChunkSize', dims);
+	% h5write(filename, '/mu', expand_complex(cell2array(mu_cell, Axis.count)));
+
+	h5create(filename, '/J', dims, 'Deflate', cl, 'ChunkSize', dims);
+% 	h5create(filename, '/J', dims);
+	h5write(filename, '/J', expand_complex(cell2array(J_cell, Axis.count)));
+end
 
 % % Write complex arrays to the input file.
 % file = H5F.create(filename, 'H5F_ACC_TRUNC', 'H5P_DEFAULT', 'H5P_DEFAULT');

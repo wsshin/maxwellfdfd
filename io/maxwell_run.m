@@ -200,7 +200,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	end
 	
 	if ~is_solveropts || ~isfield(solveropts, 'maxit')
-		solveropts.maxit = 1e5;
+		solveropts.maxit = intmax;
 	else
 		chkarg(istypesizeof(solveropts.maxit, 'real') && solveropts.maxit > 0, ...
 			'solveropts.maxit should be positive.');	
