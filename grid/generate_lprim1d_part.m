@@ -44,6 +44,14 @@ is_in = (lprim_inter > b_min) & (lprim_inter < b_max);
 lprim0_array = [lprim0_array, lprim_inter(is_in)];  % boundaries of shapes are aligned with primary gird
 
 lprim0_array = unique(lprim0_array);  % sorted and duplicate elements are removed
+isequal_approx = @(a, b) abs(a-b) < dl_max * 1e-8;
+dlprim0_array = diff(lprim0_array);
+ind_unique = ~isequal_approx(dlprim0_array, 0);
+lprim0_array = [lprim0_array(ind_unique), lprim0_array(end)];
+if isequal_approx(lprim0_array(end), lprim0_array(end-1))
+	lprim0_array = lprim0_array(1:end-1);
+end
+
 assert(lprim0_array(1) == b_min && lprim0_array(end) == b_max);
 
 ldual0_array = unique(ldual0_array);  % sorted and duplicate elements are removed
@@ -134,7 +142,6 @@ for j = 2:n_prim0
 		curr = [val-dl, val, val+dl];  %  same cell size on both sides of primary node; important for eps = 2/(1/eps1 + 1/eps2)
 	end
 	
-	isequal_approx = @(a, b) abs(a-b) < dl_max * 1e-8;
 	if isequal_approx(curr(1), prev(end-1)) && isequal_approx(curr(2), prev(end))  % curr(1) == prev(end-1) && curr(2) == prev(end)
 		curr = [prev, curr(3:end)];
 		lprim_part_cell = [lprim_part_cell(1:end-1), {curr}];
