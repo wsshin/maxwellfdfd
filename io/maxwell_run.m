@@ -2,13 +2,13 @@
 % Run MaxwellFDS.
 
 %%% Syntax
-%  [E_cell, H_cell] = maxwell_run(FREQ, DOMAIN, OBJ, SRC, [inspect_only])
+%  [E_cell, H_cell] = maxwell_run(OSC, DOM, OBJ, SRC, [inspect_only])
 %  [E_cell, H_cell, obj_array, src_array] = maxwell_run(...)
 %  [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(...)
 
 
 %%% Description
-% |maxwell_run(FREQ, DOMAIN, OBJ, SRC)| constructs a simulation domain from
+% |maxwell_run(OSC, DOM, OBJ, SRC)| constructs a simulation domain from
 % given objects and sources, and launches the frequency-domain solver (FDS) to
 % solve Maxwell's equations in the simulation domain.
 %
@@ -17,7 +17,7 @@
 % runs without launching FDS.  This is useful to inspect input arguments before
 % starting expensive computation.
 % 
-% Each of |FREQ|, |DOMAIN|, |OBJ|, and |SRC| represents a group of parameters.
+% Each of |OSC|, |DOM|, |OBJ|, and |SRC| represents a group of parameters.
 % Each group supports several flexible expressions.  See the following sections
 % about the input parameter groups for more details.
 %
@@ -37,8 +37,8 @@
 % solutions as the solutions are evolved by the iterative method used in FDS.
 
 
-%%% Input Parameter Group - FREQ
-% Possible expressions of FREQ group are listed below:
+%%% Input Parameter Group - OSC
+% OSC group begins with |'OSC'| and ends with one of the followings:
 %
 % * |L0, wvlen|  
 % * |osc|
@@ -53,8 +53,8 @@
 % about the length unit and vacuum wavelength.
 
 
-%%% Input Parameter Group - DOMAIN
-% Possible expressions of DOMAIN group are listed below:
+%%% Input Parameter Group - DOM
+% DOM group begins with |'DOM'| and ends with one of the followings:
 %
 % * |material, box, dl, bc, Lpml, [withuniformgrid]|
 % * |domain, dl, bc, Lpml, [withuniformgrid]|
@@ -96,7 +96,7 @@
 
 
 %%% Input Parameter Group - OBJ
-% Possible expressions of OBJ group are listed below:
+% OBJ group begins with |'OBJ'| and ends with one of the followings:
 %
 % * |material_1, shapes_1, ..., material_N, shapes_N|
 % * |obj_1, ..., obj_N|
@@ -121,7 +121,7 @@
 
 
 %%% Input Parameter Group - SRC
-% Possible expressions of DOMAIN group are listed below:
+% SRC group begins with |'SRC'| and ends with
 %
 % * |src_1, ..., src_M|
 %
@@ -129,7 +129,7 @@
 
 
 %%% Material Description
-% Possible expressions for each material description are listed below:
+% Each material is described by one of the followings:
 %
 % * |{name, color, permittivity}|
 % * |{material_datapath, color}|
@@ -160,13 +160,14 @@
 %%% Example
 %   gray = [0.5 0.5 0.5];  % [r g b]
 %   inspect_only = true;
-%   [E, H, obj_array, err] = maxwell_run(1e-9, 1550, ...  % FREQ
-%       {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...  % DOMAIN
-%       {['Palik', filesep, 'SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
-%       {['CRC', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
-%       PointSrc(Axis.x, [0, 0, 200]), ...  % SRC
-%       inspect_only ...
-%       );
+%   [E, H, obj_array, err] = maxwell_run(...
+%       'OSC', 1e-9, 1550, ...
+%       'DOM', {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...
+%       'OBJ', ...
+%           {['Palik', filesep, 'SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
+%           {['CRC', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
+%       'SRC', PointSrc(Axis.x, [0, 0, 200]), ...
+%       inspect_only);
 
 function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	DEFAULT_METHOD = 'direct';  % 'direct', 'gpu', 'aws', 'inputfile'
