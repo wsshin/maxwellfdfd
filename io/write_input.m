@@ -107,11 +107,18 @@ end
 use_petsc = true;
 if use_petsc
 	eps_array = cell2array(eps_cell, Axis.count);
+	if isreal(eps_array)
+		eps_array = complex(eps_array);
+	end
 % 	PetscBinaryWrite([filenamebase, '.eps'], eps_array(:), 'indices', 'int32', 'precision', 'float64');
-	PetscBinaryWrite([filenamebase, '.eps'], eps_array(:) + 1i*eps(ones(size(eps_array(:)))));
+	PetscBinaryWrite([filenamebase, '.eps'], eps_array(:));
+
 	J_array = cell2array(J_cell, Axis.count);
+	if isreal(J_array)
+		J_array = complex(J_array);
+	end
 % 	PetscBinaryWrite([filenamebase, '.J'], 1i*J_array(:), 'indices', 'int32', 'precision', 'float64');
-	PetscBinaryWrite([filenamebase, '.J'], J_array(:) + 1i*eps(ones(size(eps_array(:)))));
+	PetscBinaryWrite([filenamebase, '.J'], J_array(:));
 
 % 	J_array2 = PetscBinaryRead([filenamebase, '.J'], 'complex', true);
 % 	norm(1i*J_array(:)-J_array2)
