@@ -104,7 +104,7 @@ for w = Axis.elems
 	end
 end
 
-use_petsc = false;
+use_petsc = true;
 if use_petsc
 	eps_array = cell2array(eps_cell, Axis.count);
 % 	PetscBinaryWrite([filenamebase, '.eps'], eps_array(:), 'indices', 'int32', 'precision', 'float64');
