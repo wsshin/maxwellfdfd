@@ -310,7 +310,7 @@ classdef Painter2d < handle
 			end
 
 			if this.isswapped
-				l_bound = wrev(l_bound);  % l_bound is cell.
+				l_bound = fliplr(l_bound);  % l_bound is cell.
 
 				temp = h_axis;
 				h_axis = v_axis;

@@ -1,5 +1,38 @@
+%% PointSrc
+% Concrete subclass of <Source.html |Source|> representing an electric point
+% dipole source.
+
+%%% Description
+% |PointSrc| is the most basic source type.  It places an oscillating point
+% dipole at the location given in the constructor.  
+%
+% |PointSrc| is a subclass of |Source|, so it inherits all the methods of
+% |Source|.  See <Source.html |Source|> for more details.
+
+%%% Constructor
+% * |this = PointSrc(polarization_axis, location, I)|
+
+%%% Methods
+% Below, |axis| is an instance of |Axis|.
+%
+% * |[p, q, r] = cycle(axis)|: |[p, q, r]| is a cyclic permutation of |[Axis.x,
+% Axis.y, Axis.z]| satisfying |r == axis|.
+
+%%% Example
+%   % Test conversion to integers and strings.
+%   fprintf('# of instances of Axis: %d\n', Axis.count);
+%   for w = Axis.elems
+%       fprintf('The integer value of Axis.%s is %d\n', char(w), int(w));
+%   end
+%
+%   % Test cyclic permutation.
+%   [p q r] = cycle(Axis.y);
+%   fprintf('The cyclic permutation of [x, y, z] beginning with y is [%s, %s, %s]\n', char(r), char(p), char(q));
+
+%%% See Also
+% <Enumerated.html Enumerated>
+
 classdef PointSrc < Source
-	% PointSrc is a class representing an electric point source.
 	
 	properties (SetAccess = immutable)
 		polarization  % one of Axis.x, Axis.y, Axis.z

@@ -223,7 +223,7 @@ else
 		L_graded = (L - L_dl_max - 2*L_dl_min)/2;
 		r = fzero(@(s) dl_min*s * (s^n - 1) / (s-1) - L_graded, r);  % dl_min * (r^1 + ... + r^n) == L_graded
 		dl_array = dl_min * (r.^(1:n));
-		dl_filler = [dl_min_array, dl_array, dl_max_array, wrev(dl_array), dl_min_array];		
+		dl_filler = [dl_min_array, dl_array, dl_max_array, fliplr(dl_array), dl_min_array];		
 	end
 		
 	% Construct filler.
@@ -271,7 +271,7 @@ else  % dl_n < dl_p or dl_n > dl_p
 	else
 		assert(dl_n > dl_p)
 		filler_p = cumsum([gap(2), -dl_array]);
-		filler_p = wrev(filler_p);
+		filler_p = fliplr(filler_p);
 		gap_sym = [gap(1), filler_p(1)];
 		filler_sym = fill_targeted_geometric_sym(dl_n, gap_sym, dl_t, rt, rmax);
 		filler = [filler_sym, filler_p(2:end)];

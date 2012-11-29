@@ -3,8 +3,8 @@
 
 %%% Description
 % The only three instances |Axis.x|, |Axis.y|, and |Axis.z| of |Axis| are used
-% extensively in FDS to represent and specify the x-, y-, and z-axis of the
-% Cartesian coordinate system.
+% extensively in MaxwellFDS to represent and specify the x-, y-, and z-axis of
+% the Cartesian coordinate system.
 %
 % |Axis| is a subclass of |Enumerated|, so it inherits all the methods of
 % |Enumerated|.  See <Enumerated.html |Enumerated|> for more details.
@@ -32,7 +32,7 @@
 %   fprintf('The cyclic permutation of [x, y, z] beginning with y is [%s, %s, %s]\n', char(r), char(p), char(q));
 
 %%% See Also
-% <Enumerated.html Enumerated>
+% <Enumerated.html |Enumerated|>
 
 classdef Axis < Enumerated
 	enumeration

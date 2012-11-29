@@ -179,7 +179,7 @@ end
 % dims = size(data);
 % nD = ndims(data);
 % data = permute(data, nD:-1:1);
-% dims = wrev(dims);
+% dims = fliplr(dims);
 % 
 % % Create the dataspace.
 % space = H5S.create_simple(nD, dims, []);
@@ -217,7 +217,7 @@ end
 % data = reshape(data, dims);
 % n_dims = ndims(data);
 % data = permute(data, n_dims:-1:1);
-% dims = wrev(dims);
+% dims = fliplr(dims);
 % 
 % 
 % % Create the dataspace.
