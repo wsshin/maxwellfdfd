@@ -91,8 +91,8 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	while iarg < narglim
 		iarg = iarg + 1; arg = varargin{iarg};
 		
-		% Set up OSC.
 		if ischar(arg) && strcmpi(arg,'OSC')
+			% Set up OSC.
 			iarg = iarg + 1; arg = varargin{iarg};
 			chkarg((istypesizeof(arg, 'real') && arg > 0) || istypesizeof(arg, 'Oscillation'), ...
 				'"argument #%d should be either "L0" (positive) or "osc" (instance of Oscillation).', iarg);
@@ -105,10 +105,8 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 			else  % arg is instance of Oscillation
 				osc = arg;
 			end
-		end
-		
-		% Set up DOM.
-		if ischar(arg) && strcmpi(arg,'DOM')
+		elseif ischar(arg) && strcmpi(arg,'DOM')
+			% Set up DOM.
 			iarg = iarg + 1; arg = varargin{iarg};
 			chkarg(iscell(arg) || istypesizeof(arg, 'Material') || istypesizeof(arg, 'Object'), ...
 				'argument #%d should be cell, instance of Material, or instance of Object.', iarg);
@@ -153,12 +151,10 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 			if istypesizeof(arg, 'logical')
 				withuniformgrid = arg;
 			else
-				iarg = iarg - 1; arg = varargin{iarg};  % because withuniformgrid is optional argument
+				iarg = iarg - 1; % because withuniformgrid is optional argument
 			end
-		end
-		
-		% Set up OBJ.
-		if ischar(arg) && (strcmpi(arg,'OBJ') || strcmpi(arg,'SOBJ'))
+		elseif ischar(arg) && (strcmpi(arg,'OBJ') || strcmpi(arg,'SOBJ'))
+			% Set up OBJ.
 			is_scatterer = strcmpi(arg,'SOBJ');
 			iarg = iarg + 1; arg = varargin{iarg};
 			if istypesizeof(arg, 'complex', [0 0 0])
@@ -195,7 +191,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 						end
 					end
 				end
-				iarg = iarg - 1; arg = varargin{iarg};
+				iarg = iarg - 1;
 				
 				if is_scatterer
 					sshape_array = [sshape_array(1:end), shape_array_temp];
@@ -205,23 +201,24 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 					obj_array = [obj_array(1:end), obj_array_temp];
 				end
 			end
-		end
-	
-		% Set up sources.
-		if ischar(arg) && strcmpi(arg,'SRC')
+		elseif ischar(arg) && strcmpi(arg,'SRC')
+			% Set up sources.
 			iarg = iarg + 1; arg = varargin{iarg};
 			if ~istypesizeof(arg, 'Source', [1 0])
 				warning('FDS:buildSys', 'no source is given.');
 			end
 
-			while iarg <= narglim && istypesizeof(arg, 'Source', [1 0])
+			while istypesizeof(arg, 'Source', [1 0])
 				if istypesizeof(arg, 'TFSFPlaneSrc')
 					isTFSF = true;
 				end
 				src_array = [src_array(1:end), arg];
 				iarg = iarg + 1; arg = varargin{iarg};
 			end
-			iarg = iarg - 1; arg = varargin{iarg};
+			iarg = iarg - 1;
+		elseif iarg == narglim
+			chkarg(false, ['some arguments are not used.\n', ...
+				'Suggestion: check if each parameter group is specified with beginning specifier.']);
 		end
 	end
 	chkarg(~isempty(osc), 'OSC parameter groups should be set.');

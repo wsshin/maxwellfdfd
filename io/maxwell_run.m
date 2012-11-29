@@ -274,80 +274,79 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 		if is_distsrc
 			pm.mark('distributed source visualization');
 		end
-	
-		E_cell = {};
-		H_cell = {};
 		fprintf('%s finishes (inspection only).\n\n', mfilename);
-		return;
+		E = {};
+		H = {};
 	elseif isequal(solveropts.method, 'inputfile')
 		write_input(solveropts.filenamebase, osc, grid3d, s_factor, ...
 			eps_node(1:end-1,1:end-1,1:end-1), eps_face, mu_edge, J, solveropts.tol, solveropts.maxit);
 
-		E_cell = {};
-		H_cell = {};
 		pm.mark('input file creation');		
 		fprintf('%s finishes. (input file created)\n\n', mfilename);
-		return;
-	end
-	
-	%% Apply spatial inversion.
-% 	d_prim = grid3d.dl(:, GK.prim);
-% 	d_dual = grid3d.dl(:, GK.dual);
-% 	s_prim = s_factor(:, GK.prim);
-% 	s_dual = s_factor(:, GK.dual);
-	d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
-	d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
-	s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
-	s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
-	mu_edge = flip_vec(mu_edge);
-	eps_face = flip_vec(eps_face);
-	J = neg_vec(flip_vec(J));  % pseudovector
-	
-	if isequal(solveropts.method, 'direct')
-		[E, H] = solve_eq_direct(osc.in_omega0(), ...
-						d_prim, d_dual, ...
-						s_prim, s_dual, ...
-						mu_edge, eps_face, ...
-						J);
-	elseif isequal(solveropts.method, 'gpu')
-		ds_prim = mult_vec(d_prim, s_prim);
-		ds_dual = mult_vec(d_dual, s_dual);
-		figure;
-		E0 = {zeros(grid.N), zeros(grid.N), zeros(grid.N)};
-%		[E, H, err] = solve(cluster, osc.in_omega0(), ...
-		[E, H] = fds(osc.in_omega0(), ...
-						ds_prim, ds_dual, ...
-						mu_edge, eps_face, ...
-						E0, J, ...
-						solveropts.maxit, solveropts.tol, 'plot');
-		%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
-	elseif isequal(solveropts.method, 'aws')
-		E0 = {zeros(grid.N), zeros(grid.N), zeros(grid.N)};
-		[E, H] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
-						osc.in_omega0(), ...
-						d_prim, d_dual, ...
-						s_prim, s_dual, ...
-						mu_edge, eps_face, ...
-						E0, J, ...
-						solveropts.maxit, solveropts.tol, 'plot');
-	end
-	
-	E = neg_vec(flip_vec(E));  % pseudovector
-	J = neg_vec(flip_vec(J));
-	H = flip_vec(H);
-	
-	pm.mark('solution calculation');
+		E = {};
+		H = {};
+	else	
+		%% Apply spatial inversion.
+	% 	d_prim = grid3d.dl(:, GK.prim);
+	% 	d_dual = grid3d.dl(:, GK.dual);
+	% 	s_prim = s_factor(:, GK.prim);
+	% 	s_dual = s_factor(:, GK.dual);
+		d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
+		d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
+		s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
+		s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
+		mu_edge = flip_vec(mu_edge);
+		eps_face = flip_vec(eps_face);
+		J = neg_vec(flip_vec(J));  % pseudovector
 
+		if isequal(solveropts.method, 'direct')
+			[E, H] = solve_eq_direct(osc.in_omega0(), ...
+							d_prim, d_dual, ...
+							s_prim, s_dual, ...
+							mu_edge, eps_face, ...
+							J);
+		elseif isequal(solveropts.method, 'gpu')
+			ds_prim = mult_vec(d_prim, s_prim);
+			ds_dual = mult_vec(d_dual, s_dual);
+			figure;
+			E0 = {zeros(grid.N), zeros(grid.N), zeros(grid.N)};
+	%		[E, H, err] = solve(cluster, osc.in_omega0(), ...
+			[E, H] = fds(osc.in_omega0(), ...
+							ds_prim, ds_dual, ...
+							mu_edge, eps_face, ...
+							E0, J, ...
+							solveropts.maxit, solveropts.tol, 'plot');
+			%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
+		elseif isequal(solveropts.method, 'aws')
+			E0 = {zeros(grid.N), zeros(grid.N), zeros(grid.N)};
+			[E, H] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
+							osc.in_omega0(), ...
+							d_prim, d_dual, ...
+							s_prim, s_dual, ...
+							mu_edge, eps_face, ...
+							E0, J, ...
+							solveropts.maxit, solveropts.tol, 'plot');
+		end
+
+		E = neg_vec(flip_vec(E));  % pseudovector
+		J = neg_vec(flip_vec(J));  % pseudovector
+		H = flip_vec(H);
+
+		pm.mark('solution calculation');
+		fprintf('%s finishes.\n\n', mfilename);
+	end
+	
 	% Construct Scalar3d objects.
 	E_cell = cell(1, Axis.count);
 	H_cell = cell(1, Axis.count);
 	J_cell = cell(1, Axis.count);
 	for w = Axis.elems
-		E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, GK.dual, osc);
-		H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, GK.prim, osc);
+		if ~isempty(E)
+			E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, GK.dual, osc);
+		end
+		if ~isempty(H)
+			H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, GK.prim, osc);
+		end
 		J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, GK.dual, osc);
-	end
-	pm.mark('solution preparation');
-		
-	fprintf('%s finishes.\n\n', mfilename);
+	end		
 end
