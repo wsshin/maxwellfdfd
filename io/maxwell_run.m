@@ -95,7 +95,7 @@
 % is preferred to uniform grid generation.
 
 
-%%% Input Parameter Group - OBJ
+%%% Input Parameter Group - OBJ and SOBJ
 % OBJ group begins with |'OBJ'| and ends with one of the followings:
 %
 % * |material_1, shapes_1, ..., material_N, shapes_N|
@@ -117,7 +117,14 @@
 % size of the array should be the same as the number of vertices in a generated
 % grid.  Because the number of vertices is hard to calculate for dynamic grid
 % generation, uniform grid generation is recommended when |eps_node_array| is
-% used.  
+% used.
+%
+% There is a similar, optional parameter group SOBJ that begins with |'SOBJ'|.
+% SOBJ stands for _scatterer objects_, and it is used to define scatterers for
+% total-field/scattered-field (TF/SF) simulation.  When a TF/SF source is used
+% as a source, the objects defined in SOBJ group are treated as scatterers
+% whereas the objects defined in OBJ group are treated as background objects.
+% If a TF/SF source is not used, SOBJ group works the same as OBJ group.
 
 
 %%% Input Parameter Group - SRC
@@ -169,7 +176,7 @@
 %       'SRC', PointSrc(Axis.x, [0, 0, 200]), ...
 %       inspect_only);
 
-function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
+function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 	DEFAULT_METHOD = 'direct';  % 'direct', 'gpu', 'aws', 'inputfile'
 		
 	% Set solver options.
@@ -226,7 +233,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
-	[osc, grid3d, s_factor, eps_face, mu_edge, J, E0, obj_array, src_array, eps_node] = ...
+	[osc, grid3d, s_factor, eps_face, mu_edge, J, obj_array, src_array, eps_node] = ...
 		build_system(varargin{1:iarg}, pm);
 	
 	if inspect_only  % inspect objects and sources
@@ -237,7 +244,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 		drawnow
 		pm.mark('domain visualization');
 		
-		% Solve for modes.
+		% Visualize modes.
 		is_distsrc = false;
 		for src = src_array
 			if istypesizeof(src, 'DistributedSrc')
@@ -284,11 +291,6 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	end
 	
 	%% Apply spatial inversion.
-    flip_array = @(F) flipdim(flipdim(flipdim(F, int(Axis.z)), int(Axis.y)), int(Axis.x));
-    flip_vec = @(F_cell) {flip_array(F_cell{Axis.x}), flip_array(F_cell{Axis.y}), flip_array(F_cell{Axis.z})};
-    neg_vec = @(F_cell) {-F_cell{Axis.x}, -F_cell{Axis.y}, -F_cell{Axis.z}};
-	mult_vec = @(F_cell, G_cell) {F_cell{Axis.x}.*G_cell{Axis.x}, F_cell{Axis.y}.*G_cell{Axis.y}, F_cell{Axis.z}.*G_cell{Axis.z}};
-		
 % 	d_prim = grid3d.dl(:, GK.prim);
 % 	d_dual = grid3d.dl(:, GK.dual);
 % 	s_prim = s_factor(:, GK.prim);
@@ -300,27 +302,28 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	mu_edge = flip_vec(mu_edge);
 	eps_face = flip_vec(eps_face);
 	J = neg_vec(flip_vec(J));  % pseudovector
-	E0 = neg_vec(flip_vec(E0));  % pseudovector
 	
 	if isequal(solveropts.method, 'direct')
 		[E, H] = solve_eq_direct(osc.in_omega0(), ...
 						d_prim, d_dual, ...
 						s_prim, s_dual, ...
 						mu_edge, eps_face, ...
-						J, E0);
+						J);
 	elseif isequal(solveropts.method, 'gpu')
 		ds_prim = mult_vec(d_prim, s_prim);
 		ds_dual = mult_vec(d_dual, s_dual);
 		figure;
+		E0 = {zeros(grid.N), zeros(grid.N), zeros(grid.N)};
 %		[E, H, err] = solve(cluster, osc.in_omega0(), ...
-		[E, H, err] = fds(osc.in_omega0(), ...
+		[E, H] = fds(osc.in_omega0(), ...
 						ds_prim, ds_dual, ...
 						mu_edge, eps_face, ...
 						E0, J, ...
 						solveropts.maxit, solveropts.tol, 'plot');
 		%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
 	elseif isequal(solveropts.method, 'aws')
-		[E, H, err] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
+		E0 = {zeros(grid.N), zeros(grid.N), zeros(grid.N)};
+		[E, H] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
 						osc.in_omega0(), ...
 						d_prim, d_dual, ...
 						s_prim, s_dual, ...
@@ -330,6 +333,7 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	end
 	
 	E = neg_vec(flip_vec(E));  % pseudovector
+	J = neg_vec(flip_vec(J));
 	H = flip_vec(H);
 	
 	pm.mark('solution calculation');
@@ -337,9 +341,11 @@ function [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(varargin)
 	% Construct Scalar3d objects.
 	E_cell = cell(1, Axis.count);
 	H_cell = cell(1, Axis.count);
+	J_cell = cell(1, Axis.count);
 	for w = Axis.elems
 		E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, GK.dual, osc);
 		H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, GK.prim, osc);
+		J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, GK.dual, osc);
 	end
 	pm.mark('solution preparation');
 		

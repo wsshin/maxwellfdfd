@@ -176,9 +176,6 @@ A = spdiags(diagvec, 0, A);
 % A = Mask*A;
 
 % Reorder the indices of the elements of A to reduce the bandwidth of A.
-r = 1:Dir.count*Nh*Nv;  % 2*Nh*Nv == length(A)
-r = reshape(r, Nh*Nv, Dir.count);
-r = r.';
-r = r(:);
+r = reordering_indices(Dir.count, [Nh Nv]);
 
 A = A(r,r);

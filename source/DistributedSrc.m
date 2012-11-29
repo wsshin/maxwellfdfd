@@ -36,6 +36,8 @@ classdef DistributedSrc < Source
 			this.intercept = intercept;
 			this.neff_guess = neff_guess;
 			this.IL = IL;
+			this.Jh = [];
+			this.Jv = [];
 		end
 		
 		function setJ(this, neff, Jh, Jv, grid3d)
@@ -56,7 +58,7 @@ classdef DistributedSrc < Source
 		end
 		
 		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
-			assert(~isempty(this.Jh) && ~isempty(this.Jv), 'Jh and Jv are not set in this DistributedSrc.');
+			assert(~isempty(this.Jh) && ~isempty(this.Jv), '"Jh" and "Jv" are not set in this DistributedSrc.');
 			index_cell = cell(1, Axis.count);
 			if w_axis == this.normal_axis
 				Jw_patch = [];

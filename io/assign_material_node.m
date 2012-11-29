@@ -1,11 +1,22 @@
-function [eps_node_array, mu_node_array] = assign_material_node(grid3d, object_array)
+function [eps_node_array, mu_node_array] = assign_material_node(grid3d, object_array, eps_node_array, mu_node_array)
 
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid.');
 chkarg(istypesizeof(object_array, 'Object', [1 0]), ...
 	'"object_array" should be row vector of instances of Object.');
 
-eps_node_array = NaN(grid3d.N);
-mu_node_array = NaN(grid3d.N);
+if nargin < 3  % no eps_node_array
+	eps_node_array = NaN(grid3d.N);
+end
+chkarg(istypesizeof(eps_node_array, 'complex', grid3d.N), ...
+	'"eps_node_array" should be %d-by-%d-by-%d array with complex elements.', ...
+	grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+
+if nargin < 4  % no mu_node_array
+	mu_node_array = NaN(grid3d.N);
+end
+chkarg(istypesizeof(mu_node_array, 'complex', grid3d.N), ...
+	'"mu_node_array" should be %d-by-%d-by-%d array with complex elements.', ...
+	grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 
 ldual = cell(1, Axis.count);  % locations of cell centers
 for w = Axis.elems

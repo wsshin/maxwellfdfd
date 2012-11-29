@@ -333,7 +333,11 @@ classdef Painter2d < handle
 					shape = obj.shape;
 				else
 					src = this.src_array(i-nobj);
-					color = 'c';  % cyan
+					if this.withabs
+						color = 'c';  % cyan
+					else
+						color = 'm';  % magenta
+					end
 					shape = src.shape;
 				end
 				

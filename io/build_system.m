@@ -2,7 +2,7 @@
 % Run MaxwellFDS.
 
 %%% Syntax
-%  [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell] = build_system(OSC, DOM, OBJ, SRC, [progmark])
+%  [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell] = build_system(OSC, DOM, OBJ, SRC, [progmark])
 %  [..., obj_array, src_array] = build_system(OSC, DOM, OBJ, SRC, [pragmark])
 %  [..., eps_node_array, mu_node_array] = build_system(OSC, DOM, OBJ, SRC, [pragmark])
 
@@ -21,7 +21,7 @@
 % ProgMark>, which outputs the progress of the system build procedure as the
 % standard output.  If it is not given, then it is created internally.
 %
-% |[osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell] =
+% |[osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell] =
 % build_system(...)| returns
 %
 % * |osc|, an instance of <Oscillation.html Oscillation>
@@ -36,8 +36,6 @@
 % mu_zz_array}|
 % * |J_cell|, a cell array of electric current sources: |{Jx_array, Jy_array,
 % Jz_array}|
-% * |E0_cell|, a cell array of initial guess electric fields of iterative
-% solvers: |{E0x_array, E0y_array, E0z_array}|
 % 
 % |[..., obj_array, src_array] = build_system(...)| returns additionally arrays
 % of instances of <Object.html |Object|> and <Source.html |Source|>.  The
@@ -61,7 +59,7 @@
 %       'SRC', PointSrc(Axis.x, [0, 0, 200]) ...
 %       );
 
-function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_cell, ...
+function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	obj_array, src_array, eps_node_array, mu_node_array] = build_system(varargin)
 	iarg = nargin; arg = varargin{iarg};
 	if istypesizeof(arg, 'ProgMark')
@@ -83,9 +81,12 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 	osc = Oscillation.empty();
 	obj_dom = Object.empty();
 	shape_array = Shape.empty();
+	sshape_array = Shape.empty();
 	obj_array = Object.empty();
+	sobj_array = Object.empty();
 	src_array = [];
 	isepsgiven = false;
+	isTFSF = false;
 	iarg = 0;
 	while iarg < narglim
 		iarg = iarg + 1; arg = varargin{iarg};
@@ -157,7 +158,8 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 		end
 		
 		% Set up OBJ.
-		if ischar(arg) && strcmpi(arg,'OBJ')
+		if ischar(arg) && (strcmpi(arg,'OBJ') || strcmpi(arg,'SOBJ'))
+			is_scatterer = strcmpi(arg,'SOBJ');
 			iarg = iarg + 1; arg = varargin{iarg};
 			if istypesizeof(arg, 'complex', [0 0 0])
 				isepsgiven = true;
@@ -165,12 +167,14 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 				mu_node_array = ones(size(eps_node_array));
 			else
 				% Set up objects.
+				obj_array_temp = Object.empty();
+				shape_array_temp = Shape.empty();
 				while iscell(arg) || istypesizeof(arg, 'Material') || istypesizeof(arg, 'Object', [1 0])
 					if istypesizeof(arg, 'Object', [1 0])
 						objs = arg;
-						obj_array = [obj_array(1:end), objs];
+						obj_array_temp = [obj_array_temp(1:end), objs];
 						for obj = objs
-							shape_array = [shape_array(1:end), obj.shape];
+							shape_array_temp = [shape_array_temp(1:end), obj.shape];
 						end
 						iarg = iarg + 1; arg = varargin{iarg};
 					else
@@ -184,14 +188,22 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 						iarg = iarg + 1; arg = varargin{iarg};
 						while istypesizeof(arg, 'Shape', [1 0])
 							shapes = arg;
-							shape_array = [shape_array(1:end), shapes];
+							shape_array_temp = [shape_array_temp(1:end), shapes];
 							objs = Object(shapes, mat);
-							obj_array = [obj_array(1:end), objs];
+							obj_array_temp = [obj_array_temp(1:end), objs];
 							iarg = iarg + 1; arg = varargin{iarg};
 						end
 					end
 				end
 				iarg = iarg - 1; arg = varargin{iarg};
+				
+				if is_scatterer
+					sshape_array = [sshape_array(1:end), shape_array_temp];
+					sobj_array = [sobj_array(1:end), obj_array_temp];
+				else
+					shape_array = [shape_array(1:end), shape_array_temp];
+					obj_array = [obj_array(1:end), obj_array_temp];
+				end
 			end
 		end
 	
@@ -203,6 +215,9 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 			end
 
 			while iarg <= narglim && istypesizeof(arg, 'Source', [1 0])
+				if istypesizeof(arg, 'TFSFPlaneSrc')
+					isTFSF = true;
+				end
 				src_array = [src_array(1:end), arg];
 				iarg = iarg + 1; arg = varargin{iarg};
 			end
@@ -217,7 +232,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 	pm.mark('initial setup');
 
 	% Generate a grid.
-	[lprim, Npml] = generate_lprim3d(domain, Lpml, shape_array, src_array, withuniformgrid);
+	[lprim, Npml] = generate_lprim3d(domain, Lpml, [shape_array, sshape_array], src_array, withuniformgrid);
 	grid3d = Grid3d(osc.unit, lprim, Npml, bc);
 	if withuniformgrid
 		pm.mark('uniform grid generation');
@@ -229,7 +244,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 
 	% Construct material parameters.
 	if ~isepsgiven
-		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);
+		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % (Nx+1) x (Ny+1) x (Nz+1)
 	end
 	eps_face_cell = harmonic_mean_eps_node(eps_node_array);
 	mu_edge_cell = arithmetic_mean_mu_node(mu_node_array);
@@ -237,31 +252,71 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, E0_ce
 	% Construct PML s-factors.
 	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d);
 	pm.mark('eps and mu assignment');
-		
-	% Solve for modes.
-	for src = src_array
-		if istypesizeof(src, 'DistributedSrc')
-			distsrc = src;
-			prep_distsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, distsrc);
-			
-			neff = distsrc.neff;
-			beta = 2*pi*neff / osc.in_L0();
-			pm.mark('mode calculation');
-			fprintf('\tbeta = %e, n_eff = %e\n', beta, neff);
+
+	if ~isTFSF
+		% Solve for modes.
+		for src = src_array
+			if istypesizeof(src, 'DistributedSrc')
+				distsrc = src;
+				prep_distsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, distsrc);
+
+				neff = distsrc.neff;
+				beta = 2*pi*neff / osc.in_L0();
+				pm.mark('mode calculation');
+				fprintf('\tbeta = %e, n_eff = %e\n', beta, neff);
+			end
 		end
+	else  % isTFSF == true
+		% Set up J for TF/SF.
+		for src = src_array
+			if istypesizeof(src, 'TFSFPlaneSrc')
+				tfsfsrc = src;
+				tfsfsrc.set_bg_material(obj_dom.material);
+				E0 = tfsfsrc.create_incidentE(osc, grid3d);
+				J = cell(1, Axis.count);
+				for w = Axis.elems
+					J{w} = zeros(grid3d.N);
+				end
+				
+				d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
+				d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
+				s_prim = flip_vec(s_factor_cell(:, GK.dual));  % GK.dual, not GK.prim
+				s_dual = flip_vec(s_factor_cell(:, GK.prim));  % GK.prim, not GK.dual
+				mu_edge_temp = flip_vec(mu_edge_cell);
+				eps_face_temp = flip_vec(eps_face_cell);
+				J = neg_vec(flip_vec(J));  % pseudovector
+				E0 = neg_vec(flip_vec(E0));  % pseudovector
+	
+				nosolve = true;
+				[~, ~, A] = solve_eq_direct(osc.in_omega0(), ...
+								d_prim, d_dual, ...
+								s_prim, s_dual, ...
+								mu_edge_temp, eps_face_temp, ...
+								J, nosolve);
+							
+				x0 = [E0{Axis.x}(:); E0{Axis.y}(:); E0{Axis.z}(:)];
+				r = reordering_indices(Axis.count, grid3d.N);
+				x0 = x0(r);
+							
+				J = (A*x0) ./ (-1i*osc.in_omega0());
+				J = reshape(J, [Axis.count grid3d.N]);
+				J = permute(J, [int([Axis.x Axis.y Axis.z])+1, 1]);
+				J = {J(:,:,:,Axis.x), J(:,:,:,Axis.y), J(:,:,:,Axis.z)};
+				J = neg_vec(flip_vec(J));  % pseudovector
+				
+				tfsfsrc.setJ(J, grid3d);
+				pm.mark('TF/SF source assignment');
+			end
+		end
+		
+		[eps_node_array, mu_node_array] = assign_material_node(grid3d, sobj_array, ...
+			eps_node_array(1:end-1, 1:end-1, 1:end-1), mu_node_array(1:end-1, 1:end-1, 1:end-1));  % (Nx+1) x (Ny+1) x (Nz+1)
+		eps_face_cell = harmonic_mean_eps_node(eps_node_array);
+		mu_edge_cell = arithmetic_mean_mu_node(mu_node_array);
 	end
+	obj_array = [obj_array, sobj_array];
 
 	% Construct sources.
 	J_cell = assign_source(grid3d, src_array);
 	pm.mark('J assignment');
-
-	% Construct a random initial E-field.
-	E0_cell = cell(1, Axis.count);
-	for w = Axis.elems
-% 		Ew0 = rand(grid3d.N) + 1i*rand(grid3d.N);
-% 		Ew0 = Ew0 / norm(Ew0(:));
-		Ew0 = zeros(grid3d.N);
-		E0_cell{w} = Ew0;
-	end
-	pm.mark('E0 assignment');
 end

@@ -1,6 +1,6 @@
-function [E, H, A, x0, b, HfromE] = solve_eq_direct(omega, d_prim, d_dual, s_prim, s_dual, mu_face, eps_edge, J, E0, nosolve)
+function [E, H, A, b, HfromE] = solve_eq_direct(omega, d_prim, d_dual, s_prim, s_dual, mu_face, eps_edge, J, nosolve)
 
-if nargin < 10  % no nosolve
+if nargin < 9  % no nosolve
 	nosolve = false;
 end
 
@@ -25,16 +25,11 @@ EPS = spdiags(eps, 0, length(eps), length(eps));
 HfromE = (INV_MU * A2);
 A = PM * A1 * HfromE * PM - omega^2 * EPS;
 HfromE = (1i/omega) * HfromE;
-x0 = [E0{Axis.x}(:); E0{Axis.y}(:); E0{Axis.z}(:)];
 
 % Reorder the indices of the elements of matrices and vectors to reduce the bandwidth of A.
-r = 1:Axis.count*prod(N);  % 2*Nh*Nv == length(A)
-r = reshape(r, prod(N), Axis.count);
-r = r.';
-r = r(:);
+r = reordering_indices(Axis.count, N);
 
 A = A(r,r);
-x0 = x0(r);
 b = b(r);
 HfromE = HfromE(r,r);
 
