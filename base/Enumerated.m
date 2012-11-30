@@ -29,7 +29,7 @@
 % Below, |Enumerated| must be replaced by a concrete subclass.
 %
 % * |Enumerated.elems()|: returns a row vector of all instances
-% * |Enumerated.count()|: returs the number of all instances
+% * |Enumerated.count()|: returns the number of all instances
 
 %%% Methods (public)
 % Below, |enumerated| is an instance of a concrete subclass of |Enumerated|.

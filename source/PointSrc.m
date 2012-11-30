@@ -9,28 +9,37 @@
 % |PointSrc| is a subclass of |Source|, so it inherits all the methods of
 % |Source|.  See <Source.html |Source|> for more details.
 
-%%% Constructor
-% * |this = PointSrc(polarization_axis, location, I)|
-
-%%% Methods
-% Below, |axis| is an instance of |Axis|.
+%%% Construction
+%  src = PointSrc(polarization_axis, location)
+%  src = PointSrc(polarization_axis, location, I)
+% 
+% *Input Arguments*
 %
-% * |[p, q, r] = cycle(axis)|: |[p, q, r]| is a cyclic permutation of |[Axis.x,
-% Axis.y, Axis.z]| satisfying |r == axis|.
+% * |polarization_axis|: direction of the dipole.  It hould be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |location|: location of the dipole in the form of |[x, y, z]|.
+% * |I|: amplitude of the current that the dipole drives.
+
+%%% Note
+% In the finite-difference grid, |PointSrc| is located at one of the _E_-field
+% points.  This poses a condition on |location| argument in the constructor: the
+% location in the directions normal to the dipole polarization should be dual
+% grid points, whereas the location in the direction along the dipole
+% polarization should be a primary grid point.  Therefore, make sure that the
+% location of the dipole does not overlap the locations of the vertices of
+% <Shape.html |Shape|> in the directions normal to the dipole polarization;
+% otherwise dynamic grid generation fails.
 
 %%% Example
-%   % Test conversion to integers and strings.
-%   fprintf('# of instances of Axis: %d\n', Axis.count);
-%   for w = Axis.elems
-%       fprintf('The integer value of Axis.%s is %d\n', char(w), int(w));
-%   end
+%   % Set an instance of PointSrc.
+%   src = PointSrc(Axis.z, [0 0 0]);
 %
-%   % Test cyclic permutation.
-%   [p q r] = cycle(Axis.y);
-%   fprintf('The cyclic permutation of [x, y, z] beginning with y is [%s, %s, %s]\n', char(r), char(p), char(q));
+%   % Use the constructed PointSrc in maxwell_run().
+%   [E, H] = maxwell_run(...
+%               'SRC', src);
 
 %%% See Also
-% <Enumerated.html Enumerated>
+% <PointSrcM.html |PointSrcM|>, <PlaneSrc.html |PlaneSrc|>
 
 classdef PointSrc < Source
 	
