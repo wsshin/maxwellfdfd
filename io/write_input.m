@@ -115,8 +115,8 @@ if use_petsc
 	if isreal(eps_array)
 		eps_array = complex(eps_array);
 	end
-	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
-% 	PetscBinaryWrite(petscfilename, eps_array(:));
+% 	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
+	PetscBinaryWrite(petscfilename, eps_array(:));
 	gzip(petscfilename);
 	delete(petscfilename);
 
@@ -125,8 +125,8 @@ if use_petsc
 	if isreal(J_array)
 		J_array = complex(J_array);
 	end
-	PetscBinaryWrite(petscfilename, J_array(:), 'indices', 'int64');
-% 	PetscBinaryWrite(petscfilename, J_array(:));
+% 	PetscBinaryWrite(petscfilename, J_array(:), 'indices', 'int64');
+	PetscBinaryWrite(petscfilename, J_array(:));
 	gzip(petscfilename);
 	delete(petscfilename);
 
