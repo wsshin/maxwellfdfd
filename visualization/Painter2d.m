@@ -268,7 +268,7 @@ classdef Painter2d < handle
 			surface_handle = pcolor(axes_handle, this.Xh, this.Yv, this.C);
             
 			if ~this.withgrid
-                set(surface_handle,'EdgeColor', 'none');
+                set(surface_handle, 'EdgeColor', 'none');
 			elseif this.withabs
 				set(surface_handle, 'EdgeColor', 'w');
 			else
@@ -276,7 +276,7 @@ classdef Painter2d < handle
 			end
 			
 			if this.withinterp
-				set(surface_handle,'FaceColor', 'interp');
+				set(surface_handle, 'FaceColor', 'interp');
 			end
 		end
 			

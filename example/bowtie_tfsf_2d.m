@@ -33,7 +33,7 @@ end
 %% Visualize the solution.
 figure
 clear opts
-opts.withobj = true;
+opts.withobjsrc = true;
 opts.withabs = true;
 % opts.withinterp = false;
 % opts.withgrid = true;

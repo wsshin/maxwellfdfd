@@ -1,10 +1,58 @@
-% Note that wvlen can be different from Oscillation.in_L0() because wvlen here
-% should be the wavelength inside the medium, not inside a vacuum.
+%% PlaneSrc
+% Concrete subclass of <Source.html |Source|> representing a constant electric
+% dipole distribution over an entire plane.
+
+%%% Description
+% |PlaneSrc| is to generate a plane wave in a homogeneous medium.  It supports
+% oblique incidence, i.e., emission in the direction different from the normal
+% direction of the plane.
+
+%%% Construction
+%  src = PlaneSrc(normal_axis, intercept, polarization)
+%  src = PlaneSrc(normal_axis, intercept, polarization, K)
+%  src = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)
+% 
+% *Input Arguments*
+%
+% * |normal_axis|: direction normal to the plane.  It should be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |intercept|: location of the plane in the |normal_axis| direction.
+% * |polarization|: direction of the dipoles distributed on the plane.  It
+% should be either one of |Axis.x|, |Axis.y|, |Axis.z|, or an angle in radian.
+% When it is an instance of <Axis.html |Axis|>, it should be orthogonal to
+% |normal_axis|.  When it is an angle in radian, it is in the 2D Cartesian
+% coordinate system normal to |normal_axis|.  For example, if |normal_axis ==
+% Axis.y|, then the angle is measured in the zx plane, and therefore it is
+% measured in the counterclockwise direction from the z-axis in the zx plane.
+% * |K|: amplitude of the surface current density that the dipoles drive.
+% * |theta|: oblique incidence angle.  |abs(theta)| should not exceed |pi/2|
+% because the waves are emitted from the both sides of the plane.
+% * |wvlen|: wavelength of the plane wave in the background medium.  It is
+% required to set up the Bloch boundary condition for oblique incidence.
+% |wvlen| is not the vacuum wavelength used in the frequency-domain Maxwell's
+% equations, but the wavelength in the medium where this |PlaneSrc| is located.
+
+%%% Note
+% In the finite-difference grid, |PlaneSrc| excites dipoles at the _E_-field
+% points.  This poses a condition on |intercept| argument in the constructor:
+% |intercept| should be at a dual grid point in the |normal_axis| direction.
+% Therefore, make sure that |intercept| does not overlap with the locations of
+% the vertices of <Shape.html |Shape|> in the |normal_axis| direction; otherwise
+% dynamic grid generation will fail.
+
+%%% Example
+%   % Set an instance of PointSrc.
+%   src =  PlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
+%
+%   % Use the constructed PointSrc in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+
+%%% See Also
+% <PointSrc.html |PointSrc|>, <PointSrcM.html |PointSrcM|>
+
+
 
 classdef PlaneSrc < Source
-	% PlaneSrc is a class representing a constant electric dipole distribution
-	% over the entire plane.  PlaneSrc is to generate a plane wave in a
-	% homogeneous medium, and it supports the Bloch boundary condition.
 	
 	properties (SetAccess = immutable)
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
@@ -24,6 +72,7 @@ classdef PlaneSrc < Source
 			chkarg(istypesizeof(polarization, 'Axis') || istypesizeof(polarization, 'real'), ...
 				'"polarization" should be instance of Axis or angle in radian.');
 			if istypesizeof(polarization, 'Axis')
+				chkarg(polarization ~= normal_axis, '"polarization" should be orthogonal to "normal_axis".');
 				[p, q] = cycle(normal_axis);
 				if polarization == p
 					polarization = 0;
@@ -43,7 +92,8 @@ classdef PlaneSrc < Source
 				theta = 0;
 				wvlen = Inf;
 			end
-			chkarg(istypesizeof(theta, 'real'), '"theta" should be polar angle in radian.');
+			chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
+				'"theta" should be polar angle in radian between -pi/2 and pi/2.');
 			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
 						
 			l = cell(Axis.count, GK.count);

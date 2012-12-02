@@ -88,7 +88,7 @@ if ~inspect_only
 	%% Visualize the solution.
 	figure
 	clear opts
-	opts.withobj = true;
+	opts.withobjsrc = true;
 	opts.withabs = true;  % true: abs(solution), false: real(solution)
 	opts.withpml = false;  % true: show PML, false: do not show PML
 	opts.withgrid = false;

@@ -1,12 +1,13 @@
 %% vis2d
-% Visualize a 2D slice of a 3D field solution with objects.
+% Visualize a 2D slice of a 3D field solution with objects and sources.
 
 %%% Syntax
-%  vis2d(scalar3d, normal_axis, intercept)
-%  vis2d(scalar2d)
-%  vis2d(..., obj_array)
-%  vis2d(..., src_array)
-%  vis2d(..., [opts])
+%  vis2d(scalar3d, normal_axis, intercept, [opts])
+%  vis2d(scalar3d, normal_axis, intercept, obj_array, [opts])
+%  vis2d(scalar3d, normal_axis, intercept, obj_array, src_array, [opts])
+%  vis2d(scalar2d, [opts])
+%  vis2d(scalar2d, obj_array, [opts])
+%  vis2d(scalar2d, obj_array, src_array, [opts])
 
 %%% Description
 % |vis2d(scalar3d, normal_axis, intercept)| vizualizes a 2D slice of one of the
@@ -18,11 +19,13 @@
 % |vis2d(scalar2d)| vizualizes a 2D slice stored as an instance of
 % <Scalar2d.html |Scalar2d|>.
 %
-% |vis2d(..., obj_array)| visualizes the objects in |obj_array| with a slice of
-% a field.  The elements of |obj_array| are instances of <Object.html Object>.
+% |vis2d(..., obj_array)| visualizes the objects in |obj_array| with the slice
+% of a field.  The elements of |obj_array| are instances of <Object.html
+% |Object|>.
 %
-% |vis2d(..., src_array)| visualizes the sources in |src_array| with a slice of
-% a field.  The elements of |obj_array| are instances of <Object.html Object>.
+% |vis2d(..., obj_array, src_array)| visualizes the objects and sources in
+% |obj_array| and |src_array| with the slice of a field.  The elements of
+% |src_array| are instances of <Source.html |Source|>.
 %
 % The optional argument |opts| is an options structure that controls the
 % behavior of visualization.  The fields of the structure are explained below.
@@ -32,16 +35,22 @@
 % * |opts.withinterp|: |{true}| or |false| to interpolate the field or not.
 % * |opts.withpml|: |true| or |{false}| to show the PML regions or not.
 % * |opts.withabs|: |true| or |{false}| to show the absolute values of the field
-% or not
+% or not.
 % * |opts.cscale|: positive value multiplied to the color bar range.  Set to
 % values less than |1.0| to saturate colors.  The default value is |1.0|.
-% * |opts.withobj|: |{true}| or |false| to show the objects or not.
+% * |opts.cmax|: maximum of the color bar range.  Once |opts.cmax| is set, it
+% overrides |opts.cscale|.
+% * |opts.withcolorbar|: |{true}| or |false| to show the colorbar or not.
+% * |opts.withobjsrc|: |true| or |false| to show the objects and sources or not.
+% The default values is |true| when the number of objects is small (<= 20), but
+% |false| when the number of objects is large (> 20).  To show only sources
+% without objects, provide an empty |obj_array| in |vis2d()|.
 
 %%% Example
-%  [E, H, obj_array] = maxwell_run(...);
-%  opts.cscale = 5e-3;
-%  opts.wihabs = true;
-%  vis2d(E{Axis.y}, Axis.z, 0, obj_array, opts);
+%   [E, H, obj_array, src_array] = maxwell_run({ARGUMENTS});
+%   opts.cscale = 5e-3;
+%   opts.wihabs = true;
+%   vis2d(E{Axis.y}, Axis.z, 0, obj_array, src_array, opts);
 
 function vis2d(varargin)
 
@@ -117,13 +126,13 @@ end
 if no_opts || ~isfield(opts, 'withcolorbar')
 	opts.withcolorbar = true;
 end
-if no_opts || ~isfield(opts, 'withobj')
+if no_opts || ~isfield(opts, 'withobjsrc')
 	if length(obj_array) <= 20
-		opts.withobj = true;
+		opts.withobjsrc = true;
 	else
-		opts.withobj = false;
+		opts.withobjsrc = false;
 		warning('FDS:vis', ['for fast plotting, more than 20 objects are not drawn by default.\n', ...
-			'Suggestion: set "opts.withobj = true" to draw objects.']);
+			'Suggestion: set "opts.withobjsrc = true" to draw objects.']);
 	end
 end
 if no_opts || ~isfield(opts, 'phase')
@@ -145,6 +154,6 @@ p.phase_angle = opts.phase;
 
 p.init_display();
 p.draw_slice();
-if opts.withobj
+if opts.withobjsrc
 	p.draw_objsrc();
 end

@@ -46,7 +46,7 @@ if ~inspect_only
 	figure;
 	clear opts
 % 	opts.withgrid = true;
-% 	opts.withobj = true;
+% 	opts.withobjsrc = true;
 	opts.withabs = true;
 	opts.withpml = false;
 	vis2d(E{Axis.z}, Axis.z, 0, obj_array, src_array, opts)

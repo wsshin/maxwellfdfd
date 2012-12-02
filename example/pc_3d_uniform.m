@@ -49,6 +49,6 @@ end
 if ~inspect_only
 	figure;
 	opts.cscale = 5e-3;
-	opts.withobj = false;
+	opts.withobjsrc = false;
 	visall(E{Axis.y}, obj_array, opts);
 end

@@ -41,7 +41,7 @@ if ~inspect_only
 	figure;
 	clear opts
 	opts.withabs = false;
-	opts.withobj = true;
+	opts.withobjsrc = true;
 	visall(E{Axis.x}, obj_array, opts);
 end
 

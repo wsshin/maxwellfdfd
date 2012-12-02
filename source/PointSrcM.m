@@ -1,5 +1,43 @@
+%% PointSrcM
+% Concrete subclass of <Source.html |Source|> representing a magnetic point
+% dipole source.
+
+%%% Description
+% |PointSrcM| places an oscillating magnetic point dipole at the location given
+% in the constructor.
+
+%%% Construction
+%  src = PointSrcM(polarization_axis, location)
+%  src = PointSrcM(polarization_axis, location, Im)
+% 
+% *Input Arguments*
+%
+% * |polarization_axis|: direction of the dipole.  It should be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |location|: location of the dipole in the form of |[x, y, z]|.
+% * |Im|: amplitude of the magnetic current that the dipole drives.
+
+%%% Note
+% In the finite-difference grid, |PointSrcM| is located at one of the _H_-field
+% points.  This poses a condition on |location| argument in the constructor: the
+% location in the directions normal to the dipole polarization should be at
+% primary grid points, whereas the location in the direction along the dipole
+% polarization should be at a dual grid point.  Therefore, make sure that the
+% location of the dipole does not overlap with the locations of the vertices of
+% <Shape.html |Shape|> in the direction along the dipole polarization; otherwise
+% dynamic grid generation will fail.
+
+%%% Example
+%   % Set an instance of PointSrc.
+%   src = PointSrcM(Axis.z, [0 0 0.5]);  % z = 0.5 should not be primary grid point
+%
+%   % Use the constructed PointSrc in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+
+%%% See Also
+% <PointSrc.html |PointSrc|>, <PlaneSrc.html |PlaneSrc|>
+
 classdef PointSrcM < Source
-	% PointSrc is a class representing an magnetic point source.
 	
 	properties (SetAccess = immutable)
 		polarization  % one of Axis.x, Axis.y, Axis.z

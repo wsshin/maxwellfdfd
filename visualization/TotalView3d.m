@@ -24,11 +24,12 @@ classdef TotalView3d < handle
 		withpml
 		withabs
 		cscale
+		cmax
 		isopaque
 	end
 	
 	properties
-		withobj
+		withobjsrc
 	end
 	
 	methods
@@ -40,7 +41,7 @@ classdef TotalView3d < handle
 			this.ha2d = NaN(1, Axis.count);
 			this.hedit = NaN(1, Axis.count);
 			this.hslider = NaN(1, Axis.count);
-			this.withobj = true;
+			this.withobjsrc = true;
 			
 			if nargin >= 1  % scalar3d
 				this.scalar3d = scalar3d;
@@ -147,6 +148,18 @@ classdef TotalView3d < handle
 			end
 		end
 
+		function cmax = get.cmax(this)
+			cmax = this.painter3d.cmax;
+		end
+		
+		function set.cmax(this, cmax)
+			chkarg(istypesizeof(cmax, 'real') && cmax > 0, '"cmax" should be positive.');
+			this.painter3d.cmax = cmax;
+			for w = Axis.elems
+				this.painter2d(w).cmax = cmax;
+			end
+		end
+		
 		function isopaque = get.isopaque(this)
 			isopaque = this.painter3d.isopaque;
 		end
@@ -156,9 +169,9 @@ classdef TotalView3d < handle
 			this.painter3d.isopaque = truth;
 		end
 				
-		function set.withobj(this, truth)
+		function set.withobjsrc(this, truth)
 			chkarg(istypesizeof(truth, 'logical'), '"truth" should be logical.');
-			this.withobj = truth;
+			this.withobjsrc = truth;
 		end
 		
 		function show(this, figure_handle)
@@ -171,9 +184,20 @@ classdef TotalView3d < handle
 			set(figure_handle, 'Units', 'normalized', 'OuterPosition', [0 0 1 1]);
 			bcolor = get(figure_handle, 'Color');  % background color
 			
+			% Set the figure renderer.  MATLAB uses 'zbuffer' by default, but it
+			% uses 'opengl' when a figure has alpha data (for transparency)
+			% because 'opengl' is the only renderer that supports alpha.  The
+			% problem is that 'zbuffer' produces a better figure than 'opengl'
+			% when alpha is not used.  TotalView3d needs alpha only in the 3D
+			% view panel (or axes), but unfortunately different panels in a
+			% single figure cannot have different renderers.  Therefore users
+			% may get confused if their 2D slices look very different depending
+			% on "totalview.isopacity" value.  To prevent such confusion, I may
+			% set the figure renderer always as 'opengl'.
+% 			set(figure_handle, 'Renderer', 'opengl');
+			
 			p3d = this.painter3d;
 			p2d = this.painter2d;
-% 			p.prep_data();
 			
 			% Figure out the longest axis.
 			L = p3d.databound(:,Sign.p) - p3d.databound(:,Sign.n);
@@ -188,51 +212,50 @@ classdef TotalView3d < handle
 			hg = 0.10;  % gap in height
 			w3 = 0.23;  % width of 3rd pane
 			h4 = 0.2;  % height of control pane
-			
-			h3 = 1 - 2*hm - h4;
-			
+						
 			wr = 1 - 2*wg - 2*wm - w3;  % rest width
 			hr = 1 - hg - 2*hm;  % rest height
 			
+			% [w1 w2]
 			w1 = L(axis_l) / (L(axis_l) + L(axis_n)) * wr;
 			w2 = L(axis_n) / (L(axis_l) + L(axis_n)) * wr;
 			
+			% [h2; h1]
 			h1 = L(axis_m) / (L(axis_m) + L(axis_n)) * hr;
 			h2 = L(axis_n) / (L(axis_m) + L(axis_n)) * hr;
 			
 			% For each 2D slice view, assign its horizontal and vertical axes.
-% 			p2d(axis_l).isswapped = (cycle(axis_n) ~= axis_m);  % [axis_h axis_v] == [axis_n axis_m]
-% 			p2d(axis_m).isswapped = (cycle(axis_l) ~= axis_n);  % [axis_h axis_v] == [axis_l axis_n]
-% 			p2d(axis_n).isswapped = (cycle(axis_l) ~= axis_m);  % [axis_h axis_v] == [axis_l axis_m]
 			p2d(axis_l).isswapped = true;  % [axis_h axis_v] == [axis_n axis_m]
 			p2d(axis_m).isswapped = true;  % [axis_h axis_v] == [axis_l axis_n]
 			p2d(axis_n).isswapped = false;  % [axis_h axis_v] == [axis_l axis_m]
 			
-			this.ha2d(axis_l) = axes('Units', 'normalized', 'Position', [(wm+w1+wg) (hm+h2+hg) w2 h1]);
-			this.ha2d(axis_n) = axes('Units', 'normalized', 'Position', [wm (hm+h2+hg) w1 h1]);
-			this.ha2d(axis_m) = axes('Units', 'normalized', 'Position', [wm hm w1 h2]);
+			this.ha2d(axis_l) = axes('Units', 'normalized', 'Position', [(wm+w1+wg) hm w2 h1]);
+			this.ha2d(axis_n) = axes('Units', 'normalized', 'Position', [wm hm w1 h1]);
+			this.ha2d(axis_m) = axes('Units', 'normalized', 'Position', [wm (hm+h1+hg) w1 h2]);
 			
+			this.ha3d = axes('Units', 'normalized', 'Position', [(wm+w1+wg) (hm+h1+hg) w2 h2]);
+
 			% Draw slices in 2D.
 			for w = Axis.elems
 				p2d(w).init_display(this.ha2d(w));
 				p2d(w).draw_slice(this.ha2d(w));
-				if this.withobj
+				if this.withobjsrc
 					p2d(w).draw_objsrc(this.ha2d(w));
 				end
 			end
 			
 			% Draw slices in 3D.
-			this.ha3d = axes('Units', 'normalized', 'Position', [(wm+w1+wg+w2+wg) hm+h4 w3 h3]);
 			p3d.init_display(this.ha3d);
 % 			upvec = zeros(1, Axis.count);
 % 			upvec(axis_n) = 1;
 % 			camup(ha3, upvec);
 % 			view(ha3, -38.5, 16)
 
- 			hc = colorbar('Position', [(wm+w1+wg) hm 0.02 h2]);
+			% Draw a color bar.
+ 			hc = colorbar('Position', [(wm+w1+wg+w2+wg) (hm+h1+hg) 0.02 h2]);
 			format_colorbar(hc, this.scalar3d);
 
-			if this.withobj
+			if this.withobjsrc
 				p3d.draw_objsrc();
 			end
 			
@@ -248,16 +271,16 @@ classdef TotalView3d < handle
 			for w = Axis.elems
 				s = int(w);  % step
 				uicontrol('Style', 'text', ...
-					'Units', 'normalized', 'Position', [(1-wm-w3) (hm+(2-s)*h5) w6 h5], ...
+					'Units', 'normalized', 'Position', [(1-wm-w3) (hm+h1-s*h5) w6 h5], ...
 					'String', upper(char(w)), 'HorizontalAlignment', 'left', 'FontSize', 15, ...
 					'BackgroundColor', bcolor);
 				this.hedit(w) = uicontrol('Style', 'edit', ...
-					'Units', 'normalized', 'Position', [(1-wm-w3+w6) (hm+(3-s)*h5-h6+0.08*h5) (w3-w5-w6)*0.8 h6], ...
+					'Units', 'normalized', 'Position', [(1-wm-w3+w6) (hm+h1-(s-1)*h5-h6+0.08*h5) (w3-w5-w6)*0.8 h6], ...
 					'String', num2str(this.intercept(w)), 'HorizontalAlignment', 'left', 'FontSize', 15, ...
 					'BackgroundColor', bcolor, ...
 					'Callback', @(src,event) edit_updated(this, w));
 				this.hslider(w) = uicontrol('Style', 'slider', ...
-					'Units', 'normalized', 'Position', [(1-wm-w5) (hm+(2-s)*h5) w5 h5], ...
+					'Units', 'normalized', 'Position', [(1-wm-w5) (hm+h1-s*h5) w5 h5], ...
 					'Min', p3d.databound(w,Sign.n), 'Max', p3d.databound(w,Sign.p), 'Value', this.intercept(w), ...
 					'BackgroundColor', bcolor, ...
 					'Callback', @(src,event) slider_updated(this, w));
@@ -272,6 +295,7 @@ classdef TotalView3d < handle
 		
 		function edit_updated(this, axis)
 			delete(this.hs3d(axis));
+			cla(this.ha2d(axis));
 			h = this.hedit(axis);
 			val = str2double(get(h, 'String'));
 			if isnan(val)
@@ -295,13 +319,14 @@ classdef TotalView3d < handle
 			this.painter2d(axis).scalar2d = slice_scalar3d(this.scalar3d, axis, val);
 			warning('on', 'FDS:interp');
 			this.painter2d(axis).draw_slice(this.ha2d(axis));
-			if this.withobj
+			if this.withobjsrc
 				this.painter2d(axis).draw_objsrc(this.ha2d(axis));
 			end
 		end
 		
 		function slider_updated(this, axis)
 			delete(this.hs3d(axis));
+			cla(this.ha2d(axis));
 			val = get(this.hslider(axis), 'Value');
 			this.intercept(axis) = val;
 			set(this.hedit(axis), 'String', num2str(val));
@@ -310,7 +335,7 @@ classdef TotalView3d < handle
 			this.painter2d(axis).scalar2d = slice_scalar3d(this.scalar3d, axis, val);
 			warning('on', 'FDS:interp');
 			this.painter2d(axis).draw_slice(this.ha2d(axis));
-			if this.withobj
+			if this.withobjsrc
 				this.painter2d(axis).draw_objsrc(this.ha2d(axis));
 			end
 		end

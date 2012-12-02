@@ -54,7 +54,7 @@ classdef Painter3d < handle
 			this.cscale = 1.0;
 			this.cmax = Inf;
 			this.isopaque = false;
-			this.opacity = 0.1;
+			this.opacity = 0.7;
 			this.withgrid = false;
 						
 			this.isVpreped = false;
@@ -265,17 +265,15 @@ classdef Painter3d < handle
 				end
 %                light('Position',[-0.6 1 -0.2],'Style','infinite');            
 			else
-                alpha('color');
 				if this.withinterp
 					set(surface_handle, 'FaceColor', 'interp', 'FaceAlpha', 'interp');
 				end
-                alphamap('rampdown');
-                alphamap('increase', this.opacity);
+                alpha(surface_handle, this.opacity);
+%                 alphamap('rampdown', this.opacity);
 			end
 		end
 		
 		function patch_handle_array = draw_objsrc(this)
-% 			patch_handle_array = draw_objsrc(this.obj_array, this.X, this.Y, this.Z);
 			patch_handle_array = draw_objsrc(this.obj_array, this.scalar3d.grid3d, this.withinterp, this.withpml);
 			
 			if ~this.isopaque

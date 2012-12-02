@@ -3,11 +3,8 @@
 % dipole source.
 
 %%% Description
-% |PointSrc| is the most basic source type.  It places an oscillating point
-% dipole at the location given in the constructor.  
-%
-% |PointSrc| is a subclass of |Source|, so it inherits all the methods of
-% |Source|.  See <Source.html |Source|> for more details.
+% |PointSrc| is the most basic source type.  It places an oscillating electric
+% point dipole at the location given in the constructor.
 
 %%% Construction
 %  src = PointSrc(polarization_axis, location)
@@ -15,7 +12,7 @@
 % 
 % *Input Arguments*
 %
-% * |polarization_axis|: direction of the dipole.  It hould be one of |Axis.x|,
+% * |polarization_axis|: direction of the dipole.  It should be one of |Axis.x|,
 % |Axis.y|, |Axis.z|.
 % * |location|: location of the dipole in the form of |[x, y, z]|.
 % * |I|: amplitude of the current that the dipole drives.
@@ -23,20 +20,19 @@
 %%% Note
 % In the finite-difference grid, |PointSrc| is located at one of the _E_-field
 % points.  This poses a condition on |location| argument in the constructor: the
-% location in the directions normal to the dipole polarization should be dual
+% location in the directions normal to the dipole polarization should be at dual
 % grid points, whereas the location in the direction along the dipole
-% polarization should be a primary grid point.  Therefore, make sure that the
-% location of the dipole does not overlap the locations of the vertices of
+% polarization should be at a primary grid point.  Therefore, make sure that the
+% location of the dipole does not overlap with the locations of the vertices of
 % <Shape.html |Shape|> in the directions normal to the dipole polarization;
-% otherwise dynamic grid generation fails.
+% otherwise dynamic grid generation will fail.
 
 %%% Example
 %   % Set an instance of PointSrc.
-%   src = PointSrc(Axis.z, [0 0 0]);
+%   src = PointSrc(Axis.z, [0 0 0]);  % z = 0 should not be dual grid point
 %
 %   % Use the constructed PointSrc in maxwell_run().
-%   [E, H] = maxwell_run(...
-%               'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
 
 %%% See Also
 % <PointSrcM.html |PointSrcM|>, <PlaneSrc.html |PlaneSrc|>

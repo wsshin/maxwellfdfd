@@ -32,7 +32,7 @@ end
 figure
 clear opts
 opts.withinterp = false;
-opts.withobj = true;
+opts.withobjsrc = true;
 opts.withabs = true;
 % opts.withgrid = true;
 opts.cscale = 1e-3;

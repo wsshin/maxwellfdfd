@@ -38,7 +38,7 @@ end
 %% Visualize the solution.
 figure
 clear opts;
-opts.withobj = true;
+opts.withobjsrc = true;
 vis2d(E{Axis.z}, Axis.z, 0, obj_array, src_array, opts)
 % vis2d(E{Axis.x}, Axis.x, 0, obj_array, src_array)
 
