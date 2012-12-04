@@ -1,0 +1,144 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Axis</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-03"><meta name="DC.source" content="Axis.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Axis</h1><!--introduction--><p>Enumeration class for the Cartesian axes x, y, z.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Instances</a></li><li><a href="#3">Methods</a></li><li><a href="#4">Example</a></li><li><a href="#5">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p>The only three instances <tt>Axis.x</tt>, <tt>Axis.y</tt>, and <tt>Axis.z</tt> of <tt>Axis</tt> are used extensively in MaxwellFDS to represent and specify the x-, y-, and z-axis of the Cartesian coordinate system.</p><p><tt>Axis</tt> is a subclass of <tt>Enumerated</tt>, so it inherits all the methods of <tt>Enumerated</tt>.  See <a href="Enumerated.html"><tt>Enumerated</tt></a> for more details.</p><h2>Instances<a name="2"></a></h2><div><ul><li><tt>Axis.x</tt>: instance representing the x-axis</li><li><tt>Axis.y</tt>: instance representing the y-axis</li><li><tt>Axis.z</tt>: instance representing the z-axis</li></ul></div><h2>Methods<a name="3"></a></h2><p>Below, <tt>axis</tt> is an instance of <tt>Axis</tt>.</p><div><ul><li><tt>[p, q, r] = cycle(axis)</tt>: <tt>[p, q, r]</tt> is a cyclic permutation of <tt>[Axis.x, Axis.y, Axis.z]</tt> satisfying <tt>r == axis</tt>.</li></ul></div><h2>Example<a name="4"></a></h2><pre class="language-matlab"><span class="comment">% Test conversion to integers and strings.</span>
+fprintf(<span class="string">'# of instances of Axis: %d\n'</span>, Axis.count);
+<span class="keyword">for</span> w = Axis.elems
+    fprintf(<span class="string">'The integer value of Axis.%s is %d\n'</span>, char(w), int(w));
+<span class="keyword">end</span>
+</pre><pre class="language-matlab"><span class="comment">% Test cyclic permutation.</span>
+[p q r] = cycle(Axis.y);
+fprintf(<span class="string">'The cyclic permutation of [x, y, z] beginning with y is [%s, %s, %s]\n'</span>, char(r), char(p), char(q));
+</pre><h2>See Also<a name="5"></a></h2><p><a href="Enumerated.html"><tt>Enumerated</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Axis 
+% Enumeration class for the Cartesian axes x, y, z.
+
+%%% Description
+% The only three instances |Axis.x|, |Axis.y|, and |Axis.z| of |Axis| are used
+% extensively in MaxwellFDS to represent and specify the x-, y-, and z-axis of
+% the Cartesian coordinate system.
+%
+% |Axis| is a subclass of |Enumerated|, so it inherits all the methods of
+% |Enumerated|.  See <Enumerated.html |Enumerated|> for more details.
+
+%%% Instances
+% * |Axis.x|: instance representing the x-axis
+% * |Axis.y|: instance representing the y-axis
+% * |Axis.z|: instance representing the z-axis
+
+%%% Methods
+% Below, |axis| is an instance of |Axis|.
+%
+% * |[p, q, r] = cycle(axis)|: |[p, q, r]| is a cyclic permutation of |[Axis.x,
+% Axis.y, Axis.z]| satisfying |r == axis|.
+
+%%% Example
+%   % Test conversion to integers and strings.
+%   fprintf('# of instances of Axis: %d\n', Axis.count);
+%   for w = Axis.elems
+%       fprintf('The integer value of Axis.%s is %d\n', char(w), int(w));
+%   end
+%
+%   % Test cyclic permutation.
+%   [p q r] = cycle(Axis.y);
+%   fprintf('The cyclic permutation of [x, y, z] beginning with y is [%s, %s, %s]\n', char(r), char(p), char(q));
+
+%%% See Also
+% <Enumerated.html |Enumerated|>
+
+classdef Axis < Enumerated
+	enumeration
+		x('x')
+		y('y')
+		z('z')
+	end
+
+	methods (Static)
+		function elems = elems(ind)
+			elems = [Axis.x, Axis.y, Axis.z];
+			if nargin > 0  % ind
+				elems = elems(ind);
+			end
+		end
+		
+		function count = count()
+			count = length(Axis.elems);
+		end
+	end
+	
+	methods
+		function [p q r] = cycle(this)
+			r = this;
+			p = Axis.elems(mod(int(this), Axis.count) + 1);
+			q = Axis.elems(mod(int(this)+1, Axis.count) + 1);
+		end
+	end
+end
+
+##### SOURCE END #####
+--></body></html>

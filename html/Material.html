@@ -1,0 +1,191 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Material</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="Material.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Material</h1><!--introduction--><p>Class representing an electromagnetic material.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>Material</tt> represents an electromagnetic material with electric permittivity and magnetic permeability.  Users should provide the name and color of the material in the constructor</p><h2>Construction<a name="2"></a></h2><pre>mat = Material(name, color, eps)
+mat = Material(name, color, eps, mu)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>name</tt>: name of the material.  Used to distinguish materials and label them in figures.</li><li><tt>color</tt>: color of the material.  Used to visualize the material in figures. It can be MATLAB's reserved color code characters (e.g., <tt>'r'</tt> for red, <tt>'k'</tt> for black) or an RGB code <tt>[r g b]</tt> where <tt>r</tt>, <tt>g</tt>, <tt>b</tt> are real numbers between 0 and 1.  Use <tt>color = 'none'</tt> to hide the objects made of this material in figures.</li><li><tt>eps</tt>: electric permittivity of the material.</li><li><tt>mu</tt>: magnetic permeability of the material.  If not assigned, the default value <tt>mu = 1</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of Material.</span>
+vacuum =  Material(<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0);
+</pre><pre class="language-matlab"><span class="comment">% Use the constructed material in maxwell_run().</span>
+[E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'OBJ'</span>, vacuum, Box([0 100; 0 50; 0 20]), {REMAINING ARGUMENTS});
+</pre><h2>See Also<a name="4"></a></h2><p><a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Material
+% Class representing an electromagnetic material.
+
+%%% Description
+% |Material| represents an electromagnetic material with electric permittivity
+% and magnetic permeability.  Users should provide the name and color of the
+% material in the constructor
+
+%%% Construction
+%  mat = Material(name, color, eps)
+%  mat = Material(name, color, eps, mu)
+% 
+% *Input Arguments*
+%
+% * |name|: name of the material.  Used to distinguish materials and label them
+% in figures.
+% * |color|: color of the material.  Used to visualize the material in figures.
+% It can be MATLAB's reserved color code characters (e.g., |'r'| for red, |'k'|
+% for black) or an RGB code |[r g b]| where |r|, |g|, |b| are real numbers
+% between 0 and 1.  Use |color = 'none'| to hide the objects made of this
+% material in figures.
+% * |eps|: electric permittivity of the material.
+% * |mu|: magnetic permeability of the material.  If not assigned, the default
+% value |mu = 1| is used.
+
+%%% Example
+%   % Create an instance of Material.
+%   vacuum =  Material('vacuum', 'none', 1.0);
+%
+%   % Use the constructed material in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', vacuum, Box([0 100; 0 50; 0 20]), {REMAINING ARGUMENTS});
+
+%%% See Also
+% <maxwell_run.html |maxwell_run|>
+
+classdef Material
+	
+	properties (SetAccess = immutable)
+		name
+		color
+		eps
+		mu
+	end
+	
+	methods
+		function this = Material(name, color, eps, mu)
+			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
+			this.name = name;
+			
+			chkarg(istypeof(color, 'char') ...
+				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
+				'"color" should be string or [r g b].');
+			this.color = color;
+			
+			chkarg(istypesizeof(eps, 'complex'), '"eps" should be complex.');
+			this.eps = eps;
+			
+			if nargin < 4  % no mu
+				mu = 1.0;
+			end
+			chkarg(istypesizeof(mu, 'complex'), '"mu" should be complex.');
+			this.mu = mu;
+		end
+	end
+	
+	methods (Static)
+		function material = create(name, color, osc)
+			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
+			chkarg(istypesizeof(color, 'char', [1 0]) ...
+				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
+				'"color" should be string or [r g b].');
+			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
+			eV = osc.in_eV();
+			
+			maxwell_root = fileparts(fileparts(mfilename('fullpath')));
+			param_dir = [maxwell_root, filesep, 'material', filesep];
+			param_file = [name, '.mat'];
+			param = load([param_dir, param_file]);  % eV, n, k are loaded
+			chkarg(eV >= param.eV(1) && eV <= param.eV(end), '"eV" should be in the range described by %s', param_file);
+			
+			n = interp1(param.eV, param.n, eV);
+			k = interp1(param.eV, param.k, eV);
+			epsilon = (n - 1i * k)^2;
+			material =  Material(name, color, epsilon);
+		end
+	end
+	
+	methods
+		function [sorted, ind] = sort(this, varargin)
+			% varargin is the optional parameters (such as 'descend') of sort().
+			n = length(this);
+			names = cell(1, n);
+			for i = 1:n
+				names{i} = this(i).name;
+			end
+			[~, ind] = sort(names, varargin{:}); 
+			sorted = this(ind);
+		end
+		
+		function truth = ne(this, another)
+			chkarg(all(size(this) == size(another)), '"this" and "another" should have same size.');
+			dims = size(this);
+			n = numel(this);
+			this = this(:);
+			another = another(:);
+			truth = true(n,1);
+			for i = 1:n
+				truth(i)= ~isequal(this(i).name, another(i).name);
+			end
+			truth = reshape(truth, dims);
+		end
+	end
+end
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,231 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Enumerated</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-30"><meta name="DC.source" content="Enumerated.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Enumerated</h1><!--introduction--><p>Abstract superclass for enumerated quantities.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Concrete Subclasses</a></li><li><a href="#3">Methods (static)</a></li><li><a href="#4">Methods (public)</a></li><li><a href="#5">Example</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>Enumerated</tt> is the superclass of classes representing enumerated quantities. Each subclass of <tt>Enumerated</tt> allows only instances predefined by <tt>enumeration</tt>.  For more details about <tt>enumeration</tt>, see <a href="matlab:web(['jar:file://',fullfile(matlabroot,'help','techdoc','help.jar!','matlab_oop','br4imrp.html')],'-helpbrowser')">Enumerations</a>.</p><p><tt>Enumerated</tt> supports conversion of its instance into a string by <tt>char()</tt>, and into an integer by <tt>int()</tt>.</p><p>Each concrete subclass of <tt>Enumerated</tt> allows comparison between its instances, i.e., supports relational operators &lt;, &lt;=, ==, &gt;=, and &gt;.  Also, the result consistent with this comparison is returned by <tt>sort()</tt> on a vector of these instances.</p><h2>Concrete Subclasses<a name="2"></a></h2><div><ul><li><a href="Axis.html"><tt>Axis</tt></a>: Catesion axes</li><li><a href="BC.html"><tt>BC</tt></a>: boundary conditions</li><li><a href="Dir.html"><tt>Dir</tt></a>: horizontal and vertical directions</li><li><a href="GK.html"><tt>GK</tt></a>: grid kinds</li><li><a href="PhysQ.html"><tt>PhysQ</tt></a>: physical quantities</li><li><a href="PML.html"><tt>PML</tt></a>: PML kinds</li><li><a href="Sign.html"><tt>Sign</tt></a>: negative and positive signs</li></ul></div><h2>Methods (static)<a name="3"></a></h2><p>Below, <tt>Enumerated</tt> must be replaced by a concrete subclass.</p><div><ul><li><tt>Enumerated.elems()</tt>: returns a row vector of all instances</li><li><tt>Enumerated.count()</tt>: returns the number of all instances</li></ul></div><h2>Methods (public)<a name="4"></a></h2><p>Below, <tt>enumerated</tt> is an instance of a concrete subclass of <tt>Enumerated</tt>.</p><div><ul><li><tt>char(enumerated)</tt>: name of <tt>enumerated</tt></li><li><tt>int(enumerated)</tt>: integer representation of <tt>enumerated</tt></li></ul></div><h2>Example<a name="5"></a></h2><p>Below, the methods of <tt>Enumerated</tt> are demonstrated using a concrete subclass <a href="Axis.html"><tt>Axis</tt></a>.</p><pre class="language-matlab"><span class="comment">% Test conversion to integers and strings.</span>
+fprintf(<span class="string">'Total # of Axis objects: %d\n'</span>, Axis.count);
+<span class="keyword">for</span> w = Axis.elems
+    fprintf(<span class="string">'Name of Axis object %d: %s\n'</span>, int(w), char(w));
+<span class="keyword">end</span>
+</pre><pre class="language-matlab"><span class="comment">% Test sort().</span>
+unsorted = [Axis.z, Axis.x, Axis.y];
+fprintf(<span class="string">'\nBefore sort: '</span>);
+<span class="keyword">for</span> w = unsorted
+    fprintf(<span class="string">'%s  '</span>, char(w));
+<span class="keyword">end</span>
+</pre><pre class="language-matlab">fprintf(<span class="string">'\nAfter sort: '</span>);
+sorted = sort(unsorted);
+<span class="keyword">for</span> w = sorted
+    fprintf(<span class="string">'%s  '</span>, char(w));
+<span class="keyword">end</span>
+fprintf(<span class="string">'\n'</span>);
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Enumerated 
+% Abstract superclass for enumerated quantities. 
+
+%%% Description
+% |Enumerated| is the superclass of classes representing enumerated quantities.
+% Each subclass of |Enumerated| allows only instances predefined by
+% |enumeration|.  For more details about |enumeration|, see
+% <matlab:web(['jar:file://',fullfile(matlabroot,'help','techdoc','help.jar!','matlab_oop','br4imrp.html')],'-helpbrowser')
+% Enumerations>.
+%
+% |Enumerated| supports conversion of its instance into a string by |char()|,
+% and into an integer by |int()|.
+%
+% Each concrete subclass of |Enumerated| allows comparison between its
+% instances, i.e., supports relational operators <, <=, ==, >=, and >.  Also,
+% the result consistent with this comparison is returned by |sort()| on a vector
+% of these instances.
+
+%%% Concrete Subclasses
+% * <Axis.html |Axis|>: Catesion axes
+% * <BC.html |BC|>: boundary conditions
+% * <Dir.html |Dir|>: horizontal and vertical directions
+% * <GK.html |GK|>: grid kinds
+% * <PhysQ.html |PhysQ|>: physical quantities
+% * <PML.html |PML|>: PML kinds
+% * <Sign.html |Sign|>: negative and positive signs
+
+%%% Methods (static)
+% Below, |Enumerated| must be replaced by a concrete subclass.
+%
+% * |Enumerated.elems()|: returns a row vector of all instances
+% * |Enumerated.count()|: returns the number of all instances
+
+%%% Methods (public)
+% Below, |enumerated| is an instance of a concrete subclass of |Enumerated|.
+%
+% * |char(enumerated)|: name of |enumerated|
+% * |int(enumerated)|: integer representation of |enumerated|
+
+%%% Example
+% Below, the methods of |Enumerated| are demonstrated using a concrete subclass
+% <Axis.html |Axis|>.
+%
+%   % Test conversion to integers and strings.
+%   fprintf('Total # of Axis objects: %d\n', Axis.count);
+%   for w = Axis.elems
+%       fprintf('Name of Axis object %d: %s\n', int(w), char(w));
+%   end
+%   
+%   % Test sort().
+%   unsorted = [Axis.z, Axis.x, Axis.y];
+%   fprintf('\nBefore sort: ');
+%   for w = unsorted
+%       fprintf('%s  ', char(w));
+%   end
+%
+%   fprintf('\nAfter sort: ');
+%   sorted = sort(unsorted);
+%   for w = sorted
+%       fprintf('%s  ', char(w));
+%   end
+%   fprintf('\n');
+
+classdef Enumerated
+	properties (SetAccess = immutable, GetAccess = private)
+		name
+	end
+	
+	methods (Abstract, Static)
+		elems = elems(ind)
+		count = count()
+	end
+	
+	methods(Static)
+		function obj = loadobj(S)
+			% If saveobj() and loadobj() are not implemented, a warning is
+			% issued when loading a saved Enumerated object.
+			obj = Axis(char(S));
+		end
+	end		
+	
+	methods
+		function this = Enumerated(name)
+			chkarg(ischar(name), '"name" should be string.');
+			this.name = name;
+		end
+		
+		function S = saveobj(this)
+			% If saveobj() and loadobj() are not implemented, a warning is
+			% issued when loading a saved Enumerated object.
+			S.name = char(this);
+		end
+		
+		function name = char(this)
+			name = this.name;
+		end
+		
+		function n = int(this)
+			% This function returned n = find(this.elems==this) originally, but
+			% it is modified to handle arguments given as arrays.
+			[~, n] = ismember(this, this.elems);
+		end
+		
+		function ind = subsindex(this)
+			ind = int(this) - 1;
+		end
+		
+		function [sorted,ind] = sort(this, varargin)
+			n = length(this);
+			nums = NaN(1, n);
+			for i = 1:n
+				nums(i) = int(this(i));
+			end
+			[~, ind] = sort(nums, varargin{:}); 
+			sorted = this(ind);
+		end
+
+		function truth = lt(this, another)
+			cn = class(this);  % class name
+			chkarg(istypesizeof(another, cn), 'cannot compare %s with %s.', cn, class(another));
+			truth = int(this) < int(another);
+		end
+		
+		function truth = le(this, another)
+			cn = class(this);  % class name
+			chkarg(istypesizeof(another, cn), 'cannot compare %s with %s.', cn, class(another));
+			truth = int(this) <= int(another);
+		end
+		
+		function truth = gt(this, another)
+			cn = class(this);  % class name
+			chkarg(istypesizeof(another, cn), 'cannot compare %s with %s.', cn, class(another));
+			truth = int(this) > int(another);
+		end
+		
+		function truth = ge(this, another)
+			cn = class(this);  % class name
+			chkarg(istypesizeof(another, cn), 'cannot compare %s with %s.', cn, class(another));
+			truth = int(this) >= int(another);
+		end
+	end
+end
+
+##### SOURCE END #####
+--></body></html>

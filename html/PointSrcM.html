@@ -1,0 +1,210 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>PointSrcM</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="PointSrcM.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>PointSrcM</h1><!--introduction--><p>Concrete subclass of <a href="Source.html"><tt>Source</tt></a> representing a magnetic point dipole source.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Note</a></li><li><a href="#4">Example</a></li><li><a href="#5">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>PointSrcM</tt> places an oscillating magnetic point dipole at the location given in the constructor.</p><h2>Construction<a name="2"></a></h2><pre>src = PointSrcM(polarization_axis, location)
+src = PointSrcM(polarization_axis, location, Im)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>polarization_axis</tt>: direction of the dipole.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>location</tt>: location of the dipole in the form of <tt>[x, y, z]</tt>.</li><li><tt>Im</tt>: amplitude of the magnetic current that the dipole drives.</li></ul></div><h2>Note<a name="3"></a></h2><p>In the finite-difference grid, <tt>PointSrcM</tt> is located at one of the <i>H</i>-field points.  This poses a condition on <tt>location</tt> argument in the constructor: the location in the directions normal to the dipole polarization should be at primary grid points, whereas the location in the direction along the dipole polarization should be at a dual grid point.  Therefore, make sure that the location of the dipole does not overlap with the locations of the vertices of <a href="Shape.html"><tt>Shape</tt></a> in the direction along the dipole polarization; otherwise dynamic grid generation in <a href="moxwell_run.html"><tt>maxwell_run</tt></a> will fail.</p><h2>Example<a name="4"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of PointSrc.</span>
+src = PointSrcM(Axis.z, [0 0 0.5]);  <span class="comment">% z = 0.5 should not be primary grid point</span>
+</pre><pre class="language-matlab"><span class="comment">% Use the constructed src in maxwell_run().</span>
+[E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'SRC'</span>, src);
+</pre><h2>See Also<a name="5"></a></h2><p><a href="PointSrc.html"><tt>PointSrc</tt></a>, <a href="PlaneSrc.html"><tt>PlaneSrc</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% PointSrcM
+% Concrete subclass of <Source.html |Source|> representing a magnetic point
+% dipole source.
+
+%%% Description
+% |PointSrcM| places an oscillating magnetic point dipole at the location given
+% in the constructor.
+
+%%% Construction
+%  src = PointSrcM(polarization_axis, location)
+%  src = PointSrcM(polarization_axis, location, Im)
+% 
+% *Input Arguments*
+%
+% * |polarization_axis|: direction of the dipole.  It should be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |location|: location of the dipole in the form of |[x, y, z]|.
+% * |Im|: amplitude of the magnetic current that the dipole drives.
+
+%%% Note
+% In the finite-difference grid, |PointSrcM| is located at one of the _H_-field
+% points.  This poses a condition on |location| argument in the constructor: the
+% location in the directions normal to the dipole polarization should be at
+% primary grid points, whereas the location in the direction along the dipole
+% polarization should be at a dual grid point.  Therefore, make sure that the
+% location of the dipole does not overlap with the locations of the vertices of
+% <Shape.html |Shape|> in the direction along the dipole polarization; otherwise
+% dynamic grid generation in <moxwell_run.html |maxwell_run|> will fail.
+
+%%% Example
+%   % Create an instance of PointSrc.
+%   src = PointSrcM(Axis.z, [0 0 0.5]);  % z = 0.5 should not be primary grid point
+%
+%   % Use the constructed src in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+
+%%% See Also
+% <PointSrc.html |PointSrc|>, <PlaneSrc.html |PlaneSrc|>, <maxwell_run.html
+% |maxwell_run|>
+
+classdef PointSrcM < Source
+	
+	properties (SetAccess = immutable)
+		polarization  % one of Axis.x, Axis.y, Axis.z
+		location  % [x, y, z];
+		Im  % current, e.g., Jz * dx * dy
+	end
+	
+	methods
+		function this = PointSrcM(polarization_axis, location, Im)
+			chkarg(istypesizeof(polarization_axis, 'Axis'), ...
+				'"polarization_axis" should be instance of Axis.');
+			chkarg(istypesizeof(location, 'real', [1, Axis.count]), ...
+				'"location" should be length-%d row vector with real elements.', Axis.count);
+			if nargin < 3  % no I
+				Im = 1.0;
+			end
+			chkarg(istypesizeof(Im, 'complex'), '"I" should be complex.');
+			
+			l = cell(Axis.count, GK.count);
+			for w = Axis.elems
+				if w == polarization_axis
+					l{w, GK.dual} = location(w);
+				else
+					l{w, GK.prim} = location(w);
+				end
+			end
+			point = Point(location);
+			this = this@Source(l, point);
+			this.polarization = polarization_axis;
+			this.location = location;
+			this.Im = Im;
+		end
+				
+		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+			index_cell = cell(1, Axis.count);
+			[q, r, p] = cycle(this.polarization);  % q, r: axes normal to polarization axis p
+			if w_axis == p
+				Jw_patch = [];
+			else  % w_axis == q or r
+				indM = NaN(1, Axis.count);
+				for v = Axis.elems
+					l = this.location(v);
+					if v == p
+						g = GK.dual;
+					else  % v == q or r
+						g = GK.prim;
+					end
+					iv = ismembc2(l, grid3d.l{v,g});
+					if iv == 0
+						[~, iv] = min(abs(grid3d.l{v,g} - l));
+						warning('FDS:srcAssign', ...
+							['%s grid in %s-axis of "grid3d" does not have location %e of this %s; ', ...
+							'closest grid vertex at %e will be taken instead.'], ...
+							char(g), char(v), l, class(this), grid3d.l{v,g}(iv));
+					end
+					indM(v) = iv;
+				end
+				dq = grid3d.dl{q, GK.prim}(indM(q));
+				dr = grid3d.dl{r, GK.prim}(indM(r));
+				I = this.Im / (dq * dr);  % (magnetic dipole) = (electric current) * (area)
+				
+				
+				if w_axis == q
+					% Assign Jq.
+					index_cell{p} = indM(p);
+					index_cell{q} = indM(q);
+					index_cell{r} = [indM(r) - 1, indM(r)];
+					assert(indM(r) - 1 >= 1, ...
+						'PointSrcM should not be at boundary of %s-axis.', char(r));
+					dlp = grid3d.dl{r, GK.dual}(index_cell{p});  % one element
+					dlr = grid3d.dl{r, GK.dual}(index_cell{r});  % two elements
+					dS = dlp .* dlr;
+					Jw_patch = [I, -I] ./ dS;
+				else
+					assert(w_axis == r);
+					% Assign Jr.
+					index_cell{p} = indM(p);
+					index_cell{q} = [indM(q) - 1, indM(q)];
+					index_cell{r} = indM(r);
+					assert(indM(q) - 1 >= 1, ...
+						'PointSrcM should not be at boundary of %s-axis.', char(q));
+					dlp = grid3d.dl{r, GK.dual}(index_cell{p});  % one element
+					dlq = grid3d.dl{q, GK.dual}(index_cell{q});  % two elements
+					dS = dlp .* dlq;
+					Jw_patch = [-I, I] ./ dS;
+					Jw_patch = Jw_patch.';
+				end
+				Jw_patch = ipermute(Jw_patch, int([q r p]));
+			end
+		end		
+	end
+end
+
+##### SOURCE END #####
+--></body></html>

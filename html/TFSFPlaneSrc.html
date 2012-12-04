@@ -1,0 +1,258 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>TFSFPlaneSrc</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="TFSFPlaneSrc.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>TFSFPlaneSrc</h1><!--introduction--><p>Concrete subclass of <a href="Source.html"><tt>Source</tt></a> representing plane wave propagating in a total field box of the total-field/scattered-field (TF/SF) method.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Methods</a></li><li><a href="#4">Note</a></li><li><a href="#5">Example</a></li><li><a href="#6">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>TFSFPlaneSrc</tt> is a source type for the TF/SF method.  It generates a plane wave inside a total field box.  The box should be empty except for scatterers. It supports an arbitrary propagation direction and polarization direction.</p><h2>Construction<a name="2"></a></h2><pre>src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis)
+src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, E0)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>bound</tt>: description of the box in the format of <tt>[xmin xmax; ymin ymax; zmin zmax]</tt></li><li><tt>propagation_axis</tt>: direction of the wavevector of the plane wave.  It can be either one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>, or <tt>[kx ky kz]</tt>.  The latter does not have to be normalized, i.e., <tt>norm([kx ky kz])</tt> does not have to be <tt>1</tt>.</li><li><tt>polarization_axis</tt>: axis of the polarization of the <i>E</i>-field of the plane wave.  It can be either one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>, or <tt>[Ex Ey Ez]</tt>. The latter does not have to be normalized, i.e., <tt>norm([Ex Ey Ez])</tt> does not have to be <tt>1</tt>.</li><li><tt>E0</tt>: complex amplitude of the plane wave measure at the origin.  If not assigned, the default value <tt>E0 = 1</tt> is used.</li></ul></div><h2>Methods<a name="3"></a></h2><div><ul><li><tt>set_bg_material(this, material)</tt>: sets the background material that determines the wavelength of the plane wave.  When <tt>TFSFPlaneSrc</tt> is passed as a SRC paarmeter in <a href="maxwell_run.html"><tt>maxwell_run</tt></a>, the material used as the default material of the simulation domain, i.e., the material assigned in the DOM parameter group, is taken automatically.</li><li><tt>E_cell = create_incidentE(this, osc, grid3d)</tt>: returns <tt>{Ex_array, Ey_array, Ez_array}</tt> that has the <i>E</i>-field of the plane wave inside the total field box region.  When <tt>TFSFPlaneSrc</tt> is used as a SRC parameter in <a href="maxwell_run.html"><tt>maxwell_run</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a> calls this function to construct <tt>J</tt> that creates the <i>E</i>-field inside the total field box.</li></ul></div><h2>Note<a name="4"></a></h2><p><tt>TFSFPlaneSrc</tt> is similar to <a href="PlaneSrc.html"><tt>PlaneSrc</tt></a>, but has a few differences. <tt>PlaneSrc</tt> requires a periodic boundary condition along the transverse direction, so it can be used only for a periodic structure. Therefore, to simulate a plane wave incident on a non-periodic, isolated scatterer, <tt>TFSFPlaneSrc</tt> sohould be used.  <tt>PlaneSrc</tt> supports an arbitrary propagation direction by utilizing the Bloch boundary condition internally, but it does not support an arbitrary polarization direction: the polarization direction is restricted to <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.  On the other hand, <tt>TFSFPlaneSrc</tt> supports a fully arbitrary polarization direction.</p><p>When passed as a SRC parameter of <a href="maxwell_run.html"><tt>maxwell_run</tt></a>, the scatterer objects are described in the SOBJ parameter group and the background objects are described in the OBJ parameter group.  No background objects should be inside the total field box, because <tt>TFSFPlaneSRC</tt> assumes that the total field box is completely filled with the default material of the simulation domain that is described in the DOM parameter group of <a href="maxwell_run.html"><tt>maxwell_run</tt></a>.</p><h2>Example<a name="5"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of TFSFPlaneSrc.</span>
+src =  TFSFPlaneSrc(Axis.y, 0, Axis.z);  <span class="comment">% y = 0 should not be primary grid point</span>
+</pre><pre class="language-matlab"><span class="comment">% Use the constructed src in maxwell_run().</span>
+[E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'SRC'</span>, src);
+</pre><h2>See Also<a name="6"></a></h2><p><a href="PlaneSrc.html"><tt>PlaneSrc</tt></a>, <a href="ModalSrc.html"><tt>ModalSrc</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% TFSFPlaneSrc
+% Concrete subclass of <Source.html |Source|> representing plane wave
+% propagating in a total field box of the total-field/scattered-field (TF/SF)
+% method.
+
+%%% Description
+% |TFSFPlaneSrc| is a source type for the TF/SF method.  It generates a plane
+% wave inside a total field box.  The box should be empty except for scatterers.
+% It supports an arbitrary propagation direction and polarization direction.
+
+%%% Construction
+%  src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis)
+%  src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, E0)
+% 
+% *Input Arguments*
+%
+% * |bound|: description of the box in the format of |[xmin xmax; ymin ymax;
+% zmin zmax]|
+% * |propagation_axis|: direction of the wavevector of the plane wave.  It
+% can be either one of |Axis.x|, |Axis.y|, |Axis.z|, or |[kx ky kz]|.  The
+% latter does not have to be normalized, i.e., |norm([kx ky kz])| does not have
+% to be |1|.
+% * |polarization_axis|: axis of the polarization of the _E_-field of the plane
+% wave.  It can be either one of |Axis.x|, |Axis.y|, |Axis.z|, or |[Ex Ey Ez]|.
+% The latter does not have to be normalized, i.e., |norm([Ex Ey Ez])| does not
+% have to be |1|.
+% * |E0|: complex amplitude of the plane wave measure at the origin.  If not
+% assigned, the default value |E0 = 1| is used.
+
+
+%%% Methods
+% * |set_bg_material(this, material)|: sets the background material that
+% determines the wavelength of the plane wave.  When |TFSFPlaneSrc| is passed as
+% a SRC paarmeter in <maxwell_run.html |maxwell_run|>, the material used as the
+% default material of the simulation domain, i.e., the material assigned in the
+% DOM parameter group, is taken automatically.
+% * |E_cell = create_incidentE(this, osc, grid3d)|: returns |{Ex_array,
+% Ey_array, Ez_array}| that has the _E_-field of the plane wave inside the total
+% field box region.  When |TFSFPlaneSrc| is used as a SRC parameter in
+% <maxwell_run.html |maxwell_run|>, <maxwell_run.html |maxwell_run|> calls this
+% function to construct |J| that creates the _E_-field inside the total field
+% box.
+
+%%% Note
+% |TFSFPlaneSrc| is similar to <PlaneSrc.html |PlaneSrc|>, but has a few
+% differences. |PlaneSrc| requires a periodic boundary condition along the
+% transverse direction, so it can be used only for a periodic structure.
+% Therefore, to simulate a plane wave incident on a non-periodic, isolated
+% scatterer, |TFSFPlaneSrc| sohould be used.  |PlaneSrc| supports an arbitrary
+% propagation direction by utilizing the Bloch boundary condition internally,
+% but it does not support an arbitrary polarization direction: the polarization
+% direction is restricted to |Axis.x|, |Axis.y|, |Axis.z|.  On the other hand,
+% |TFSFPlaneSrc| supports a fully arbitrary polarization direction.
+%
+% When passed as a SRC parameter of <maxwell_run.html |maxwell_run|>, the
+% scatterer objects are described in the SOBJ parameter group and the background
+% objects are described in the OBJ parameter group.  No background objects
+% should be inside the total field box, because |TFSFPlaneSRC| assumes that the
+% total field box is completely filled with the default material of the
+% simulation domain that is described in the DOM parameter group of
+% <maxwell_run.html |maxwell_run|>.
+
+%%% Example
+%   % Create an instance of TFSFPlaneSrc.
+%   src =  TFSFPlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
+%
+%   % Use the constructed src in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+
+%%% See Also
+% <PlaneSrc.html |PlaneSrc|>, <ModalSrc.html |ModalSrc|>, <maxwell_run.html |maxwell_run|>
+
+classdef TFSFPlaneSrc < Source
+		
+	properties (SetAccess = immutable)
+		khat  % [nx, ny, nz]: unit vector along k-vector of plane wave
+		Ehat  % [px, py, pz]: unit vector along polarization direction
+		E0  % complex amplitude of plane wave
+	end
+	
+	properties (SetAccess = private)
+		N_bg  % complex refractive index of background medium
+		grid3d  % Grid3d instance used to set up E and J
+		J  % {Jx_array, Jy_array, Jz_array}: J generating plane wave in TF/SF box
+	end
+	
+	methods
+		function this = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, E0)
+			chkarg(istypesizeof(bound, 'real', [Axis.count, Sign.count]), ...
+				'"bound" should be %d-by-%d array of real elements.', Axis.count, Sign.count);
+			chkarg(istypesizeof(propagation_axis, 'Axis') || istypesizeof(propagation_axis, 'real', [1, Axis.count]), ...
+				'"propagation_axis" should be instance of Axis or length-%d row vector with real elements.', Axis.count);
+			chkarg(istypesizeof(polarization_axis, 'Axis') || istypesizeof(polarization_axis, 'real', [1, Axis.count]), ...
+				'"polarization_axis" should be instance of Axis or length-%d row vector with real elements.', Axis.count);
+			
+			if nargin < 4
+				E0 = 1;
+			end
+			chkarg(istypesizeof(E0, 'complex'), '"E0" should be complex.');
+			
+			l = cell(Axis.count, GK.count);
+			for w = Axis.elems
+				l{w,GK.prim} = bound(w,:);
+			end
+			this = this@Source(l, Box(bound));
+
+			this.khat = propagation_axis;
+			if istypesizeof(propagation_axis, 'Axis')
+				this.khat = zeros(1, Axis.count);
+				this.khat(propagation_axis) = 1;
+			end
+			this.khat = this.khat / norm(this.khat);
+			
+			this.Ehat = polarization_axis;
+			if istypesizeof(polarization_axis, 'Axis')
+				this.Ehat = zeros(1, Axis.count);
+				this.Ehat(polarization_axis) = 1;
+			end
+			this.Ehat = this.Ehat / norm(this.Ehat);
+			
+			chkarg(this.khat * this.Ehat.' < 1e-12, '"normal_axis" and "polarization_axis" should be orthogonal.');
+			
+			this.E0 = E0;
+			this.N_bg = NaN;
+			this.grid3d = Grid3d.empty();
+		end
+		
+		function set_bg_material(this, material)
+			chkarg(istypesizeof(material, 'Material'), '"mat_bg" should be instance of Material.');
+			this.N_bg = sqrt(material.eps * material.mu);
+		end
+		
+		function E_cell = create_incidentE(this, osc, grid3d)
+			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
+			chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
+			this.grid3d = grid3d;
+
+			E_cell = cell(1, Axis.count);
+			l = cell(1, Axis.count);
+			bound = this.shape.bound;
+			ind = cell(1, Axis.count);
+			k = this.khat * 2*pi * this.N_bg / osc.in_L0();  % k*n = (2*pi*n/lambda)
+			for w = Axis.elems
+				E_cell{w} = zeros(grid3d.N);
+				
+				[p, q] = cycle(w);
+				l{p} = grid3d.l{p, GK.dual};
+				l{q} = grid3d.l{q, GK.dual};
+				l{w} = grid3d.l{w, GK.prim};
+				
+				for v = Axis.elems
+					ind_n = find(l{v} >= bound(v,Sign.n), 1, 'first');
+					ind_p = find(l{v} <= bound(v,Sign.p), 1, 'last');
+					ind{v} = ind_n:ind_p;
+				end
+				
+				[X, Y, Z] = ndgrid(l{Axis.x}(ind{Axis.x}), l{Axis.y}(ind{Axis.y}), l{Axis.z}(ind{Axis.z}));
+				E_cell{w}(ind{:}) = (this.E0 * this.Ehat(w)) * exp(1i * (k(Axis.x)*X + k(Axis.y)*Y + k(Axis.z)*Z));
+			end
+		end
+		
+		function setJ(this, J_cell, grid3d)
+			chkarg(isequal(grid3d, this.grid3d), 'same "grid3d" should be used as in create_incidentE().');
+			chkarg(istypesizeof(J_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
+				'"J_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
+				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+			
+			this.J = J_cell;
+		end
+		
+		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+			assert(~isnan(this.N_bg), '"mat_bg" is not set in this TFSFPlaneSrc.');
+			
+			index_cell = cell(1, Axis.count);
+			for w = Axis.elems
+				index_cell{w} = 1:grid3d.N(w);
+			end
+			Jw_patch = this.J{w_axis};
+		end
+	end
+end
+
+##### SOURCE END #####
+--></body></html>

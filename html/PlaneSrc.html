@@ -1,0 +1,257 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>PlaneSrc</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="PlaneSrc.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>PlaneSrc</h1><!--introduction--><p>Concrete subclass of <a href="Source.html"><tt>Source</tt></a> representing a constant electric dipole distribution over an entire plane.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Note</a></li><li><a href="#4">Example</a></li><li><a href="#5">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>PlaneSrc</tt> is to generate a plane wave in a homogeneous medium.  It supports oblique incidence, i.e., emission in the direction different from the normal direction of the plane.</p><h2>Construction<a name="2"></a></h2><pre>src = PlaneSrc(normal_axis, intercept, polarization)
+src = PlaneSrc(normal_axis, intercept, polarization, K)
+src = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: direction normal to the plane.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>intercept</tt>: location of the plane in the <tt>normal_axis</tt> direction.</li><li><tt>polarization</tt>: direction of the dipoles distributed on the plane.  It should be either one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>, or an angle in radian. When it is an instance of <a href="Axis.html"><tt>Axis</tt></a>, it should be orthogonal to <tt>normal_axis</tt>.  When it is an angle in radian, it is in the 2D Cartesian coordinate system normal to <tt>normal_axis</tt>.  For example, if <tt>normal_axis == Axis.y</tt>, then the angle is measured in the zx plane, and therefore it is measured in the counterclockwise direction from the z-axis in the zx plane.</li><li><tt>K</tt>: amplitude of the surface current density that the dipoles drive.</li><li><tt>theta</tt>: oblique incidence angle.  <tt>abs(theta)</tt> should not exceed <tt>pi/2</tt> because the waves are emitted from the both sides of the plane.</li><li><tt>wvlen</tt>: wavelength of the plane wave in the background medium.  It is required to set up the Bloch boundary condition for oblique incidence. <tt>wvlen</tt> is not the vacuum wavelength used in the frequency-domain Maxwell's equations, but the wavelength in the medium where this <tt>PlaneSrc</tt> is located.</li></ul></div><h2>Note<a name="3"></a></h2><p>In the finite-difference grid, <tt>PlaneSrc</tt> excites dipoles at the <i>E</i>-field points.  This poses a condition on <tt>intercept</tt> argument in the constructor: <tt>intercept</tt> should be at a dual grid point in the <tt>normal_axis</tt> direction. Therefore, make sure that <tt>intercept</tt> does not overlap with the locations of the vertices of <a href="Shape.html"><tt>Shape</tt></a> in the <tt>normal_axis</tt> direction; otherwise dynamic grid generation in <a href="moxwell_run.html"><tt>maxwell_run</tt></a> will fail.</p><h2>Example<a name="4"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of PointSrc.</span>
+src =  PlaneSrc(Axis.y, 0, Axis.z);  <span class="comment">% y = 0 should not be primary grid point</span>
+</pre><pre class="language-matlab"><span class="comment">% Use the constructed src in maxwell_run().</span>
+[E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'SRC'</span>, src);
+</pre><h2>See Also<a name="5"></a></h2><p><a href="PointSrc.html"><tt>PointSrc</tt></a>, <a href="PointSrcM.html"><tt>PointSrcM</tt></a>, <a href="TFSFPlaneSrc.html"><tt>TFSFPlaneSrc</tt></a>, <a href="ModalSrc.html"><tt>ModalSrc</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% PlaneSrc
+% Concrete subclass of <Source.html |Source|> representing a constant electric
+% dipole distribution over an entire plane.
+
+%%% Description
+% |PlaneSrc| is to generate a plane wave in a homogeneous medium.  It supports
+% oblique incidence, i.e., emission in the direction different from the normal
+% direction of the plane.
+
+%%% Construction
+%  src = PlaneSrc(normal_axis, intercept, polarization)
+%  src = PlaneSrc(normal_axis, intercept, polarization, K)
+%  src = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)
+% 
+% *Input Arguments*
+%
+% * |normal_axis|: direction normal to the plane.  It should be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |intercept|: location of the plane in the |normal_axis| direction.
+% * |polarization|: direction of the dipoles distributed on the plane.  It
+% should be either one of |Axis.x|, |Axis.y|, |Axis.z|, or an angle in radian.
+% When it is an instance of <Axis.html |Axis|>, it should be orthogonal to
+% |normal_axis|.  When it is an angle in radian, it is in the 2D Cartesian
+% coordinate system normal to |normal_axis|.  For example, if |normal_axis ==
+% Axis.y|, then the angle is measured in the zx plane, and therefore it is
+% measured in the counterclockwise direction from the z-axis in the zx plane.
+% * |K|: amplitude of the surface current density that the dipoles drive.
+% * |theta|: oblique incidence angle.  |abs(theta)| should not exceed |pi/2|
+% because the waves are emitted from the both sides of the plane.
+% * |wvlen|: wavelength of the plane wave in the background medium.  It is
+% required to set up the Bloch boundary condition for oblique incidence.
+% |wvlen| is not the vacuum wavelength used in the frequency-domain Maxwell's
+% equations, but the wavelength in the medium where this |PlaneSrc| is located.
+
+%%% Note
+% In the finite-difference grid, |PlaneSrc| excites dipoles at the _E_-field
+% points.  This poses a condition on |intercept| argument in the constructor:
+% |intercept| should be at a dual grid point in the |normal_axis| direction.
+% Therefore, make sure that |intercept| does not overlap with the locations of
+% the vertices of <Shape.html |Shape|> in the |normal_axis| direction; otherwise
+% dynamic grid generation in <moxwell_run.html |maxwell_run|> will fail.
+
+%%% Example
+%   % Create an instance of PointSrc.
+%   src =  PlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
+%
+%   % Use the constructed src in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+
+%%% See Also
+% <PointSrc.html |PointSrc|>, <PointSrcM.html |PointSrcM|>, <TFSFPlaneSrc.html
+% |TFSFPlaneSrc|>, <ModalSrc.html |ModalSrc|>, <maxwell_run.html |maxwell_run|>
+
+classdef PlaneSrc < Source
+	
+	properties (SetAccess = immutable)
+		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
+		intercept  % intercept between plane and normal axis
+		phi  % angle of polarization with respect to first Cartesian direction in this plane
+		theta  % emission angle in the plane normal to polarization: (+) toward normal x polarization, (-) toward -normal x polarization
+		kBloch  % Bloch k-vector [kx, ky, kz]
+		K  % surface current density
+	end
+	
+	methods
+		function this = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)
+			chkarg(istypesizeof(normal_axis, 'Axis'), ...
+				'"normal_axis" should be instance of Axis.');
+			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
+			
+			chkarg(istypesizeof(polarization, 'Axis') || istypesizeof(polarization, 'real'), ...
+				'"polarization" should be instance of Axis or angle in radian.');
+			if istypesizeof(polarization, 'Axis')
+				chkarg(polarization ~= normal_axis, '"polarization" should be orthogonal to "normal_axis".');
+				[p, q] = cycle(normal_axis);
+				if polarization == p
+					polarization = 0;
+				else
+					assert(polarization == q);
+					polarization = pi/2;
+				end
+			end
+			
+			if nargin < 4  % no K
+				K = 1.0;
+			end
+			chkarg(istypesizeof(K, 'complex'), '"K" should be complex.');
+
+			if nargin < 6  % no wvlen
+				assert(nargin < 5);  % no theta
+				theta = 0;
+				wvlen = Inf;
+			end
+			chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
+				'"theta" should be polar angle in radian between -pi/2 and pi/2.');
+			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
+						
+			l = cell(Axis.count, GK.count);
+			l{normal_axis, GK.dual} = intercept;
+			plane = Plane(normal_axis, intercept);
+			this = this@Source(l, plane);
+			
+			this.normal_axis = normal_axis;
+			this.intercept = intercept;
+			this.phi = polarization;
+			this.theta = theta;
+			this.K = K;
+
+			this.kBloch = [0 0 0];
+			if this.theta ~= 0
+				[p, q] = cycle(this.normal_axis);
+				kt = (2*pi/wvlen) * sin(this.theta);  % k tangential to plane
+				kp = kt * cos(this.phi + pi/2);
+				kq = kt * sin(this.phi + pi/2);
+				this.kBloch(p) = kp;
+				this.kBloch(q) = kq;
+			end
+		end
+		
+		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+			grid3d.set_kBloch(this);
+			index_cell = cell(1, Axis.count);
+			if w_axis == this.normal_axis
+				Jw_patch = [];
+			else
+				n = this.normal_axis;
+				w = w_axis;
+				v = setdiff(Axis.elems, [n, w]);
+				
+				g = GK.dual;
+				ind_n = ismembc2(this.intercept, grid3d.l{n,g});
+				if ind_n == 0
+					[~, ind_n] = min(abs(grid3d.l{n,g} - this.intercept));
+					warning('FDS:srcAssign', ...
+						['%s grid in %s-axis of "grid3d" does not have location %e of this %s; ', ...
+						'closest grid vertex at %e will be taken instead.'], ...
+						char(g), char(n), this.intercept, class(this), grid3d.l{n,g}(ind_n));
+				end
+
+				dn = grid3d.dl{n,g}(ind_n);
+				J = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
+				
+				if w == cycle(this.normal_axis)
+					Jw = J * cos(this.phi);
+				else
+					Jw = J * sin(this.phi);
+				end
+				
+				if Jw == 0
+					Jw_patch = [];
+				else
+					%  Set Jw_patch.
+					lw = grid3d.l{w, GK.prim};
+					lv = grid3d.l{v, GK.dual};
+					kw = this.kBloch(w);
+					kv = this.kBloch(v);
+
+% 					if w < v
+% 						Jw_patch = Jw .* (exp(-1i * (kw .* lw)).' * exp(-1i * (kv .* lv)));
+% 					else
+% 						assert(w > v);
+% 						Jw_patch = Jw .* (exp(-1i * (kv .* lv)).' * exp(-1i * (kw .* lw)));
+% 					end
+
+					Jw_patch = Jw .* (exp(-1i * (kw .* lw)).' * exp(-1i * (kv .* lv)));
+					Jw_patch = ipermute(Jw_patch, int([w v n]));
+
+					% Set index_cell.
+					index_cell{n} = ind_n;
+					Nw = grid3d.N(w);
+					Nv = grid3d.N(v);
+					index_cell{w} = 1:Nw;
+					index_cell{v} = 1:Nv;
+				end
+			end
+		end		
+	end
+end
+
+
+##### SOURCE END #####
+--></body></html>
