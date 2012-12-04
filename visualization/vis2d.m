@@ -45,6 +45,9 @@
 % The default values is |true| when the number of objects is small (<= 20), but
 % |false| when the number of objects is large (> 20).  To show only sources
 % without objects, provide an empty |obj_array| in |vis2d()|.
+% * |opts.phase|: additional phase angle |phi|.  The field is visualized with an
+% additional factor |exp(i*phi)| multiplied.  Not useful if |opts.withabs =
+% true|.
 
 %%% Example
 %   [E, H, obj_array, src_array] = maxwell_run({ARGUMENTS});

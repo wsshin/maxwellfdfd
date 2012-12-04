@@ -38,6 +38,9 @@
 % The default values is |true| when the number of objects is small (<= 20), but
 % |false| when the number of objects is large (> 20).  To show only sources
 % without objects, provide an empty |obj_array| in |visall()|.
+% * |opts.phase|: additional phase angle |phi|.  The field is visualized with an
+% additional factor |exp(i*phi)| multiplied.  Not useful if |opts.withabs =
+% true|.
 
 %%% Note
 % When |opts.isopaque = false| is used, the 3D view shows the slices nicely with
@@ -109,6 +112,9 @@ end
 if no_opts || ~isfield(opts, 'withobjsrc')
 	opts.withobjsrc = true;
 end
+if no_opts || ~isfield(opts, 'phase')
+	opts.phase = 0;
+end
 
 tv = TotalView3d();
 tv.scalar3d = scalar3d;
@@ -122,5 +128,6 @@ tv.cscale = opts.cscale;
 tv.cmax = opts.cmax;
 tv.isopaque = opts.isopaque;
 tv.withobjsrc = opts.withobjsrc;
+tv.phase_angle = opts.phase;
 
 tv.show();

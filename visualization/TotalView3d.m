@@ -22,6 +22,7 @@ classdef TotalView3d < handle
 		withgrid
 		withinterp
 		withpml
+		phase_angle
 		withabs
 		cscale
 		cmax
@@ -121,6 +122,18 @@ classdef TotalView3d < handle
 			this.painter3d.withpml = truth;
 			for w = Axis.elems
 				this.painter2d(w).withpml = truth;
+			end
+		end
+		
+		function phase_angle = get.phase_angle(this)
+			phase_angle = this.painter3d.phase_angle;
+		end
+		
+		function set.phase_angle(this, phase_angle)
+			chkarg(istypesizeof(phase_angle, 'real'), '"phase_angle" should be real.');
+			this.painter3d.phase_angle = phase_angle;
+			for w = Axis.elems
+				this.painter2d(w).phase_angle = phase_angle;
 			end
 		end
 		

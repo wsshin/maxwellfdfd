@@ -213,7 +213,7 @@ classdef Painter2d < handle
 					crange = [-this.cmax, this.cmax];
 				end
 				caxis(axes_handle, crange);
-				colormap(axes_handle, 'jet');
+				colormap(axes_handle, b2r);
 			end
 		end
 
@@ -333,11 +333,7 @@ classdef Painter2d < handle
 					shape = obj.shape;
 				else
 					src = this.src_array(i-nobj);
-					if this.withabs
-						color = 'c';  % cyan
-					else
-						color = 'm';  % magenta
-					end
+					color = 'g';  % green
 					shape = src.shape;
 				end
 				

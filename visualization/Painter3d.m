@@ -200,7 +200,7 @@ classdef Painter3d < handle
 					crange = [-this.cmax, this.cmax];
 				end
 				caxis(axes_handle, crange);
-				colormap(axes_handle, 'jet');
+				colormap(axes_handle, b2r);
 			end
 		end
 		

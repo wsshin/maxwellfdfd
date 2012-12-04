@@ -25,7 +25,7 @@ film1_Ag = Object(film1, Ag);
 film2 = Box([25, 700; -25, 25; -200, 1700], 20);
 film2_Ag = Object(film2, Ag);
 
-src = DistributedSrc(Axis.z, 200, 2.0);
+src = ModalSrc(Axis.z, 200, 2.0);
 
 
 %% Solve the system.
