@@ -38,19 +38,18 @@
 % |intercept| should be at a dual grid point in the |normal_axis| direction.
 % Therefore, make sure that |intercept| does not overlap with the locations of
 % the vertices of <Shape.html |Shape|> in the |normal_axis| direction; otherwise
-% dynamic grid generation will fail.
+% dynamic grid generation in <moxwell_run.html |maxwell_run|> will fail.
 
 %%% Example
-%   % Set an instance of PointSrc.
+%   % Create an instance of PointSrc.
 %   src =  PlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
 %
-%   % Use the constructed PointSrc in maxwell_run().
+%   % Use the constructed src in maxwell_run().
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
 
 %%% See Also
-% <PointSrc.html |PointSrc|>, <PointSrcM.html |PointSrcM|>
-
-
+% <PointSrc.html |PointSrc|>, <PointSrcM.html |PointSrcM|>, <TFSFPlaneSrc.html
+% |TFSFPlaneSrc|>, <ModalSrc.html |ModalSrc|>, <maxwell_run.html |maxwell_run|>
 
 classdef PlaneSrc < Source
 	

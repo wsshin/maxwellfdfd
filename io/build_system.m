@@ -82,6 +82,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	obj_dom = Object.empty();
 	shape_array = Shape.empty();
 	sshape_array = Shape.empty();
+	mat_array = Material.empty();
 	obj_array = Object.empty();
 	sobj_array = Object.empty();
 	src_array = [];
@@ -136,6 +137,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 				end
 				obj_dom = Object(domain, mat_dom);
 			end
+			mat_array = [mat_array(1:end), obj_dom.material];
 	
 			% Set up boundary conditions and PML thicknesses.
 			iarg = iarg + 1; bc = varargin{iarg};
@@ -171,6 +173,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 						obj_array_temp = [obj_array_temp(1:end), objs];
 						for obj = objs
 							shape_array_temp = [shape_array_temp(1:end), obj.shape];
+							mat_array = [mat_array(1:end), obj.material];
 						end
 						iarg = iarg + 1; arg = varargin{iarg};
 					else
@@ -180,6 +183,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 							assert(istypesizeof(arg, 'Material'));
 							mat = arg;
 						end
+						mat_array = [mat_array(1:end), mat];
 
 						iarg = iarg + 1; arg = varargin{iarg};
 						while istypesizeof(arg, 'Shape', [1 0])
@@ -225,8 +229,14 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	chkarg(~isempty(obj_dom), 'DOM parameter groups should be set.');
 	obj_array = [obj_dom, obj_array];
 	
-	chkarg(iarg <= narglim, 'more arguments than expected.');
+	chkarg(iarg <= narglim, 'more arguments than expected.');	
 	pm.mark('initial setup');
+	
+	mat_array = unique(mat_array);
+	fprintf('materials used:\n');
+	for mat = mat_array
+		fprintf('\t%s: eps = %s, mu = %s\n', mat.name, num2str(mat.eps), num2str(mat.mu));
+	end
 
 	% Generate a grid.
 	[lprim, Npml] = generate_lprim3d(domain, Lpml, [shape_array, sshape_array], src_array, withuniformgrid);
@@ -253,9 +263,9 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	if ~isTFSF
 		% Solve for modes.
 		for src = src_array
-			if istypesizeof(src, 'DistributedSrc')
+			if istypesizeof(src, 'ModalSrc')
 				distsrc = src;
-				prep_distsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, distsrc);
+				prep_modalsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, distsrc);
 
 				neff = distsrc.neff;
 				beta = 2*pi*neff / osc.in_L0();

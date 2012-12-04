@@ -1,6 +1,47 @@
+%% RectSrc
+% Concrete subclass of <Source.html |Source|> representing a constant electric
+% dipole distribution over a rectangular patch.
+
+%%% Description
+% |RectSrc| is similar to <PlaneSrc.html |PlaneSrc|>, but it places constant
+% electric dipoles on a rectangular patch rather than an entire plane.
+
+%%% Construction
+%  src = RectSrc(normal_axis, intercept, rect, polarization)
+%  src = RectSrc(normal_axis, intercept, rect, polarization, K)
+% 
+% *Input Arguments*
+%
+% * |normal_axis|: direction normal to the rectangular patch.  It should be one
+% of |Axis.x|, |Axis.y|, |Axis.z|.
+% * |intercept|: location of the rectangular patch in the |normal_axis|
+% direction.
+% * |rect|: description of the rectangular patch in the format of |[hmin hmax;
+% vmin vmax]|.  If |normal_axiz == Axis.y|, then it is |[zmin zmax; xmin xmax]|.
+% * |polarization|: direction of the dipoles distributed on the rectangular
+% patch.  It should be one of |Axis.x|, |Axis.y|, |Axis.z| that is orthogonal to
+% |normal_axis|.
+% * |K|: amplitude of the surface current density that the dipoles drive.
+
+%%% Note
+% In the finite-difference grid, |RectSrc| excites dipoles at the _E_-field
+% points.  This poses a condition on |intercept| argument in the constructor:
+% |intercept| should be at a dual grid point in the |normal_axis| direction.
+% Therefore, make sure that |intercept| does not overlap with the locations of
+% the vertices of <Shape.html |Shape|> in the |normal_axis| direction; otherwise
+% dynamic grid generation in <moxwell_run.html |maxwell_run|> will fail.
+
+%%% Example
+%   % Create an instance of PointSrc.
+%   src =  RectSrc(Axis.y, -2000, [0 10; 20 180], Axis.x);  % y = -2000 should not be primary grid point
+%
+%   % Use the constructed src in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+
+%%% See Also
+% <PlaneSrc.html |PlaneSrc|>, <maxwell_run.html |maxwell_run|>
+
 classdef RectSrc < Source
-	% RectSrc is a class representing a constant electric dipole distribution
-	% over a rectangular patch.
 	
 	properties (SetAccess = immutable)
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z

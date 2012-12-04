@@ -247,7 +247,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 		% Visualize modes.
 		is_distsrc = false;
 		for src = src_array
-			if istypesizeof(src, 'DistributedSrc')
+			if istypesizeof(src, 'ModalSrc')
 				is_distsrc = true;
 				distsrc = src;
 				[h, v, n] = cycle(distsrc.normal_axis);

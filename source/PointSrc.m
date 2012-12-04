@@ -25,17 +25,19 @@
 % polarization should be at a primary grid point.  Therefore, make sure that the
 % location of the dipole does not overlap with the locations of the vertices of
 % <Shape.html |Shape|> in the directions normal to the dipole polarization;
-% otherwise dynamic grid generation will fail.
+% otherwise dynamic grid generation in <moxwell_run.html |maxwell_run|> will
+% fail.
 
 %%% Example
-%   % Set an instance of PointSrc.
+%   % Create an instance of PointSrc.
 %   src = PointSrc(Axis.z, [0 0 0]);  % z = 0 should not be dual grid point
 %
-%   % Use the constructed PointSrc in maxwell_run().
+%   % Use the constructed src in maxwell_run().
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
 
 %%% See Also
-% <PointSrcM.html |PointSrcM|>, <PlaneSrc.html |PlaneSrc|>
+% <PointSrcM.html |PointSrcM|>, <PlaneSrc.html |PlaneSrc|>, <maxwell_run.html
+% |maxwell_run|>
 
 classdef PointSrc < Source
 	

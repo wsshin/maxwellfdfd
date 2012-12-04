@@ -1,5 +1,39 @@
+%% Material
+% Class representing an electromagnetic material.
+
+%%% Description
+% |Material| represents an electromagnetic material with electric permittivity
+% and magnetic permeability.  Users should provide the name and color of the
+% material in the constructor
+
+%%% Construction
+%  mat = Material(name, color, eps)
+%  mat = Material(name, color, eps, mu)
+% 
+% *Input Arguments*
+%
+% * |name|: name of the material.  Used to distinguish materials and label them
+% in figures.
+% * |color|: color of the material.  Used to visualize the material in figures.
+% It can be MATLAB's reserved color code characters (e.g., |'r'| for red, |'k'|
+% for black) or an RGB code |[r g b]| where |r|, |g|, |b| are real numbers
+% between 0 and 1.  Use |color = 'none'| to hide the objects made of this
+% material in figures.
+% * |eps|: electric permittivity of the material.
+% * |mu|: magnetic permeability of the material.  If not assigned, the default
+% value |mu = 1| is used.
+
+%%% Example
+%   % Create an instance of Material.
+%   vacuum =  Material('vacuum', 'none', 1.0);
+%
+%   % Use the constructed material in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', vacuum, Box([0 100; 0 50; 0 20]), {REMAINING ARGUMENTS});
+
+%%% See Also
+% <maxwell_run.html |maxwell_run|>
+
 classdef Material
-	% Material is a class for a material.
 	
 	properties (SetAccess = immutable)
 		name
@@ -48,6 +82,32 @@ classdef Material
 			k = interp1(param.eV, param.k, eV);
 			epsilon = (n - 1i * k)^2;
 			material =  Material(name, color, epsilon);
+		end
+	end
+	
+	methods
+		function [sorted, ind] = sort(this, varargin)
+			% varargin is the optional parameters (such as 'descend') of sort().
+			n = length(this);
+			names = cell(1, n);
+			for i = 1:n
+				names{i} = this(i).name;
+			end
+			[~, ind] = sort(names, varargin{:}); 
+			sorted = this(ind);
+		end
+		
+		function truth = ne(this, another)
+			chkarg(all(size(this) == size(another)), '"this" and "another" should have same size.');
+			dims = size(this);
+			n = numel(this);
+			this = this(:);
+			another = another(:);
+			truth = true(n,1);
+			for i = 1:n
+				truth(i)= ~isequal(this(i).name, another(i).name);
+			end
+			truth = reshape(truth, dims);
 		end
 	end
 end

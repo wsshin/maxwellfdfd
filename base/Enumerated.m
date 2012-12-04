@@ -105,7 +105,7 @@ classdef Enumerated
 			ind = int(this) - 1;
 		end
 		
-		function [sorted,ind] = sort(this, varargin)
+		function [sorted, ind] = sort(this, varargin)
 			n = length(this);
 			nums = NaN(1, n);
 			for i = 1:n

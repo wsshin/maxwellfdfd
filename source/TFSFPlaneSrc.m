@@ -1,5 +1,76 @@
+%% TFSFPlaneSrc
+% Concrete subclass of <Source.html |Source|> representing plane wave
+% propagating in a total field box of the total-field/scattered-field (TF/SF)
+% method.
+
+%%% Description
+% |TFSFPlaneSrc| is a source type for the TF/SF method.  It generates a plane
+% wave inside a total field box.  The box should be empty except for scatterers.
+% It supports an arbitrary propagation direction and polarization direction.
+
+%%% Construction
+%  src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis)
+%  src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, E0)
+% 
+% *Input Arguments*
+%
+% * |bound|: description of the box in the format of |[xmin xmax; ymin ymax;
+% zmin zmax]|
+% * |propagation_axis|: direction of the wavevector of the plane wave.  It
+% can be either one of |Axis.x|, |Axis.y|, |Axis.z|, or |[kx ky kz]|.  The
+% latter does not have to be normalized, i.e., |norm([kx ky kz])| does not have
+% to be |1|.
+% * |polarization_axis|: axis of the polarization of the _E_-field of the plane
+% wave.  It can be either one of |Axis.x|, |Axis.y|, |Axis.z|, or |[Ex Ey Ez]|.
+% The latter does not have to be normalized, i.e., |norm([Ex Ey Ez])| does not
+% have to be |1|.
+% * |E0|: complex amplitude of the plane wave measure at the origin.  If not
+% assigned, the default value |E0 = 1| is used.
+
+
+%%% Methods
+% * |set_bg_material(this, material)|: sets the background material that
+% determines the wavelength of the plane wave.  When |TFSFPlaneSrc| is passed as
+% a SRC paarmeter in <maxwell_run.html |maxwell_run|>, the material used as the
+% default material of the simulation domain, i.e., the material assigned in the
+% DOM parameter group, is taken automatically.
+% * |E_cell = create_incidentE(this, osc, grid3d)|: returns |{Ex_array,
+% Ey_array, Ez_array}| that has the _E_-field of the plane wave inside the total
+% field box region.  When |TFSFPlaneSrc| is used as a SRC parameter in
+% <maxwell_run.html |maxwell_run|>, <maxwell_run.html |maxwell_run|> calls this
+% function to construct |J| that creates the _E_-field inside the total field
+% box.
+
+%%% Note
+% |TFSFPlaneSrc| is similar to <PlaneSrc.html |PlaneSrc|>, but has a few
+% differences. |PlaneSrc| requires a periodic boundary condition along the
+% transverse direction, so it can be used only for a periodic structure.
+% Therefore, to simulate a plane wave incident on a non-periodic, isolated
+% scatterer, |TFSFPlaneSrc| sohould be used.  |PlaneSrc| supports an arbitrary
+% propagation direction by utilizing the Bloch boundary condition internally,
+% but it does not support an arbitrary polarization direction: the polarization
+% direction is restricted to |Axis.x|, |Axis.y|, |Axis.z|.  On the other hand,
+% |TFSFPlaneSrc| supports a fully arbitrary polarization direction.
+%
+% When passed as a SRC parameter of <maxwell_run.html |maxwell_run|>, the
+% scatterer objects are described in the SOBJ parameter group and the background
+% objects are described in the OBJ parameter group.  No background objects
+% should be inside the total field box, because |TFSFPlaneSRC| assumes that the
+% total field box is completely filled with the default material of the
+% simulation domain that is described in the DOM parameter group of
+% <maxwell_run.html |maxwell_run|>.
+
+%%% Example
+%   % Create an instance of TFSFPlaneSrc.
+%   src =  TFSFPlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
+%
+%   % Use the constructed src in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+
+%%% See Also
+% <PlaneSrc.html |PlaneSrc|>, <ModalSrc.html |ModalSrc|>, <maxwell_run.html |maxwell_run|>
+
 classdef TFSFPlaneSrc < Source
-	% TFSFSrc is a source used for the TF/SF method.
 		
 	properties (SetAccess = immutable)
 		khat  % [nx, ny, nz]: unit vector along k-vector of plane wave
@@ -25,6 +96,7 @@ classdef TFSFPlaneSrc < Source
 			if nargin < 4
 				E0 = 1;
 			end
+			chkarg(istypesizeof(E0, 'complex'), '"E0" should be complex.');
 			
 			l = cell(Axis.count, GK.count);
 			for w = Axis.elems
