@@ -1,0 +1,178 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>powerflux_patch</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="powerflux_patch.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>powerflux_patch</h1><!--introduction--><p>Calculate the power flux through a rectangular patch.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Parameters</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>power = powerflux_patch(E_cell, H_cell, normal_axis, intercept)
+power = powerflux_patch(E_cell, H_cell, normal_axis, intercept, rect)</pre><h2>Parameters<a name="2"></a></h2><p><b>Input</b></p><div><ul><li><tt>E_cell</tt>: <i>E</i>-field in the format of <tt>[Ex, Ey, Ez]</tt>, where each <tt>Ew</tt> is an instance of <a href="Scalar3d.html"><tt>Scalar3d</tt></a>.</li><li><tt>H_cell</tt>: <i>H</i>-field in the format of <tt>[Hx, Hy, Hz]</tt>, where each <tt>Hw</tt> is an instance of <a href="Scalar3d.html"><tt>Scalar3d</tt></a>.</li><li><tt>normal_axis</tt>: axis normal to a rectangular patch.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>intercept</tt>: location of the rectangular patch in the <tt>normal_axis</tt> direction.</li><li><tt>rect</tt>: bounds of the rectangle in the plane.  For <tt>normal_axis = Axis.y</tt>, it is in the format of <tt>[zmin zmax; xmin xmax]</tt>.  If not assigned, the entire cross section normal to <tt>normal_axis</tt> is used.</li></ul></div><p><b>Output</b></p><div><ul><li><tt>power</tt>: calculated power flux through the rectangular patch.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab">[E, H] = maxwell_run({ARGUMENTS});
+power = powerflux_patch(E, H, Axis.z, 0, [0 200; 0 100]);
+</pre><h2>See Also<a name="4"></a></h2><p><a href="powerflux_box.html"><tt>powerflux_box</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% powerflux_patch
+% Calculate the power flux through a rectangular patch.
+
+%%% Syntax
+%  power = powerflux_patch(E_cell, H_cell, normal_axis, intercept)
+%  power = powerflux_patch(E_cell, H_cell, normal_axis, intercept, rect)
+
+%%% Parameters
+% *Input*
+%
+% * |E_cell|: _E_-field in the format of |[Ex, Ey, Ez]|, where each |Ew| is an
+% instance of <Scalar3d.html |Scalar3d|>.
+% * |H_cell|: _H_-field in the format of |[Hx, Hy, Hz]|, where each |Hw| is an
+% instance of <Scalar3d.html |Scalar3d|>.
+% * |normal_axis|: axis normal to a rectangular patch.  It should be one of
+% |Axis.x|, |Axis.y|, |Axis.z|.
+% * |intercept|: location of the rectangular patch in the |normal_axis|
+% direction.
+% * |rect|: bounds of the rectangle in the plane.  For |normal_axis = Axis.y|,
+% it is in the format of |[zmin zmax; xmin xmax]|.  If not assigned, the entire
+% cross section normal to |normal_axis| is used.
+%
+% *Output*
+% 
+% * |power|: calculated power flux through the rectangular patch.
+
+%%% Example
+%   [E, H] = maxwell_run({ARGUMENTS});
+%   power = powerflux_patch(E, H, Axis.z, 0, [0 200; 0 100]);
+
+%%% See Also
+% <powerflux_box.html |powerflux_box|>, <maxwell_run.html |maxwell_run|>
+
+function power = powerflux_patch(E_cell, H_cell, normal_axis, intercept, rect)
+
+chkarg(istypesizeof(E_cell, 'Scalar3dcell', [1, Axis.count]), ...
+	'"E_cell" should be length-%d row cell array with Scalar3d as elements.', Axis.count)
+chkarg(istypesizeof(H_cell, 'Scalar3dcell', [1, Axis.count]), ...
+	'"H_cell" should be length-%d row cell array with Scalar3d as elements.', Axis.count)
+chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
+chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real');
+
+[h, v, n] = cycle(normal_axis);
+
+Sn = poynting(n, E_cell{h}, E_cell{v}, H_cell{h}, H_cell{v}, n, intercept);
+
+if nargin < 5  % no rect
+	power = flux_patch(Sn);
+else
+	power = flux_patch(Sn, rect);
+end
+
+
+% Eh2d = slice_scalar3d(E_cell{h}, n, intercept);
+% Ev2d = slice_scalar3d(E_cell{v}, n, intercept);
+% Hh2d = slice_scalar3d(H_cell{h}, n, intercept);
+% Hv2d = slice_scalar3d(H_cell{v}, n, intercept);
+% 
+% grid2d = Eh2d.grid2d;
+% 
+% hbound = rect(Dir.h,:);
+% vbound = rect(Dir.v,:);
+% chkarg(issorted(hbound) && issorted(vbound), 'each row of "rect" should be sorted in ascending order.');
+% 
+% chkarg(grid2d.contains(rect.'), '"rect" should be contained in grid.');
+% 
+% hall = grid2d.lall{Dir.h, GK.prim};
+% vall = grid2d.lall{Dir.v, GK.prim};
+% [Xh, Yv] = meshgrid(hall, vall);
+% 
+% in = find(hall > hbound(Sign.n), 1, 'first');
+% ip = find(hall < hbound(Sign.p), 1, 'last');
+% jn = find(vall > vbound(Sign.n), 1, 'first');
+% jp = find(vall < vbound(Sign.p), 1, 'last');
+% 
+% hi = [hbound(Sign.n), hall(in:ip), hbound(Sign.p)];
+% vi = [vbound(Sign.n), vall(jn:jp), vbound(Sign.p)];
+% [XIh, YIv] = meshgrid(hi, vi);
+% 
+% Eh = Eh2d.array;
+% Eh = permute(Eh, int([Dir.v, Dir.h]));
+% Eh = interp2(Xh, Yv, Eh, XIh, YIv);
+% Eh = ipermute(Eh, int([Dir.v, Dir.h]));
+% 
+% Ev = Ev2d.array;
+% Ev = permute(Ev, int([Dir.v, Dir.h]));
+% Ev = interp2(Xh, Yv, Ev, XIh, YIv);
+% Ev = ipermute(Ev, int([Dir.v, Dir.h]));
+% 
+% Hh = Hh2d.array;
+% Hh = permute(Hh, int([Dir.v, Dir.h]));
+% Hh = interp2(Xh, Yv, Hh, XIh, YIv);
+% Hh = ipermute(Hh, int([Dir.v, Dir.h]));
+% 
+% Hv = Hv2d.array;
+% Hv = permute(Hv, int([Dir.v, Dir.h]));
+% Hv = interp2(Xh, Yv, Hv, XIh, YIv);
+% Hv = ipermute(Hv, int([Dir.v, Dir.h]));
+% 
+% Sn = real(Eh .* conj(Hv) - Ev .* conj(Hh)) / 2;
+% 
+% power = trapz(hi, Sn, int(Dir.h));  % integrate along horizontal direction
+% power = trapz(vi, power);  % integrate along vertical direction
+
+##### SOURCE END #####
+--></body></html>

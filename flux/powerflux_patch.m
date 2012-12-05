@@ -1,3 +1,36 @@
+%% powerflux_patch
+% Calculate the power flux through a rectangular patch.
+
+%%% Syntax
+%  power = powerflux_patch(E_cell, H_cell, normal_axis, intercept)
+%  power = powerflux_patch(E_cell, H_cell, normal_axis, intercept, rect)
+
+%%% Parameters
+% *Input*
+%
+% * |E_cell|: _E_-field in the format of |[Ex, Ey, Ez]|, where each |Ew| is an
+% instance of <Scalar3d.html |Scalar3d|>.
+% * |H_cell|: _H_-field in the format of |[Hx, Hy, Hz]|, where each |Hw| is an
+% instance of <Scalar3d.html |Scalar3d|>.
+% * |normal_axis|: axis normal to a rectangular patch.  It should be one of
+% |Axis.x|, |Axis.y|, |Axis.z|.
+% * |intercept|: location of the rectangular patch in the |normal_axis|
+% direction.
+% * |rect|: bounds of the rectangle in the plane.  For |normal_axis = Axis.y|,
+% it is in the format of |[zmin zmax; xmin xmax]|.  If not assigned, the entire
+% cross section normal to |normal_axis| is used.
+%
+% *Output*
+% 
+% * |power|: calculated power flux through the rectangular patch.
+
+%%% Example
+%   [E, H] = maxwell_run({ARGUMENTS});
+%   power = powerflux_patch(E, H, Axis.z, 0, [0 200; 0 100]);
+
+%%% See Also
+% <powerflux_box.html |powerflux_box|>, <maxwell_run.html |maxwell_run|>
+
 function power = powerflux_patch(E_cell, H_cell, normal_axis, intercept, rect)
 
 chkarg(istypesizeof(E_cell, 'Scalar3dcell', [1, Axis.count]), ...
@@ -17,7 +50,7 @@ else
 	power = flux_patch(Sn, rect);
 end
 
-%%%
+
 % Eh2d = slice_scalar3d(E_cell{h}, n, intercept);
 % Ev2d = slice_scalar3d(E_cell{v}, n, intercept);
 % Hh2d = slice_scalar3d(H_cell{h}, n, intercept);

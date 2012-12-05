@@ -1,5 +1,33 @@
+%% Box
+% Concrete subclass of <Shape.html |Shape|> representing a 3D box.
+
+%%% Description
+% |Box| is the most basic shape.  Its sides are aligned with the axes of the
+% Cartesian coordinate system.
+
+%%% Construction
+%  shape = Box(bound)
+%  shape = Box(bound, dl_max)
+% 
+% *Input Arguments*
+%
+% * |bound|: bounds of the box in the format of |[xmin xmax; ymin ymax; zmin
+% zmax]|.
+% * |dl_max|: maximum grid size allowed in the box.  It can be either |[dx dy
+% dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% |dl_max = Inf| is used.
+
+%%% Example
+%   % Create an instance of Box.
+%   shape = Box([-100 100; -50 50; 0 20]);
+%
+%   % Use the constructed shape in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
+
+%%% See Also
+% <Shape.html |Shape|>, <maxwell_run.html |maxwell_run|>
+
 classdef Box < Shape
-	% Box is a Shape for a box.
 		
 	methods
         function this = Box(bound, dl_max)

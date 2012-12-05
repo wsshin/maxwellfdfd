@@ -1,3 +1,44 @@
+%% periodize_shape
+% Constructs a periodic array of a given shape.
+
+%%% Syntax
+%  shape_array = periodize_shape(shape, primitive_vec_cell, boundshape)
+
+%%% Parameters
+% *Input*
+%
+% * |shape|: instance of <Shape.html |Shape|> to be repeated.
+% * |primitive_vec_cell|: three primitive lattice vectors in the format of |{[x1
+% y1 z1], [x2 y2 z2], [x3 y3 z3]}|.  
+% * |boundshape|: shape that contains the centers of the translated shapes.  It
+% is used to control the overall extent of the periodic array.
+%
+% *Output*
+%
+% * |shape_array|: array of instances of <Shape.html |Shape|>.
+
+%%% Example
+%   % Create a shape for a slab.
+%   t = 500;  % thickness
+%   slab = Box([-5000 5000; -3000 3000; 0 t]);
+%
+%   % Create an array of circular cylinders.
+%   r = 100;  % radius
+%   rod = CircularCylinder(Axis.z, t, [0 0 t/2], r);
+%   rod_array = periodize_shape(rod, {[400 0 0], [0 400 0], [0 0 t]}, slab)
+%   
+%   % Use the constructed shape in maxwell_run().
+%   gray = [0.5 0.5 0.5];
+%   [E, H] = maxwell_run(...
+%               {INITIAL ARGUMENTS}, ...
+%               'OBJ', ...
+%                   {'silicon', gray, 11.56}, slab, ...
+%                   {'vacuum', 'none', 1.0}, rod_array, ...
+%               {REMAINING ARGUMENTS});
+
+%%% See Also
+% <Shape.html |Shape|>, <maxwell_run.html |maxwell_run|>
+
 function shape_array = periodize_shape(shape, primitive_vec_cell, boundshape)
 
 chkarg(istypesizeof(shape, 'Shape'), '"shape" should be instance of Shape.');

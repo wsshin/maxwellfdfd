@@ -1,5 +1,37 @@
+%% Plane
+% Concrete subclass of <ZeroVolShape.html |Shape|> representing a plane.
+
+%%% Description
+% |Plane| represents the shape of a plane.  It does not have a volume, but it is
+% used to force a user-defined primary grid plane in <maxwell_run.html
+% |maxwell_run|>.
+
+%%% Construction
+%  shape = Plane(normal_axis, intercept)
+%  shape = Plane(normal_axis, intercept, dl_max)
+
+% *Input Arguments*
+%
+% * |normal_axis|: axis normal to the plane.  It should be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |intercept|: location of the plane in the |normal_axis| direction.
+% * |dl_max|: maximum grid size allowed in the plane.  It can be either |[dx dy
+% dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% |dl_max = Inf| is used.  In the |normal_axis| direction, |dl_max| is
+% meaningless.
+
+%%% Example
+%   % Create an instance of Plane.
+%   shape = Plane(Axis.y, 100);
+%
+%   % Use the constructed shape in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
+
+%%% See Also
+% <Rectangle.html |Rectangle|>, <Line.html |Line|>, <Point.html |Point|>,
+% <ZeroVolShape.html |ZeroVolShape|>, <maxwell_run.html |maxwell_run|>
+
 classdef Plane < ZeroVolShape
-	% Plane is a Shape for a plane.
 	
 	properties
 		normal_axis

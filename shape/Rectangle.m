@@ -1,3 +1,40 @@
+%% Rectangle
+% Concrete subclass of <ZeroVolShape.html |Shape|> representing a rectangular
+% patch.
+
+%%% Description
+% |Rectangle| represents the shape of a rectangle on a plane.  It does not have
+% a volume, but it is used to force a user-defined primary grid plane and four
+% primary grid lines, which corresponds to the four sides of the rectangle, in
+% <maxwell_run.html |maxwell_run|>.
+
+%%% Construction
+%  shape = Rectangle(normal_axis, intercept, rect)
+%  shape = Rectangle(normal_axis, intercept, rect, dl_max)
+
+% *Input Arguments*
+%
+% * |normal_axis|: axis normal to the plane of the rectangle.  It should be one
+% of |Axis.x|, |Axis.y|, |Axis.z|.
+% * |intercept|: location of the rectangle in the |normal_axis| direction.
+% * |rect|: bounds of the rectangle in the plane.  If |normal_axis == Axis.y|,
+% it should be in the format of |[zmin zmax; xmin xmax]|.
+% * |dl_max|: maximum grid size allowed in the rectangle.  It can be either |[dx
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% |dl_max = Inf| is used.  In the |normal_axis| direction, |dl_max| is
+% meaningless.
+
+%%% Example
+%   % Create an instance of Rectangle.
+%   shape = Rectangle(Axis.z, 100, [0 100; 0 100]);
+%
+%   % Use the constructed shape in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
+
+%%% See Also
+% <Plane.html |Plane|>, <Line.html |Line|>, <Point.html |Point|>,
+% <ZeroVolShape.html |ZeroVolShape|>, <maxwell_run.html |maxwell_run|>
+
 classdef Rectangle < ZeroVolShape
 	% Plane is a Shape for a plane.
 	

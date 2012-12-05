@@ -1,6 +1,45 @@
+%% SectoralCylinder
+% Concrete subclass of <GenericCylinder.html |GenericCylinder|> representing a
+% cylinder with a sectoral cross section.
+
+%%% Description
+% |SectoralCylinder| represents the shape of a sectoral cylinder.  Its cross
+% section is a circular sector (angular portion of a disk).  The axis of the
+% cylinder should be aligned with one of the axes of the Cartesian coordinate
+% system.
+
+%%% Construction
+%  shape = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta)
+%  shape = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)
+% 
+% *Input Arguments*
+%
+% * |normal_axis|: axis of the cylinder.  It should be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |height|: size of the cylinder along its axis.
+% * |center|: center of the cylinder in the format of |[x y z]|.  For
+% |normal_axis = Axis.z|, |(x, y)| is the coordinate of the center of the
+% circle.
+% * |radius|: radius of the circle
+% * |theta|: beginning angle of the sector in radian
+% * |d_theta|: angular width of the sector in radian between -2*pi and 2*pi.
+% * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% |dl_max = Inf| is used.
+
+%%% Example
+%   % Create an instance of SectoralCylinder.
+%   shape = SectoralCylinder(Axis.z, 100, [0 0 50], 50, pi/6, pi/3);
+%
+%   % Use the constructed shape in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
+
+%%% See Also
+% <CircularCylinder.html |CircularCylinder|>, <EllipticCylinder.html
+% |EllipticCylinder|>, <PolyognalCylinder.html |PolygonalCylinder|>, <Shape.html
+% |Shape|>, <maxwell_run.html |maxwell_run|>
+
 classdef SectoralCylinder < GenericCylinder
-	% EllipticCylinder is a Shape for a cylinder whose cross section is an
-	% ellipse.
 
 	methods
         function this = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)

@@ -1,3 +1,30 @@
+%% powerflux_box
+% Calculate the net power flux through a box.
+
+%%% Syntax
+%  power = powerflux_box(E_cell, H_cell, box)
+
+%%% Parameters
+% *Input*
+%
+% * |E_cell|: _E_-field in the format of |[Ex, Ey, Ez]|, where each |Ew| is an
+% instance of <Scalar3d.html |Scalar3d|>.
+% * |H_cell|: _H_-field in the format of |[Hx, Hy, Hz]|, where each |Hw| is an
+% instance of <Scalar3d.html |Scalar3d|>.
+% * |box|: bounds of a box in the format of |[xmin xmax; ymin ymax; zmin zmax]|.
+%
+% *Output*
+% 
+% * |power|: calculated net power flux through the box.  A positive value means
+% a flux going out of the box.
+
+%%% Example
+%   [E, H] = maxwell_run({ARGUMENTS});
+%   power = powerflux_box(E, H, Axis.z, 0, [0 200; 0 100; 0 100]);
+
+%%% See Also
+% <powerflux_patch.html |powerflux_patch|>, <maxwell_run.html |maxwell_run|>
+
 function power = powerflux_box(E_cell, H_cell, box)
 
 chkarg(istypesizeof(E_cell, 'Scalar3dcell', [1, Axis.count]), ...

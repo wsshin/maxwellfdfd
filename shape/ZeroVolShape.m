@@ -1,5 +1,16 @@
+%% ZeroVolShape
+% Subclass of <Shape.html |Shape|> representing a shape without volume.
+
+%%% Description
+% |ZeroVolShape| is the superclass of shapes without volume such as a plane,
+% point, line.  |ZeroVolShape| is designed to help visualization of shapes
+% without volume, because such shapes are hard to visualize.
+
+%%% See Also
+% <Plane.html |Plane|>, <Rectangle.html |Rectangle|>, <Line.html |Line|>,
+% <Point.html |Point|>, <maxwell_run.html |maxwell_run|>
+
 classdef ZeroVolShape < Shape
-	% ZeroVolShape is a superclass for all shapes with zero volume.
 
 % 	methods (Abstract)
 % 		draw2d(this, axes_handle, normal_axis, intercept)

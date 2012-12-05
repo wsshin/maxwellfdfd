@@ -1,7 +1,44 @@
+%% PolygonalCylinder
+% Concrete subclass of <GenericCylinder.html |GenericCylinder|> representing a
+% cylinder with a polygonal cross section.
+
+%%% Description
+% |PolygonalCylinder| is a Shape for a cylinder whose cross section is a
+% polygon.  It is assumed that the polygon is convex and the mean of its
+% vertices is inside the polygon.  The axis of the cylinder should be aligned
+% with one of the axes of the Cartesian coordinate system.
+
+%%% Construction
+%  shape = PolygonalCylinder(normal_axis, height, normal_center, point_array)
+%  shape = PolygonalCylinder(normal_axis, height, normal_center, point_array, dl_max)
+% 
+% *Input Arguments*
+%
+% * |normal_axis|: axis of the cylinder.  It should be one of |Axis.x|,
+% |Axis.y|, |Axis.z|.
+% * |height|: size of the cylinder along its axis.
+% * |normal_center|: center of the axis of the cylinder.  It is a real number.
+% * |radius|: radius of the circle
+% * |point_array|: |n|-by-|2| array of the vertices of the polygon with |n|
+% vertices.  For |normal_axis == Axis.y|, it is in the format of |[z1 x1; ...;
+% zn xn]|.
+% * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% |dl_max = Inf| is used.
+
+%%% Example
+%   % Create an instance of SectoralCylinder.
+%   shape = PolygonalCylinder(Axis.z, 100, 50, [0 0; 50 0; 25 25*sqrt(3)]);  % cross section is regular triangle
+%
+%   % Use the constructed shape in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
+
+%%% See Also
+% <CircularCylinder.html |CircularCylinder|>, <EllipticCylinder.html
+% |EllipticCylinder|>, <SectoralCylinder.html |SectoralCylinder|>, <Shape.html
+% |Shape|>, <maxwell_run.html |maxwell_run|>
+
 classdef PolygonalCylinder < GenericCylinder
-	% PolygonalCylinder is a Shape for a cylinder whose cross section is a
-	% polygon.  It is assumed that the polygon is convex and the mean of its
-	% vertices is inside the polygon.
 
 	methods
         function this = PolygonalCylinder(normal_axis, height, normal_center, point_array, dl_max)

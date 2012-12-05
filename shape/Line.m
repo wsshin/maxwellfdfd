@@ -1,5 +1,37 @@
+%% Line
+% Concrete subclass of <ZeroVolShape.html |Shape|> representing a plane.
+
+%%% Description
+% |Line| represents the shape of a line.  It does not have a volume, but it is
+% used to force a user-defined primary grid line in <maxwell_run.html
+% |maxwell_run|>.
+
+%%% Construction
+%  shape = Line(axis, intercept)
+%  shape = Line(axis, intercept, dl_max)
+
+% *Input Arguments*
+%
+% * |axis|: axis of the line.  It should be one of |Axis.x|, |Axis.y|, |Axis.z|.
+% * |intercept|: location of the line in the plane normal to the line.  For
+% |axis == Axis.y|, it is in the format of |[z x]|.
+% * |dl_max|: maximum grid size allowed in the plane.  It can be either |[dx dy
+% dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% |dl_max = Inf| is used.  In the directions normal to the |axis| direction,
+% |dl_max| is meaningless.
+
+%%% Example
+%   % Create an instance of Line.
+%   shape = Line(Axis.z, [0 100]);
+%
+%   % Use the constructed shape in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
+
+%%% See Also
+% <Plane.html |Plane|>, <Rectangle.html |Rectangle|>, <Point.html |Point|>,
+% <ZeroVolShape.html |ZeroVolShape|>, <maxwell_run.html |maxwell_run|>
+
 classdef Line < ZeroVolShape
-	% Line is a Shape for a line.
 	
 	properties
 		axis  % direction of line

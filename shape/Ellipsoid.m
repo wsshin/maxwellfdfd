@@ -1,5 +1,35 @@
+%% Ellipsoid
+% Concrete subclass of <Shape.html |Shape|> representing an ellipsoid.
+
+%%% Description
+% |Ellipsoid| represents the shape of an ellipsoid.  The three axes of the
+% ellipsoid should be aligned with the axes of the Cartesian coordinate system.
+
+%%% Construction
+%  shape = Ellipsoid(center, semiaxes)
+%  shape = Ellipsoid(center, semiaxes, dl_max)
+
+% *Input Arguments*
+%
+% * |center|: center of the ellipsoid in the format of |[x y z]|.
+% * |semiaxes|: semiaxes of the ellipse in the format of |[a b c]|.
+% * |dl_max|: maximum grid size allowed in the ellipsoid.  It can be either |[dx
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% |dl_max = Inf| is used.
+
+%%% Example
+%   % Create an instance of Ellipsoid.
+%   shape = Ellipsoid(Axis.z, [0 0 0], [100 50 50]);
+%
+%   % Use the constructed shape in maxwell_run().
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
+
+%%% See Also
+% <Sphere.html |Sphere|>, <CircularCylinder.html |CircularCylinder|>,
+% <EllipticCylinder.html |EllipticCylinder|>, <Shape.html |Shape|>,
+% <maxwell_run.html |maxwell_run|>
+
 classdef Ellipsoid < Shape
-	% Ellipsoid is a Shape for an ellipsoid.
 
 	methods
         function this = Ellipsoid(center, semiaxes, dl_max)
