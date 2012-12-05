@@ -30,7 +30,7 @@ domain_vac = Object(domain, vac);
 slab = Box([-5.5*a, 5.5*a; -3.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
 slab_Si = Object(slab, Si);
 
-hole = CircularCylinder(Axis.z, [0 0 0], r, t, [2*r/dd, 2*r/dd, t/td]);
+hole = CircularCylinder(Axis.z, t, [0 0 0], r, [2*r/dd, 2*r/dd, t/td]);
 
 slab_yn = Box([-5.5*a, 5.5*a; -3.5*h, -0.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
 hole_yn_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yn);

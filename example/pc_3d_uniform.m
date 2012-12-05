@@ -18,7 +18,7 @@ slab = Box([-5.5*a, 5.5*a; -3.5*h, 3.5*h; -t/2, t/2]);
 slab_yn = Box([-5.5*a, 5.5*a; -3.5*h, -0.5*h; -t/2, t/2]);
 slab_yp = Box([-5.5*a, 5.5*a; 0.5*h, 3.5*h; -t/2, t/2]);
 
-hole = CircularCylinder(Axis.z, [0 0 0], r, t);
+hole = CircularCylinder(Axis.z, t, [0 0 0], r);
 
 hole_yn_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yn);
 hole_yp_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp);

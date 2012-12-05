@@ -19,7 +19,7 @@ if isnew
 	slab_yn = Box([-5.5*a, 5.5*a; -3.5*h, -0.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
 	slab_yp = Box([-5.5*a, 5.5*a; 0.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
 
-	hole = CircularCylinder(Axis.z, [0 0 0], r, t, [2*r/dd, 2*r/dd, t/td]);
+	hole = CircularCylinder(Axis.z, t, [0 0 0], r, [2*r/dd, 2*r/dd, t/td]);
 
 	%% Solve the system.
 	gray = [0.5 0.5 0.5];  % [r g  b]
