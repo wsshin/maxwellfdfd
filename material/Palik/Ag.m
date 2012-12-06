@@ -1,5 +1,4 @@
-clear all; close all; clc;
-const;
+clear all; close all; clear classes; clc;
 
 %% Palik's Ag, p.353
 wvlen1 = 1e-1 * [1.240 1.550 2.066 2.480 2.755 3.099 3.444 3.542 4.133 4.959 6.199 8.265 12.40 15.50 16.75 20.66 24.80 30.99 33.51 35.42 41.33 44.28 47.68 51.66 56.35 61.99 68.88 72.93 77.49 82.65 88.56 95.37 103.3 112.7 118.1 124.0 130.5 137.8 145.9 155.0 158.9 163.1 167.5 172.2 177.1 182.3 187.8 193.7 200.0 206.6 213.8 221.4 229.6 233.9];
@@ -108,7 +107,7 @@ n = [n1 n2 n3 n4 n5 n6].';
 k = [k1 k2 k3 k4 k5 k6].';
 
 %% Convert the wavelengths to the photon energies.
-eV = heV*c0*1e9 ./ wvlen;
+eV = PhysC.h * PhysC.c0 * 1e9 ./ wvlen;
 
 %% Reverse the data order.
 eV = eV(end:-1:1);
@@ -145,4 +144,4 @@ end
 
 
 %% Save data.
-%save('Ag.mat', 'eV', 'n', 'k');
+save('Ag.mat', 'eV', 'n', 'k');

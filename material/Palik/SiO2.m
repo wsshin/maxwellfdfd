@@ -1,5 +1,4 @@
-clear all; close all; clc;
-const;
+clear all; close all; clear classes; clc;
 
 %% Palik's SiO2 (Glass), p.753
 wvlen1 = 1e-1 * [6.199 6.351 6.508 6.665 6.831 6.997 7.166 7.345 7.523 7.705];
@@ -192,7 +191,7 @@ n = [n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12].';
 k = [k1 k2 k3 k4 k5 k6 k7 k8 k9 k10 k11 k12].';
 
 %% Convert the wavelengths to the photon energies.
-eV = heV*c0*1e9 ./ wvlen;
+eV = PhysC.h * PhysC.c0 * 1e9 ./ wvlen;
 
 %% Reverse the data order.
 eV = eV(end:-1:1);
@@ -229,4 +228,4 @@ end
 
 
 %% Save data.
-%save('SiO2.mat', 'eV', 'n', 'k');
+save('SiO2.mat', 'eV', 'n', 'k');

@@ -1,4 +1,4 @@
-const;
+clear all; close all; clear classes; clc;
 
 %% Silver on pp.144-145 in Section 12 of CRC Handbook of Chemistry and Physics, 92nd Ed., W. M. Haynes (Editor), CRC Press
 eV = [0.10 0.20 0.30 0.40 0.50 1.00 1.50 2.00 2.50 3.00 3.25 3.50 3.60 3.70 3.77 3.80 3.90 4.00 4.10 4.20 4.30 4.50 4.75 5.00 5.50 6.00 6.50 7.00 7.50 8.00 9.00 10.00 11.00 12.00 13.00 14.00 14.50 15.00 16.00 17.00 18.00 19.00 20.00 21.00 21.50 22.00 22.50 23.00 23.50 24.00 24.50 25.00 25.50 26.00 26.50 27.00 27.50 28.00 28.50 29.00 30.00 31.00 32.00 33.00 34.00 35.00 36.00 38.00 40.00 42.00 44.00 46.00 48.00 50.00 52.00 54.00 56.00 58.00 60.00 62.00 64.00 66.00 68.00 70.00 72.00 74.00 76.00 78.00 80.00 85.00 90.00 95.00 100.00];
@@ -11,7 +11,7 @@ n = n.';
 k = k.';
 
 %% Convert the photon energies (in eV) to the wavelengths (in nm).
-wvlen = heV*c0*1e9 ./ eV;
+wvlen = PhysC.h * PhysC.c0 * 1e9 ./ eV;
 
 % %% Reverse the data order, and make them column vectors.
 % eV = eV(end:-1:1).';
@@ -29,11 +29,12 @@ eps_eV = 2;
 eps_wvlen = 3;
 eps_omega = 4;
 q_omega = 5;
-plotstyle = nk_wvlen;
+plotstyle = eps_eV;
+figure;
 switch plotstyle
     case nk_wvlen  % plot n and k
         loglog(wvlen, n, wvlen, k)
-        %plot(wvlen, n, wvlen, k)
+%         plot(wvlen, n, wvlen, k)
         legend('n', 'k', 'Location', 'SouthEast');
         xlabel 'wavelength (nm)'
         %axis([1e2 1e4 1e-2 1e2])
@@ -66,4 +67,4 @@ end
 
 
 %% Save data.
-%save('Ag.mat', 'eV', 'n', 'k');
+save('Ag.mat', 'eV', 'n', 'k');

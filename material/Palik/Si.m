@@ -1,5 +1,4 @@
-clear all; close all; clc;
-const;
+clear all; close all; clear classes; clc;
 
 %% Palik's Si, p.555
 wvlen1 = 1e-1 * [6.199 6.351 6.508 6.665 6.831 6.997 7.166 7.345 7.523 7.705 7.897 8.087 8.287 8.492 8.694 8.906 9.129 9.350 9.581 9.816 10.05 10.30 10.55 10.81 11.08 11.34 11.62 11.91 12.20 12.50 12.81 13.12 13.43 13.76 14.10 14.45 14.79 15.16 15.54 15.92 16.31 16.71 17.10 17.54 17.97 18.39];
@@ -105,7 +104,7 @@ n = [n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14].';
 k = [k1 k2 k3 k4 k5 k6 k7 k8 k9 k10 k11 k12 k13 k14].';
 
 %% Convert the wavelengths to the photon energies.
-eV = heV*c0*1e9 ./ wvlen;
+eV = PhysC.h * PhysC.c0 * 1e9 ./ wvlen;
 
 %% Reverse the data order.
 eV = eV(end:-1:1);
@@ -142,4 +141,4 @@ end
 
 
 %% Save data.
-%save('Si.mat', 'eV', 'n', 'k');
+save('Si.mat', 'eV', 'n', 'k');
