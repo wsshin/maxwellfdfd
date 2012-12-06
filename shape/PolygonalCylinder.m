@@ -88,7 +88,7 @@ classdef PolygonalCylinder < GenericCylinder
 			lprim = cell(1, Axis.count);
 			lprim{h} = p_array(1, 1:end-1);
 			lprim{v} = p_array(2, 1:end-1);
-			lprim{n} = [normal_center - height/2, normal_center + height/2];
+			lprim{n} = [-height height]/2 + normal_center;
 			
 			if nargin < 5  % no dl_max
 				super_args = {normal_axis, @lsf2d, lprim};

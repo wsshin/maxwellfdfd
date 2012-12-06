@@ -90,7 +90,7 @@ classdef SectoralCylinder < GenericCylinder
 			lprim = cell(1, Axis.count);
 			lprim{h} = [radius * cos(thetas) + center(h), center(h)];
 			lprim{v} = [radius * sin(thetas) + center(v), center(v)];
-			lprim{n} = [-height/2 height/2] + center(n);
+			lprim{n} = [-height height]/2 + center(n);
 			
 			if lsf_th(0) > 0
 				lprim{h} = [lprim{h}, center(h) + radius];

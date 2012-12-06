@@ -15,7 +15,7 @@ classdef GenericCylinder < Shape
 			
 			[h, v, n] = cycle(normal_axis);
 			bound_n = [min(lprim_cell{n}), max(lprim_cell{n})];
-			sn = diff(bound_n);
+			sn = diff(bound_n) / 2;
 			cn = mean(bound_n);
 
 			% For rhv = r([h, v]), and rn = r(n), the level set
