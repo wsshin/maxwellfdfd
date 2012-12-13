@@ -29,10 +29,12 @@
 % * |opts.withpml|: |true| or |{false}| to show the PML regions or not.
 % * |opts.withabs|: |true| or |{false}| to show the absolute values of the field
 % or not.
-% * |opts.cscale|: positive value multiplied to the color bar range.  Set to
+% * |opts.cscale|: positive value that controls the color bar range.  Set to
 % values less than |1.0| to saturate colors.  The default value is |1.0|.
-% * |opts.cmax|: maximum of the color bar range.  Once |opts.cmax| is set, it
-% overrides |opts.cscale|.
+% * |opts.cmax|: another positive value that controls the color bar range; the
+% positive maximum of the color bar range is |cscale * cmax|.  If it is set to
+% |NaN|, which is the default, then |cscale * (maximum amplitude of the plotted
+% data)| is used for the maximum of the color bar range.
 % * |opts.isopaque|: |{true}| or |false| to show opaque slices in 3D or not.
 % * |opts.withobjsrc|: |true| or |false| to show the objects and sources or not.
 % The default values is |true| when the number of objects is small (<= 20), but
@@ -104,7 +106,7 @@ if no_opts || ~isfield(opts, 'cscale')
 	opts.cscale = 1.0;
 end
 if no_opts || ~isfield(opts, 'cmax')
-	opts.cmax = Inf;
+	opts.cmax = NaN;
 end
 if no_opts || ~isfield(opts, 'isopaque')
 	opts.isopaque = true;

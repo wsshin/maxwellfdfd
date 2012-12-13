@@ -20,6 +20,7 @@ classdef Painter2d < handle
         withabs
 		databound
 		isswapped
+		cmax
 	end
 	
 	% Internal properties for the properties affecting C, Xh, Yv
@@ -30,6 +31,7 @@ classdef Painter2d < handle
 		phase_angle_
         withabs_
 		isswapped_
+		cmax_
 	end
 
 	% Properties that do not affect C, Xh, Yv, but require draw().
@@ -37,7 +39,6 @@ classdef Painter2d < handle
 		obj_array
 		src_array
 		cscale
-		cmax  % if cmax ~= Inf, use cmax in crange and ignore maxamp and cscale
         withgrid
 		withcolorbar
 	end
@@ -49,11 +50,11 @@ classdef Painter2d < handle
 			this.phase_angle_ = 0;
 			this.withabs_ = false;
 			this.isswapped_ = false;
+			this.cmax_ = NaN;
 
 			this.obj_array = [];
 			this.src_array = [];
 			this.cscale = 1.0;
-			this.cmax = Inf;
 			this.withgrid = false;
 			this.withcolorbar = false;
 						
@@ -141,6 +142,18 @@ classdef Painter2d < handle
 			end
 		end
 		
+		function cmax = get.cmax(this)
+			cmax = this.cmax_;
+		end
+		
+		function set.cmax(this, cmax)
+			chkarg(istypesizeof(cmax, 'real') && (cmax > 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
+			if isnan(cmax)
+				this.isCpreped = false;
+			end
+			this.cmax_ = cmax;
+		end
+		
 		function set.obj_array(this, obj_array)
 			chkarg(istypesizeof(obj_array, 'Object', [1, 0]), '"obj_array" should be row vector of instances of Object.');
 			this.obj_array = obj_array;
@@ -154,11 +167,6 @@ classdef Painter2d < handle
 		function set.cscale(this, cscale)
 			chkarg(istypesizeof(cscale, 'real') && cscale > 0, '"cscale" should be positive.');
 			this.cscale = cscale;
-		end
-		
-		function set.cmax(this, cmax)
-			chkarg(istypesizeof(cmax, 'real') && cmax > 0, '"cmax" should be positive.');
-			this.cmax = cmax;
 		end
 		
 		function set.withgrid(this, truth)
@@ -186,6 +194,9 @@ classdef Painter2d < handle
 			end
 			
 			this.maxamp = max(abs(this.C(:)));
+			if isnan(this.cmax)
+				this.cmax = this.maxamp;
+			end
 			
 			if this.withabs
 				this.C = abs(this.C);
@@ -199,19 +210,11 @@ classdef Painter2d < handle
 		
 		function set_caxis(this, axes_handle)
 			if this.withabs
-				if isinf(this.cmax)
-					crange = this.cscale .* [0, this.maxamp];
-				else
-					crange = [0, this.cmax];
-				end
+				crange = this.cscale .* [0, this.cmax];
 				caxis(axes_handle, crange);
 				colormap(axes_handle, 'hot');
 			else
-				if isinf(this.cmax)
-					crange = this.cscale .* [-this.maxamp, this.maxamp];
-				else
-					crange = [-this.cmax, this.cmax];
-				end
+				crange = this.cscale .* [-this.cmax, this.cmax];
 				caxis(axes_handle, crange);
 				colormap(axes_handle, b2r);
 			end

@@ -166,7 +166,7 @@ classdef TotalView3d < handle
 		end
 		
 		function set.cmax(this, cmax)
-			chkarg(istypesizeof(cmax, 'real') && cmax > 0, '"cmax" should be positive.');
+			chkarg(istypesizeof(cmax, 'real') && (cmax > 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
 			this.painter3d.cmax = cmax;
 			for w = Axis.elems
 				this.painter2d(w).cmax = cmax;
@@ -248,6 +248,10 @@ classdef TotalView3d < handle
 			
 			this.ha3d = axes('Units', 'normalized', 'Position', [(wm+w1+wg) (hm+h1+hg) w2 h2]);
 
+			% Prepare data to show.
+			p3d.prep_data();
+			this.cmax = p3d.cmax;
+			
 			% Draw slices in 2D.
 			for w = Axis.elems
 				p2d(w).init_display(this.ha2d(w));

@@ -20,6 +20,7 @@ classdef Painter3d < handle
 		phase_angle
         withabs
 		databound
+		cmax
 	end
 	
 	% Internal properties for the properties affecting V, X, Y, Z
@@ -29,6 +30,7 @@ classdef Painter3d < handle
 		withpml_
 		phase_angle_
         withabs_
+		cmax_
 	end
 
 	% Properties that do not affect V, X, Y, Z, but require draw().
@@ -36,7 +38,6 @@ classdef Painter3d < handle
 		obj_array
 		src_array
 		cscale
-		cmax  % if cmax ~= Inf, use cmax in crange and ignore maxamp and cscale
         isopaque
         opacity
         withgrid
@@ -48,11 +49,11 @@ classdef Painter3d < handle
 			this.withpml_ = false;
 			this.phase_angle_ = 0;
 			this.withabs_ = false;
+			this.cmax_ = NaN;
 
 			this.obj_array = [];
 			this.src_array = [];
 			this.cscale = 1.0;
-			this.cmax = Inf;
 			this.isopaque = false;
 			this.opacity = 0.7;
 			this.withgrid = false;
@@ -64,9 +65,7 @@ classdef Painter3d < handle
 		function databound = get.databound(this)
 			databound = this.scalar3d.grid3d.bound_plot(this.withpml);
 		end
-		
-% 		function plotbound = get.plotbound
-		
+				
 		function scalar3d = get.scalar3d(this)
 			scalar3d = this.scalar3d_;
 		end
@@ -130,6 +129,18 @@ classdef Painter3d < handle
 			end
 		end
 		
+		function cmax = get.cmax(this)
+			cmax = this.cmax_;
+		end
+
+		function set.cmax(this, cmax)
+			chkarg(istypesizeof(cmax, 'real') && (cmax > 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
+			if isnan(cmax)
+				this.isVpreped = false;
+			end
+			this.cmax_ = cmax;
+		end
+		
 		function set.obj_array(this, obj_array)
 			chkarg(istypesizeof(obj_array, 'Object', [1, 0]), '"obj_array" should be row vector of instances of Object.');
 			this.obj_array = obj_array;
@@ -143,11 +154,6 @@ classdef Painter3d < handle
 		function set.cscale(this, cscale)
 			chkarg(istypesizeof(cscale, 'real') && cscale > 0, '"cscale" should be positive.');
 			this.cscale = cscale;
-		end
-
-		function set.cmax(this, cmax)
-			chkarg(istypesizeof(cmax, 'real') && cmax > 0, '"cmax" should be positive.');
-			this.cmax = cmax;
 		end
 		
 		function set.isopaque(this, truth)
@@ -173,6 +179,9 @@ classdef Painter3d < handle
 			end
 			
 			this.maxamp = max(abs(this.V(:)));
+			if isnan(this.cmax)
+				this.cmax = this.maxamp;
+			end
 			
 			if this.withabs
 				this.V = abs(this.V);
@@ -186,19 +195,11 @@ classdef Painter3d < handle
 		
 		function set_caxis(this, axes_handle)
 			if this.withabs
-				if isinf(this.cmax)
-					crange = this.cscale .* [0, this.maxamp];
-				else
-					crange = [0, this.cmax];
-				end
+				crange = this.cscale .* [0, this.cmax];
 				caxis(axes_handle, crange);
 				colormap(axes_handle, 'hot');
 			else
-				if isinf(this.cmax)
-					crange = this.cscale .* [-this.maxamp, this.maxamp];
-				else
-					crange = [-this.cmax, this.cmax];
-				end
+				crange = this.cscale .* [-this.cmax, this.cmax];
 				caxis(axes_handle, crange);
 				colormap(axes_handle, b2r);
 			end
