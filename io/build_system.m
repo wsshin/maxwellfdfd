@@ -71,8 +71,15 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	end
 		
 	function material = create_material(varargin)
-		if nargin == 2
-			material = Material.create(varargin{:}, osc);
+		if istypesizeof(varargin{end}, 'logical')
+			islossless = varargin{end};
+			varargin = varargin(1:end-1);
+		else
+			islossless = false;
+		end
+		
+		if length(varargin) == 2
+			material = Material.create(varargin{:}, osc, islossless);
 		else
 			material = Material(varargin{:});
 		end
@@ -100,7 +107,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 			if istypesizeof(arg, 'real')
 				L0 = arg;
 				iarg = iarg + 1; wvlen = varargin{iarg};
-				chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, 'argument #%d should be "wvlen" (positive).', iarg);
+				chkarg(istypesizeof(wvlen, 'complex'), 'argument #%d should be "wvlen" (complex).', iarg);
 				unit = PhysUnit(L0);
 				osc = Oscillation(wvlen, unit);
 			else  % arg is instance of Oscillation

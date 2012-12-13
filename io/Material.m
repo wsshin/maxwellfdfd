@@ -64,12 +64,17 @@ classdef Material
 	end
 	
 	methods (Static)
-		function material = create(name, color, osc)
+		function material = create(name, color, osc, islossless)
 			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
 			chkarg(istypesizeof(color, 'char', [1 0]) ...
 				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
 				'"color" should be string or [r g b].');
 			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
+			
+			if nargin < 4
+				islossless = false;
+			end
+			
 			eV = osc.in_eV();
 			
 			maxwell_root = fileparts(fileparts(mfilename('fullpath')));
@@ -81,6 +86,10 @@ classdef Material
 			n = interp1(param.eV, param.n, eV);
 			k = interp1(param.eV, param.k, eV);
 			epsilon = (n - 1i * k)^2;
+			if islossless
+				epsilon = real(epsilon);
+				name = [name, ' (lossless)'];
+			end
 			material =  Material(name, color, epsilon);
 		end
 	end
