@@ -2,7 +2,7 @@ function s_factor_cell = generate_s_factor(omega, grid3d, m, R)
 % For example, s_factor_cell{Axis.x, GK.dual} is the s-factor multiplied to Ex
 % (or eps_ww).
 
-chkarg(istypesizeof(omega, 'real') && omega > 0, '"omega" should be positive.');
+chkarg(istypesizeof(omega, 'complex'), '"omega" should be complex.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 
 if nargin < 3  % no m

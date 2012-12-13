@@ -12,7 +12,7 @@ classdef Oscillation
 	
 	methods
         function this = Oscillation(wvlen, unit)
-			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
+			chkarg(istypesizeof(wvlen, 'complex'), '"wvlen" should be complex.');
             this.wvlen = wvlen;
 			chkarg(istypesizeof(unit, 'PhysUnit'), '"unit" should be instance of PhysUnit.');
 			this.unit = unit;
