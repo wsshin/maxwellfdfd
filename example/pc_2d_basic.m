@@ -1,4 +1,4 @@
-clear all; close all; clear classes; clc;
+% clear all; close all; clear classes; clc;
 
 %% Set flags.
 isnew = true;
@@ -46,7 +46,7 @@ if ~inspect_only
 	figure;
 	clear opts
 % 	opts.withgrid = true;
-	opts.withobjsrc = true;
+% 	opts.withobjsrc = true;
 	opts.withabs = false;
 	opts.withpml = false;
 	opts.phase = pi/2;
