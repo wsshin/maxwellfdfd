@@ -271,13 +271,13 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 		% Solve for modes.
 		for src = src_array
 			if istypesizeof(src, 'ModalSrc')
-				distsrc = src;
-				prep_modalsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, distsrc);
+				modalsrc = src;
+				prep_modalsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, modalsrc);
 
-				neff = distsrc.neff;
+				neff = modalsrc.neff;
 				beta = 2*pi*neff / osc.in_L0();
 				pm.mark('mode calculation');
-				fprintf('\tbeta = %e, n_eff = %e\n', beta, neff);
+				fprintf('\tbeta = %s, n_eff = %s\n', num2str(beta), num2str(neff));
 			end
 		end
 	else  % isTFSF == true

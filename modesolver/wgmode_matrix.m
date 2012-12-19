@@ -1,4 +1,4 @@
-function A = wgmode_matrix(omega, eps_face_cell, mu_edge_cell, s_factor_cell, grid3d, normal_axis, intercept, pml_kind)
+function [A, En_Ht, gEh_HvEn, gEv_HhEn, Hn_Et] = wgmode_matrix(omega, eps_face_cell, mu_edge_cell, s_factor_cell, grid3d, normal_axis, intercept, pml_kind)
 % The operator A acts on H fields, not E fields.  Therefore, A x = lambda x
 % solves for H fields of an eigenmode of the system. For the eigenvalue
 % equation, see Sec II of G. Veronis and S. Fan, Journal of Lightwave
@@ -128,6 +128,9 @@ DvEn = generate_DpEr(Dir.v, bc, dv_prim);
 DhHn = generate_DpHr(Dir.h, bc, dh_dual);
 DvHn = generate_DpHr(Dir.v, bc, dv_dual);
 
+DhEv = generate_DpEq(Dir.h, bc, dh_prim); 
+DvEh = generate_DpEq(Dir.v, bc, dv_prim); 
+
 % Create the operator.
 %
 % See Sec. II of G. Veronis and S. Fan, Journal of Lightwave Technology, vol.
@@ -135,12 +138,29 @@ DvHn = generate_DpHr(Dir.v, bc, dv_dual);
 eps_vv_hh = [eps_vv(:); eps_hh(:)];
 EPS_vv_hh = spdiags(eps_vv_hh, 0, 2*N, 2*N);
 INV_EPS_nn = spdiags(1./eps_nn(:), 0, N, N);  % when eps_nn has Inf, "EPS_nn \ Mat" complains about singularity
+INV_MU_nn = spdiags(1./mu_nn(:), 0, N, N);
 MU_hh_vv = spdiags([mu_hh(:); mu_vv(:)], 0, 2*N, 2*N);
+MU_hh = spdiags(mu_hh(:), 0, N, N);
+MU_vv = spdiags(mu_vv(:), 0, N, N);
 MU_nn = spdiags(mu_nn(:), 0, N, N);
 
 A = -omega^2 * EPS_vv_hh * MU_hh_vv ...
     + EPS_vv_hh * [DvEn; -DhEn] * (INV_EPS_nn * [-DvHh, DhHv]) ...
     - [DhHn; DvHn] * (MU_nn \ ([DhHh, DvHv] * MU_hh_vv));
+
+% ez_array = (DxHy*hy.array(:) - DyHx*hx.array(:))./eps_zz(:)/omega/sqrt(-1);
+% ex_array = (sqrt(-1)*omega*(mu_yy(:).*hy.array(:)) - DxEz*ez.array(:))./gamma;
+% ey_array = (-sqrt(-1)*omega*(mu_xx(:).*hx.array(:)) - DyEz*ez.array(:))./gamma;
+
+En_Ht = (1/(omega*1i)) * INV_EPS_nn * [-DvHh DhHv];  % En from Ht
+Hn_Et = (-1/(omega*1i)) * INV_MU_nn * [-DvEh DhEv];  % Hn from Et
+gEh_HvEn = [1i*omega*MU_vv -DhEn];  % gamma*Eh from Hv, En
+gEv_HhEn = [-1i*omega*MU_hh -DvEn];  % gamma*Ev from Hh, En
+
+% Z = sparse(N,N);
+% I = speye(N);
+% gEt_Ht = [gEh_HvEn Z Z; Z Z gEv_HhEn] * [Z I; En_Ht; I Z; En_Ht];
+
 
 % We should make sure that eigenvectors' elements corresponding to infinitely
 % large elements of eps_vv_hh are zero.  If the corresponding rows and columns
@@ -179,3 +199,6 @@ A = spdiags(diagvec, 0, A);
 r = reordering_indices(Dir.count, [Nh Nv]);
 
 A = A(r,r);
+
+
+

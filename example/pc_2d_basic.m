@@ -34,7 +34,7 @@ if isnew
 		inspect_only);
 
 	if ~inspect_only
-		save(mfilename, 'E', 'H', 'obj_array');
+		save(mfilename, 'E', 'H', 'obj_array', 'src_array', 'J');
 	end
 else
 	load(mfilename);

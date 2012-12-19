@@ -9,7 +9,7 @@ end
 if isequal(strategy, 'beta')
 	beta_guess = val;
 	[v, lambda] = eigs(A, 1, -beta_guess^2);
-	beta = sqrt(lambda)/1i;
+	beta = sqrt(-lambda);  % this guantees real(beta) >= 0
 else
 	assert(isequal(strategy, 'modeindex'));
 	mode_index = val;

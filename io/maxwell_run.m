@@ -245,33 +245,29 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 		pm.mark('domain visualization');
 		
 		% Visualize modes.
-		is_distsrc = false;
+		is_modalsrc = false;
 		for src = src_array
 			if istypesizeof(src, 'ModalSrc')
-				is_distsrc = true;
-				distsrc = src;
-				[h, v, n] = cycle(distsrc.normal_axis);
-				grid2d = Grid2d(grid3d, n);
+				is_modalsrc = true;
+				modalsrc = src;
+				for g = GK.elems
+					Ft2d = modalsrc.Ft2d(g,:);
 
-				Jh2d = array2scalar(distsrc.Jh, PhysQ.J, grid2d, h, GK.dual, osc, distsrc.intercept);
-				Jv2d = array2scalar(distsrc.Jv, PhysQ.J, grid2d, v, GK.dual, osc, distsrc.intercept);
+					cmax = max(abs([Ft2d{Axis.x}.array(:); Ft2d{Axis.y}.array(:); Ft2d{Axis.z}.array(:)]));
+					opts.withabs = true;
+					opts.cmax = cmax;
 
-				cmax = max(abs([Jh2d.array(:); Jv2d.array(:)]));
-				opts.withabs = true;
-				opts.cmax = cmax;
-				figure;
-				set(gcf, 'units','normalized','position',[0 0.5 0.5 0.5]);			
-				vis2d(Jh2d, obj_array, opts);
-				drawnow;
-
-				figure;
-				set(gcf, 'units','normalized','position',[0.5 0.5 0.5 0.5]);			
-				vis2d(Jv2d, obj_array, opts);
-				drawnow;
+					for w = Axis.elems
+						figure;
+						set(gcf, 'units','normalized','position',[subsindex(w)/3 subsindex(g)/2 1/3 1/3]);			
+						vis2d(Ft2d{w}, obj_array, opts);
+						drawnow;
+					end
+				end
 			end
 		end
 		
-		if is_distsrc
+		if is_modalsrc
 			pm.mark('distributed source visualization');
 		end
 		fprintf('%s finishes (inspection only).\n\n', mfilename);

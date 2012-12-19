@@ -56,8 +56,9 @@ classdef ModalSrc < Source
 	
 	properties (SetAccess = private)
 		grid2d  % instance of Grid2d
-		Jh  % J in horizontal direction on this plane: Jx for normal == z
-		Jv  % J in vertical direction on this plane: Jy for normal == z
+		Ft2d  % {Hh2d Hv2d Hn2d; Eh2d Ev2d En2d}: cell array of Scalar2d for H and E on this plane; {Hx2d Hy2d Hz2d; Ex2d Ey2d Ez2d} for normal == z
+		Jh  % 2D array J in horizontal direction on this plane: Jx for normal == z
+		Jv  % 2D array J in vertical direction on this plane: Jy for normal == z
 		neff  % effective n
 	end
 	
@@ -86,21 +87,35 @@ classdef ModalSrc < Source
 			this.Jv = [];
 		end
 		
-		function setJ(this, neff, Jh, Jv, grid3d)
+		function setEH(this, neff, osc, E_cell, H_cell, grid3d)
 			chkarg(istypesizeof(neff, 'complex'), '"neff" should be complex.');
 			this.neff = neff;
+			
+			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 			
 			chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 			this.grid2d = Grid2d(grid3d, this.normal_axis);
 
 			Nh = this.grid2d.N(Dir.h);
 			Nv = this.grid2d.N(Dir.v);
+			h = this.grid2d.axis(Dir.h);
+			v = this.grid2d.axis(Dir.v);
 			
-			assert(istypesizeof(Jh, 'complex', [Nh Nv]), '"Jh" should be %d-by-%d matrix with complex elements.', Nh, Nv);
-			assert(istypesizeof(Jv, 'complex', [Nh Nv]), '"Jv" should be %d-by-%d matrix with complex elements.', Nh, Nv);
-
-			this.Jh = Jh;
-			this.Jv = Jv;
+			assert(istypesizeof(E_cell, 'complexcell', [1 Axis.count], [Nh Nv]), ...
+				'"E_cell" should be length-%d row cell array whose each element is %d-by-%d array with complex elements.', Axis.count, Nh, Nv);
+			assert(istypesizeof(H_cell, 'complexcell', [1 Axis.count], [Nh Nv]), ...
+				'"H_cell" should be length-%d row cell array whole each element is %d-by-%d array with complex elements.', Axis.count, Nh, Nv);
+			
+			this.Jh = H_cell{v};
+			this.Jv = -H_cell{h};
+			
+			this.Ft2d = cell(GK.count, Axis.count);
+			for w = Axis.elems
+				this.Ft2d{GK.prim, w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, GK.prim, osc, this.intercept);
+			end
+			for w = Axis.elems
+				this.Ft2d{GK.dual, w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, GK.dual, osc, this.intercept);
+			end
 		end
 		
 		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
