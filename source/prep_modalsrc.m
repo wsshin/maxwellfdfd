@@ -25,7 +25,7 @@ beta_guess = 2*pi*modalsrc.neff_guess/osc.in_L0();
 neff = beta*osc.in_L0()/2/pi;
 
 Ht = reshape(Ht, Dir.count, []).';
-[h, v] = cycle(modalsrc.normal_axis);
+[h, v, n] = cycle(modalsrc.normal_axis);
 Hh = Ht(:, Dir.h);
 Hv = Ht(:, Dir.v);
 
@@ -45,4 +45,14 @@ Hh = reshape(Hh, Nh, Nv);
 Hv = reshape(Hv, Nh, Nv);
 Hn = reshape(Hn, Nh, Nv);
 
-modalsrc.setEH(neff, osc, {Eh Ev En}, {Hh Hv Hn}, grid3d);
+E_cell = cell(1, Axis.count);
+E_cell{h} = Eh;
+E_cell{v} = Ev;
+E_cell{n} = En;
+
+H_cell = cell(1, Axis.count);
+H_cell{h} = Hh;
+H_cell{v} = Hv;
+H_cell{n} = Hn;
+
+modalsrc.setEH(neff, osc, E_cell, H_cell, grid3d);

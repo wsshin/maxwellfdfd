@@ -208,7 +208,8 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 	end
 	
 	if ~is_solveropts || ~isfield(solveropts, 'maxit')
-		solveropts.maxit = intmax;
+% 		solveropts.maxit = intmax;
+		solveropts.maxit = 1e8;
 	else
 		chkarg(istypesizeof(solveropts.maxit, 'real') && solveropts.maxit > 0, ...
 			'solveropts.maxit should be positive.');	

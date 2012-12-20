@@ -51,15 +51,15 @@ mu_vv = mu_edge_cell{v}(:,:,ind_n);
 mu_nn = mu_edge_cell{n}(:,:,ind_n);
 
 % Check the homogeneity of eps and mu at "intercept" in the "normal_axis" direction.
-assert(ind_n >= 2);
-eps_nn_prev = eps_face_cell{n}(:,:,ind_n-1);
-chkarg(all(all(eps_nn == eps_nn_prev)), ...
-	'"eps_edge_cell" is not homogeneous in the "normal_axis" direction at "intercept".')
+% assert(ind_n >= 2);
+% eps_nn_prev = eps_face_cell{n}(:,:,ind_n-1);
+% chkarg(all(all(eps_nn == eps_nn_prev)), ...
+% 	'"eps_edge_cell" is not homogeneous in the "normal_axis" direction at "intercept".')
 
-mu_hh_prev = mu_edge_cell{h}(:,:,ind_n-1);
-mu_vv_prev = mu_edge_cell{v}(:,:,ind_n-1);
-chkarg(all(all(mu_hh == mu_hh_prev)) && all(all(mu_vv == mu_vv_prev)), ...
-	'"mu_face_cell" is not homogeneous in the "normal_axis" direction at "intercept".')
+% mu_hh_prev = mu_edge_cell{h}(:,:,ind_n-1);
+% mu_vv_prev = mu_edge_cell{v}(:,:,ind_n-1);
+% chkarg(all(all(mu_hh == mu_hh_prev)) && all(all(mu_vv == mu_vv_prev)), ...
+% 	'"mu_face_cell" is not homogeneous in the "normal_axis" direction at "intercept".')
 
 % Derive various parameters (for 2D problems) from grid2d.
 bc = grid2d.bc;
