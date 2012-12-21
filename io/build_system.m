@@ -239,6 +239,9 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	chkarg(iarg <= narglim, 'more arguments than expected.');	
 	pm.mark('initial setup');
 	
+	fprintf('\tLength Unit: %s m\n', osc.unit.value(PhysQ.L));
+	fprintf('\twvlen = %s, freq = %s eV\n', num2str(osc.in_L0()), num2str(osc.in_eV()));
+	
 	mat_array = unique(mat_array);
 	fprintf('materials used:\n');
 	for mat = mat_array
