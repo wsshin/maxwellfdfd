@@ -57,7 +57,7 @@ classdef ModalSrc < Source
 	properties (SetAccess = private)
 		grid2d  % instance of Grid2d
 		osc  % instance of Oscillation
-		Ft2d  % {Hh2d Hv2d Hn2d; Eh2d Ev2d En2d}: cell array of Scalar2d for H and E on this plane; {Hx2d Hy2d Hz2d; Ex2d Ey2d Ez2d} for normal == z
+		Ft2d  % {Hx2d Hy2d Hz2d; Ex2d Ey2d Ez2d}: cell array of Scalar2d for H and E on this plane
 		Jh  % 2D array J in horizontal direction on this plane: Jx for normal == z
 		Jv  % 2D array J in vertical direction on this plane: Jy for normal == z
 		neff  % effective n
@@ -65,6 +65,7 @@ classdef ModalSrc < Source
 	
 	% Properties for dispersion relation and propagation length
 	properties (Dependent, SetAccess = immutable)
+		ispreped  % true if this ModalSrc is prepared; false otherwise
 		beta_r  % real part of complex wavevector
 		Lp  % propagation length
 	end
@@ -102,6 +103,10 @@ classdef ModalSrc < Source
 		function Lp = get.Lp(this)
 			beta = 2*pi*this.neff / this.osc.in_L0();
 			Lp = -1/imag(beta);
+		end
+		
+		function ispreped = get.ispreped(this)
+			ispreped = ~isempty(this.Jh) && ~isempty(this.Jh);
 		end
 		
 		function setEH(this, neff, osc, E_cell, H_cell, grid3d)

@@ -272,7 +272,9 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 		for src = src_array
 			if istypesizeof(src, 'ModalSrc')
 				modalsrc = src;
-				prep_modalsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, modalsrc);
+				if ~modalsrc.ispreped
+					prep_modalsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, modalsrc);
+				end
 
 				neff = modalsrc.neff;
 				beta = 2*pi*neff / osc.in_L0();
