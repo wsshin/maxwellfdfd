@@ -24,7 +24,7 @@
 % * |theta|: beginning angle of the sector in radian
 % * |d_theta|: angular width of the sector in radian between -2*pi and 2*pi.
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
-% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
 
 %%% Example

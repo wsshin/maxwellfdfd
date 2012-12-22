@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Box</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="Box.m"><style type="text/css">
+      --><title>Box</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-22"><meta name="DC.source" content="Box.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>Box</h1><!--introduction--><p>Concrete subclass of <a href="Shape.html"><tt>Shape</tt></a> representing a 3D box.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>Box</tt> is the most basic shape.  Its sides are aligned with the axes of the Cartesian coordinate system.</p><h2>Construction<a name="2"></a></h2><pre>shape = Box(bound)
-shape = Box(bound, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>bound</tt>: bounds of the box in the format of <tt>[xmin xmax; ymin ymax; zmin zmax]</tt>.</li><li><tt>dl_max</tt>: maximum grid size allowed in the box.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If not assigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of Box.</span>
+shape = Box(bound, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>bound</tt>: bounds of the box in the format of <tt>[xmin xmax; ymin ymax; zmin zmax]</tt>.</li><li><tt>dl_max</tt>: maximum grid size allowed in the box.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If unassigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of Box.</span>
 shape = Box([-100 100; -50 50; 0 20]);
 </pre><pre class="language-matlab"><span class="comment">% Use the constructed shape in maxwell_run().</span>
 [E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'OBJ'</span>, {<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0}, shape, {REMAINING ARGUMENTS});
@@ -88,8 +88,8 @@ shape = Box([-100 100; -50 50; 0 20]);
 % * |bound|: bounds of the box in the format of |[xmin xmax; ymin ymax; zmin
 % zmax]|.
 % * |dl_max|: maximum grid size allowed in the box.  It can be either |[dx dy
-% dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
-% |dl_max = Inf| is used.
+% dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned, |dl_max
+% = Inf| is used.
 
 %%% Example
 %   % Create an instance of Box.

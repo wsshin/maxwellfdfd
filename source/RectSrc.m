@@ -88,15 +88,7 @@ classdef RectSrc < Source
 				q = setdiff(Axis.elems, [n, p]);
 				
 				g = GK.dual;
-				ind_n = ismembc2(this.intercept, grid3d.l{n,g});
-				if ind_n == 0
-					[~, ind_n] = min(abs(grid3d.l{n,g} - this.intercept));
-					warning('FDS:srcAssign', ...
-						['%s grid in %s-axis of "grid3d" does not have location %e of this %s; ', ...
-						'closest grid vertex at %e will be taken instead.'], ...
-						char(g), char(n), this.intercept, class(this), grid3d.l{n,g}(ind_n));
-				end
-				
+				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				dn = grid3d.dl{n,g}(ind_n);
 				J = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
 

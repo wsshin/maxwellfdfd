@@ -20,10 +20,11 @@
 % * |polarization|: direction of the dipoles distributed on the plane.  It
 % should be either one of |Axis.x|, |Axis.y|, |Axis.z|, or an angle in radian.
 % When it is an instance of <Axis.html |Axis|>, it should be orthogonal to
-% |normal_axis|.  When it is an angle in radian, it is in the 2D Cartesian
-% coordinate system normal to |normal_axis|.  For example, if |normal_axis ==
-% Axis.y|, then the angle is measured in the zx plane, and therefore it is
-% measured in the counterclockwise direction from the z-axis in the zx plane.
+% |normal_axis|.  When it is an angle in radian, it is measured in the 2D
+% Cartesian coordinate system normal to |normal_axis|.  For example, if
+% |normal_axis == Axis.y|, then the angle is measured in the zx plane, and
+% therefore it is measured in the counterclockwise direction from the z-axis in
+% the zx plane.
 % * |K|: amplitude of the surface current density that the dipoles drive.
 % * |theta|: oblique incidence angle.  |abs(theta)| should not exceed |pi/2|
 % because the waves are emitted from the both sides of the plane.
@@ -51,7 +52,7 @@
 % <PointSrc.html |PointSrc|>, <PointSrcM.html |PointSrcM|>, <TFSFPlaneSrc.html
 % |TFSFPlaneSrc|>, <ModalSrc.html |ModalSrc|>, <maxwell_run.html |maxwell_run|>
 
-classdef PlaneSrc < Source
+classdef PlaneSrc < Source & WithBloch
 	
 	properties (SetAccess = immutable)
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
@@ -119,24 +120,16 @@ classdef PlaneSrc < Source
 		
 		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
 			grid3d.set_kBloch(this);
-			index_cell = cell(1, Axis.count);
 			if w_axis == this.normal_axis
 				Jw_patch = [];
+				index_cell = cell(1, Axis.count);
 			else
 				n = this.normal_axis;
 				w = w_axis;
 				v = setdiff(Axis.elems, [n, w]);
 				
 				g = GK.dual;
-				ind_n = ismembc2(this.intercept, grid3d.l{n,g});
-				if ind_n == 0
-					[~, ind_n] = min(abs(grid3d.l{n,g} - this.intercept));
-					warning('FDS:srcAssign', ...
-						['%s grid in %s-axis of "grid3d" does not have location %e of this %s; ', ...
-						'closest grid vertex at %e will be taken instead.'], ...
-						char(g), char(n), this.intercept, class(this), grid3d.l{n,g}(ind_n));
-				end
-
+				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				dn = grid3d.dl{n,g}(ind_n);
 				J = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
 				
@@ -148,6 +141,7 @@ classdef PlaneSrc < Source
 				
 				if Jw == 0
 					Jw_patch = [];
+					index_cell = cell(1, Axis.count);
 				else
 					%  Set Jw_patch.
 					lw = grid3d.l{w, GK.prim};
@@ -166,11 +160,8 @@ classdef PlaneSrc < Source
 					Jw_patch = ipermute(Jw_patch, int([w v n]));
 
 					% Set index_cell.
+					index_cell = {':', ':', ':'};
 					index_cell{n} = ind_n;
-					Nw = grid3d.N(w);
-					Nv = grid3d.N(v);
-					index_cell{w} = 1:Nw;
-					index_cell{v} = 1:Nv;
 				end
 			end
 		end		

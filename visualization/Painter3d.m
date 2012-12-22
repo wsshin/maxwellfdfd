@@ -134,7 +134,7 @@ classdef Painter3d < handle
 		end
 
 		function set.cmax(this, cmax)
-			chkarg(istypesizeof(cmax, 'real') && (cmax > 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
+			chkarg(istypesizeof(cmax, 'real') && (cmax >= 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
 			if isnan(cmax)
 				this.isVpreped = false;
 			end

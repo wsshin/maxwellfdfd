@@ -98,9 +98,9 @@ classdef Grid1d < handle
 			bound = this.lall{GK.prim}([1 end]);
 		end
 		
-		function set_kBloch(this, plane_src)
-			chkarg(istypesizeof(plane_src, 'PlaneSrc'), '"plane_src" should be instance of PlaneSrc.');
-			this.kBloch = plane_src.kBloch(this.axis);
+		function set_kBloch(this, blochSrc)
+			chkarg(istypesizeof(blochSrc, 'WithBloch'), '"blochSrc" should be instance of WithBloch.');
+			this.kBloch = blochSrc.kBloch(this.axis);
 		end
 		
 		function truth = contains(this, l)

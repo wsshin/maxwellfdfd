@@ -17,7 +17,7 @@
 % * |intercept|: location of the rectangular patch in the |normal_axis|
 % direction.
 % * |rect|: bounds of the rectangle in the plane.  For |normal_axis = Axis.y|,
-% it is in the format of |[zmin zmax; xmin xmax]|.  If not assigned, the entire
+% it is in the format of |[zmin zmax; xmin xmax]|.  If unassigned, the entire
 % cross section normal to |normal_axis| is used.
 %
 % *Output*

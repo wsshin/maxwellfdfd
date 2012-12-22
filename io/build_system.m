@@ -296,22 +296,9 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 				for w = Axis.elems
 					J{w} = zeros(grid3d.N);
 				end
-				
-				d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
-				d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
-				s_prim = flip_vec(s_factor_cell(:, GK.dual));  % GK.dual, not GK.prim
-				s_dual = flip_vec(s_factor_cell(:, GK.prim));  % GK.prim, not GK.dual
-				mu_edge_temp = flip_vec(mu_edge_cell);
-				eps_face_temp = flip_vec(eps_face_cell);
-				J = neg_vec(flip_vec(J));  % pseudovector
-				E0 = neg_vec(flip_vec(E0));  % pseudovector
-	
+					
 				nosolve = true;
-				[~, ~, A] = solve_eq_direct(osc.in_omega0(), ...
-								d_prim, d_dual, ...
-								s_prim, s_dual, ...
-								mu_edge_temp, eps_face_temp, ...
-								J, nosolve);
+				[~, ~, A] = solve_eq_direct(osc.in_omega0(), eps_face_cell, mu_edge_cell, s_factor_cell, J, grid3d, nosolve);
 							
 				x0 = [E0{Axis.x}(:); E0{Axis.y}(:); E0{Axis.z}(:)];
 				r = reordering_indices(Axis.count, grid3d.N);
@@ -321,7 +308,6 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 				J = reshape(J, [Axis.count grid3d.N]);
 				J = permute(J, [int([Axis.x Axis.y Axis.z])+1, 1]);
 				J = {J(:,:,:,Axis.x), J(:,:,:,Axis.y), J(:,:,:,Axis.z)};
-				J = neg_vec(flip_vec(J));  % pseudovector
 				
 				tfsfsrc.setJ(J, grid3d);
 				pm.mark('TF/SF source assignment');

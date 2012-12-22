@@ -166,7 +166,7 @@ classdef TotalView3d < handle
 		end
 		
 		function set.cmax(this, cmax)
-			chkarg(istypesizeof(cmax, 'real') && (cmax > 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
+			chkarg(istypesizeof(cmax, 'real') && (cmax >= 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
 			this.painter3d.cmax = cmax;
 			for w = Axis.elems
 				this.painter2d(w).cmax = cmax;

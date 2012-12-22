@@ -23,7 +23,7 @@ if is3D
 
 	V = F_array;
 	for w = Axis.elems
-		V = attach_extra_F(V, gk, axis, grid3d.bc(w,Sign.n), w);
+		V = attach_extra_F(V, gk, axis, grid3d.bc(w,Sign.n), w, grid3d.kBloch(w)*grid3d.L(w));
 	end
 	V = permute(V, int([Axis.y, Axis.x, Axis.z]));
 	
@@ -53,8 +53,8 @@ else  % grid is Grid2d
 	[Xh, Yv] = meshgrid(l{:});
 
 	C = F_array;
-	C = attach_extra_F(C, gk, axis_temp, grid2d.bc(Dir.h,Sign.n), Axis.x);  % treat C as 3D array with one element in 3rd dimension
-	C = attach_extra_F(C, gk, axis_temp, grid2d.bc(Dir.v,Sign.n), Axis.y);  % treat C as 3D array with one element in 3rd dimension
+	C = attach_extra_F(C, gk, axis_temp, grid2d.bc(Dir.h,Sign.n), Axis.x, grid2d.kBloch(Dir.h)*grid2d.L(Dir.h));  % treat C as 3D array with one element in 3rd dimension
+	C = attach_extra_F(C, gk, axis_temp, grid2d.bc(Dir.v,Sign.n), Axis.y, grid2d.kBloch(Dir.v)*grid2d.L(Dir.v));  % treat C as 3D array with one element in 3rd dimension
 	C = permute(C, int([Dir.v, Dir.h]));
 
 	li = grid2d.lall(:,GK.prim);
@@ -66,7 +66,7 @@ else  % grid is Grid2d
 end
 
 
-function Fw_array = attach_extra_F(Fw_array, gk, w, bc_vn, v)
+function Fw_array = attach_extra_F(Fw_array, gk, w, bc_vn, v, kvLv)
 % Augment the Fw array with ghost boundary elements in the v-axis.
 % Surprisingly, this function combines attach_extra_E() and attach_extra_H().
 
@@ -75,6 +75,7 @@ chkarg(istypesizeof(gk, 'GK'), '"physQ" should be instance of GK.');
 chkarg(istypesizeof(w, 'Axis'), '"w" should be instance of Axis.');
 chkarg(istypesizeof(bc_vn, 'BC'), '"bc_vn" should be instance of BC.');
 chkarg(istypesizeof(v, 'Axis'), '"v" should be instance of Axis.');
+chkarg(istypesizeof(kvLv, 'real'), '"kvLv" should be real.');
 
 ind_n = {':',':',':'};
 ind_p = {':',':',':'};
@@ -82,7 +83,7 @@ Nv = size(Fw_array, int(v));
 if (gk == GK.dual && v == w) || (gk == GK.prim && v ~= w)  % E: gk == GK.dual, H: gk == GK.prim
 	if bc_vn == BC.p
 		ind_p{v} = 1;
-		Fw_array = cat(int(v), Fw_array, Fw_array(ind_p{:}));
+		Fw_array = cat(int(v), Fw_array, Fw_array(ind_p{:})*exp(-1i*kvLv));
 	else  % bc_vp == BC.m
 		size_extra = size(Fw_array);
 		size_extra(v) = 1;
@@ -92,7 +93,7 @@ else  % (gk == GK.dual && v ~= w) || (gk == GK.prim && v == w)
 	if bc_vn == BC.p
 		ind_n{v} = Nv;
 		ind_p{v} = 1;
-		Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
+		Fw_array = cat(int(v), Fw_array(ind_n{:})*exp(1i*kvLv), Fw_array, Fw_array(ind_p{:})*exp(-1i*kvLv));
 	else  % bc_vn == BC.m || BC.e, bc_vp == BC.m
 		ind_n{v} = 1;
 		ind_p{v} = Nv;

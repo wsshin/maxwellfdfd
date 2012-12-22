@@ -23,7 +23,7 @@
 % * |neff_guess|: estimate of the effective refractive index of the mode to
 % calculate. 
 % * |KA|: integral of the norm of the surface current density.  It indicates the
-% strength of the mode amplitude.  If not assigned, the deault value |KA = 1| is
+% strength of the mode amplitude.  If unassigned, the deault value |KA = 1| is
 % used.
 
 %%% Note
@@ -143,9 +143,9 @@ classdef ModalSrc < Source
 		
 		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
 			assert(~isempty(this.Jh) && ~isempty(this.Jv), '"Jh" and "Jv" are not set in this ModalSrc.');
-			index_cell = cell(1, Axis.count);
 			if w_axis == this.normal_axis
 				Jw_patch = [];
+				index_cell = cell(1, Axis.count);
 			else
 				g2d = Grid2d(grid3d, this.normal_axis);
 				assert(isequal(g2d, this.grid2d), ...
@@ -156,21 +156,11 @@ classdef ModalSrc < Source
 				n = this.normal_axis;
 				
 				g = GK.dual;
-				ind_n = ismembc2(this.intercept, grid3d.l{n,g});
-				if ind_n == 0
-					[~, ind_n] = min(abs(grid3d.l{n,g} - this.intercept));
-					warning('FDS:srcAssign', ...
-						['%s grid in %s-axis of "grid3d" does not have location %e of this %s; ', ...
-						'closest grid vertex at %e will be taken instead.'], ...
-						char(g), char(n), this.intercept, class(this), grid3d.l{n,g}(ind_n));
-				end
+				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				
 				% Set index_cell.
-				Nh = this.grid2d.N(Dir.h);
-				Nv = this.grid2d.N(Dir.v);
+				index_cell = {':', ':', ':'};
 				index_cell{n} = ind_n;
-				index_cell{h} = 1:Nh;
-				index_cell{v} = 1:Nv;
 				
 				% Set Jw_patch.
 				dn = grid3d.dl{n,g}(ind_n);

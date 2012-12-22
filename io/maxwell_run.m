@@ -283,52 +283,49 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 		E = {};
 		H = {};
 	else	
-		%% Apply spatial inversion.
-	% 	d_prim = grid3d.dl(:, GK.prim);
-	% 	d_dual = grid3d.dl(:, GK.dual);
-	% 	s_prim = s_factor(:, GK.prim);
-	% 	s_dual = s_factor(:, GK.dual);
-		d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
-		d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
-		s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
-		s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
-		mu_edge = flip_vec(mu_edge);
-		eps_face = flip_vec(eps_face);
-		J = neg_vec(flip_vec(J));  % pseudovector
-
 		if isequal(solveropts.method, 'direct')
-			[E, H] = solve_eq_direct(osc.in_omega0(), ...
-							d_prim, d_dual, ...
-							s_prim, s_dual, ...
-							mu_edge, eps_face, ...
-							J);
-		elseif isequal(solveropts.method, 'gpu')
-			ds_prim = mult_vec(d_prim, s_prim);
-			ds_dual = mult_vec(d_dual, s_dual);
-			figure;
-			E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-	%		[E, H, err] = solve(cluster, osc.in_omega0(), ...
-			[E, H] = fds(osc.in_omega0(), ...
-							ds_prim, ds_dual, ...
-							mu_edge, eps_face, ...
-							E0, J, ...
-							solveropts.maxit, solveropts.tol, 'plot');
-			%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
-		elseif isequal(solveropts.method, 'aws')
-			ds_prim = mult_vec(d_prim, s_prim);
-			ds_dual = mult_vec(d_dual, s_dual);
-			E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-			[E, H] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
-							osc.in_omega0(), ...
-							ds_prim, ds_dual, ...
-							mu_edge, eps_face, ...
-							E0, J, ...
-							solveropts.maxit, solveropts.tol);
-		end
+			[E, H] = solve_eq_direct(osc.in_omega0(), eps_face, mu_edge, s_factor, J, grid3d);
+		else  % for solvers using E-field based equation
+			%% Apply spatial inversion.
+% 			d_prim = grid3d.dl(:, GK.prim);
+% 			d_dual = grid3d.dl(:, GK.dual);
+% 			s_prim = s_factor(:, GK.prim);
+% 			s_dual = s_factor(:, GK.dual);
+			d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
+			d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
+			s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
+			s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
+			mu_edge = flip_vec(mu_edge);
+			eps_face = flip_vec(eps_face);
+			J = neg_vec(flip_vec(J));  % pseudovector
 
-		E = neg_vec(flip_vec(E));  % pseudovector
-		J = neg_vec(flip_vec(J));  % pseudovector
-		H = flip_vec(H);
+			if isequal(solveropts.method, 'gpu')
+				ds_prim = mult_vec(d_prim, s_prim);
+				ds_dual = mult_vec(d_dual, s_dual);
+				figure;
+				E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+				[E, H] = fds(osc.in_omega0(), ...
+								ds_prim, ds_dual, ...
+								mu_edge, eps_face, ...
+								E0, J, ...
+								solveropts.maxit, solveropts.tol, 'plot');
+				%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
+			elseif isequal(solveropts.method, 'aws')
+				ds_prim = mult_vec(d_prim, s_prim);
+				ds_dual = mult_vec(d_dual, s_dual);
+				E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+				[E, H] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
+								osc.in_omega0(), ...
+								ds_prim, ds_dual, ...
+								mu_edge, eps_face, ...
+								E0, J, ...
+								solveropts.maxit, solveropts.tol);
+			end
+			
+			E = neg_vec(flip_vec(E));  % pseudovector
+			J = neg_vec(flip_vec(J));  % pseudovector
+			H = flip_vec(H);
+		end
 
 		pm.mark('solution calculation');
 		fprintf('%s finishes.\n\n', mfilename);

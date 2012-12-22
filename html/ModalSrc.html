@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ModalSrc</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="ModalSrc.m"><style type="text/css">
+      --><title>ModalSrc</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-22"><meta name="DC.source" content="ModalSrc.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>ModalSrc</h1><!--introduction--><p>Concrete subclass of <a href="Source.html"><tt>Source</tt></a> representing an electric dipole distribution that generates a mode of a waveguide.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Note</a></li><li><a href="#4">Example</a></li><li><a href="#5">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>ModalSrc</tt> is used to store the transverse <i>J</i>-field distribution on a plane to generate a mode of a waveguide.  The plane should be orthogonal to the axis of the waveguide.  The mode is calculated by an external mode solver.  To assist the mode solver to calculate the mode, users need to provide an estimate of the effective refractive constant of the mode to the constructor of <tt>ModalSrc</tt>.</p><h2>Construction<a name="2"></a></h2><pre>src = ModalSrc(normal_axis, intercept, neff_guess)
-src = ModalSrc(normal_axis, intercept, neff_guess, KA)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: direction normal to the plane over which the electric dipoles distribute.  It is also the axis of the waveguide.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>intercept</tt>: location of the plane in the <tt>normal_axis</tt> direction.</li><li><tt>neff_guess</tt>: estimate of the effective refractive index of the mode to calculate.</li><li><tt>KA</tt>: integral of the norm of the surface current density.  It indicates the strength of the mode amplitude.  If not assigned, the deault value <tt>KA = 1</tt> is used.</li></ul></div><h2>Note<a name="3"></a></h2><p>In the finite-difference grid, <tt>ModalSrc</tt> excites dipoles at the <i>E</i>-field points.  This poses a condition on <tt>intercept</tt> argument in the constructor: <tt>intercept</tt> should be at a dual grid point in the <tt>normal_axis</tt> direction. Therefore, make sure that <tt>intercept</tt> does not overlap with the locations of the vertices of <a href="Shape.html"><tt>Shape</tt></a> in the <tt>normal_axis</tt> direction; otherwise dynamic grid generation in <a href="moxwell_run.html"><tt>maxwell_run</tt></a> will fail.</p><h2>Example<a name="4"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of PointSrc.</span>
+src = ModalSrc(normal_axis, intercept, neff_guess, KA)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: direction normal to the plane over which the electric dipoles distribute.  It is also the axis of the waveguide.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>intercept</tt>: location of the plane in the <tt>normal_axis</tt> direction.</li><li><tt>neff_guess</tt>: estimate of the effective refractive index of the mode to calculate.</li><li><tt>KA</tt>: integral of the norm of the surface current density.  It indicates the strength of the mode amplitude.  If unassigned, the deault value <tt>KA = 1</tt> is used.</li></ul></div><h2>Note<a name="3"></a></h2><p>In the finite-difference grid, <tt>ModalSrc</tt> excites dipoles at the <i>E</i>-field points.  This poses a condition on <tt>intercept</tt> argument in the constructor: <tt>intercept</tt> should be at a dual grid point in the <tt>normal_axis</tt> direction. Therefore, make sure that <tt>intercept</tt> does not overlap with the locations of the vertices of <a href="Shape.html"><tt>Shape</tt></a> in the <tt>normal_axis</tt> direction; otherwise dynamic grid generation in <a href="moxwell_run.html"><tt>maxwell_run</tt></a> will fail.</p><h2>Example<a name="4"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of PointSrc.</span>
 src =  ModalSrc(Axis.y, -1000, 1.0);  <span class="comment">% y = -1000 should not be primary grid point</span>
 </pre><pre class="language-matlab"><span class="comment">% Use the constructed src in maxwell_run().</span>
 [E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'SRC'</span>, src);
@@ -97,7 +97,7 @@ src =  ModalSrc(Axis.y, -1000, 1.0);  <span class="comment">% y = -1000 should n
 % * |neff_guess|: estimate of the effective refractive index of the mode to
 % calculate. 
 % * |KA|: integral of the norm of the surface current density.  It indicates the
-% strength of the mode amplitude.  If not assigned, the deault value |KA = 1| is
+% strength of the mode amplitude.  If unassigned, the deault value |KA = 1| is
 % used.
 
 %%% Note
@@ -130,9 +130,18 @@ classdef ModalSrc < Source
 	
 	properties (SetAccess = private)
 		grid2d  % instance of Grid2d
-		Jh  % J in horizontal direction on this plane: Jx for normal == z
-		Jv  % J in vertical direction on this plane: Jy for normal == z
+		osc  % instance of Oscillation
+		Ft2d  % {Hx2d Hy2d Hz2d; Ex2d Ey2d Ez2d}: cell array of Scalar2d for H and E on this plane
+		Jh  % 2D array J in horizontal direction on this plane: Jx for normal == z
+		Jv  % 2D array J in vertical direction on this plane: Jy for normal == z
 		neff  % effective n
+	end
+	
+	% Properties for dispersion relation and propagation length
+	properties (Dependent, SetAccess = immutable)
+		ispreped  % true if this ModalSrc is prepared; false otherwise
+		beta_r  % real part of complex wavevector
+		Lp  % propagation length
 	end
 	
 	methods
@@ -160,28 +169,57 @@ classdef ModalSrc < Source
 			this.Jv = [];
 		end
 		
-		function setJ(this, neff, Jh, Jv, grid3d)
+		function beta_r = get.beta_r(this)
+			beta = 2*pi*this.neff / this.osc.in_L0();
+			beta_r = real(beta);
+		end
+		
+		function Lp = get.Lp(this)
+			beta = 2*pi*this.neff / this.osc.in_L0();
+			Lp = -1/imag(beta);
+		end
+		
+		function ispreped = get.ispreped(this)
+			ispreped = ~isempty(this.Jh) && ~isempty(this.Jh);
+		end
+		
+		function setEH(this, neff, osc, E_cell, H_cell, grid3d)
 			chkarg(istypesizeof(neff, 'complex'), '"neff" should be complex.');
 			this.neff = neff;
+			
+			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
+			this.osc = osc;
 			
 			chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 			this.grid2d = Grid2d(grid3d, this.normal_axis);
 
 			Nh = this.grid2d.N(Dir.h);
 			Nv = this.grid2d.N(Dir.v);
+			h = this.grid2d.axis(Dir.h);
+			v = this.grid2d.axis(Dir.v);
 			
-			assert(istypesizeof(Jh, 'complex', [Nh Nv]), '"Jh" should be %d-by-%d matrix with complex elements.', Nh, Nv);
-			assert(istypesizeof(Jv, 'complex', [Nh Nv]), '"Jv" should be %d-by-%d matrix with complex elements.', Nh, Nv);
-
-			this.Jh = Jh;
-			this.Jv = Jv;
+			assert(istypesizeof(E_cell, 'complexcell', [1 Axis.count], [Nh Nv]), ...
+				'"E_cell" should be length-%d row cell array whose each element is %d-by-%d array with complex elements.', Axis.count, Nh, Nv);
+			assert(istypesizeof(H_cell, 'complexcell', [1 Axis.count], [Nh Nv]), ...
+				'"H_cell" should be length-%d row cell array whole each element is %d-by-%d array with complex elements.', Axis.count, Nh, Nv);
+			
+			this.Jh = H_cell{v};
+			this.Jv = -H_cell{h};
+			
+			this.Ft2d = cell(GK.count, Axis.count);
+			for w = Axis.elems
+				this.Ft2d{GK.prim, w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, GK.prim, osc, this.intercept);
+			end
+			for w = Axis.elems
+				this.Ft2d{GK.dual, w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, GK.dual, osc, this.intercept);
+			end
 		end
 		
 		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
 			assert(~isempty(this.Jh) && ~isempty(this.Jv), '"Jh" and "Jv" are not set in this ModalSrc.');
-			index_cell = cell(1, Axis.count);
 			if w_axis == this.normal_axis
 				Jw_patch = [];
+				index_cell = cell(1, Axis.count);
 			else
 				g2d = Grid2d(grid3d, this.normal_axis);
 				assert(isequal(g2d, this.grid2d), ...
@@ -192,21 +230,11 @@ classdef ModalSrc < Source
 				n = this.normal_axis;
 				
 				g = GK.dual;
-				ind_n = ismembc2(this.intercept, grid3d.l{n,g});
-				if ind_n == 0
-					[~, ind_n] = min(abs(grid3d.l{n,g} - this.intercept));
-					warning('FDS:srcAssign', ...
-						['%s grid in %s-axis of "grid3d" does not have location %e of this %s; ', ...
-						'closest grid vertex at %e will be taken instead.'], ...
-						char(g), char(n), this.intercept, class(this), grid3d.l{n,g}(ind_n));
-				end
+				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				
 				% Set index_cell.
-				Nh = this.grid2d.N(Dir.h);
-				Nv = this.grid2d.N(Dir.v);
+				index_cell = {':', ':', ':'};
 				index_cell{n} = ind_n;
-				index_cell{h} = 1:Nh;
-				index_cell{v} = 1:Nv;
 				
 				% Set Jw_patch.
 				dn = grid3d.dl{n,g}(ind_n);

@@ -23,7 +23,7 @@
 % vertices.  For |normal_axis == Axis.y|, it is in the format of |[z1 x1; ...;
 % zn xn]|.
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
-% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
 
 %%% Example

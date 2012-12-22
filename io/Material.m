@@ -20,7 +20,7 @@
 % between 0 and 1.  Use |color = 'none'| to hide the objects made of this
 % material in figures.
 % * |eps|: electric permittivity of the material.
-% * |mu|: magnetic permeability of the material.  If not assigned, the default
+% * |mu|: magnetic permeability of the material.  If unassigned, the default
 % value |mu = 1| is used.
 
 %%% Example

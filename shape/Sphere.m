@@ -13,8 +13,8 @@
 % * |center|: center of the sphere in the format of |[x y z]|.
 % * |radius|: radius of the sphere
 % * |dl_max|: maximum grid size allowed in the sphere.  It can be either |[dx dy
-% dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
-% |dl_max = Inf| is used.
+% dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned, |dl_max
+% = Inf| is used.
 
 %%% Example
 %   % Create an instance of Sphere.

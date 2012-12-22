@@ -147,7 +147,7 @@ classdef Painter2d < handle
 		end
 		
 		function set.cmax(this, cmax)
-			chkarg(istypesizeof(cmax, 'real') && (cmax > 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
+			chkarg(istypesizeof(cmax, 'real') && (cmax >= 0 || isnan(cmax)), '"cmax" should be positive or NaN.');
 			if isnan(cmax)
 				this.isCpreped = false;
 			end
@@ -377,12 +377,12 @@ classdef Painter2d < handle
 					if i > nobj  % source
 						if istypesizeof(shape, 'Point')
 							set(h, 'LineWidth', 3);
-% 						elseif istypesizeof(shape, 'Line')
-% 							if n_axis == shape.axis
-% 								set(h, 'LineWidth', 3);
+						elseif istypesizeof(shape, 'Line')
+							if n_axis == shape.axis
+								set(h, 'LineWidth', 3);
 % 							else
 % 								set(h, 'LineStyle', ':');
-% 							end
+							end
 % 						elseif istypesizeof(shape, 'Plane')
 % 							set(h, 'LineStyle', ':');
 						end

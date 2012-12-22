@@ -1,16 +1,10 @@
-function [E, H, A, b, HfromE] = solve_eq_direct(omega, d_prim, d_dual, s_prim, s_dual, mu_face, eps_edge, J, nosolve)
+function [E, H, A, b, HfromE] = solve_eq_direct(omega, eps_face_cell, mu_edge_cell, s_factor_cell, J_cell, grid3d, nosolve)
 
-if nargin < 9  % no nosolve
+if nargin < 7  % no nosolve
 	nosolve = false;
 end
 
-N = [length(d_prim{Axis.x}), length(d_prim{Axis.y}), length(d_prim{Axis.z})];
-
-[A1, A2, mu, eps, b] = fds_matrices(omega, ...
-						d_prim, d_dual, ...
-						s_prim, s_dual, ...
-						mu_face, eps_edge, ...
-						J);
+[A1, A2, mu, eps, b] = fds_matrices(omega, eps_face_cell, mu_edge_cell, s_factor_cell, J_cell, grid3d);
 
 % Mask elements corresponding to PEC.
 ind_pec = isinf(abs(eps));
@@ -27,6 +21,7 @@ A = PM * A1 * HfromE * PM - omega^2 * EPS;
 HfromE = (1i/omega) * HfromE;
 
 % Reorder the indices of the elements of matrices and vectors to reduce the bandwidth of A.
+N = grid3d.N;
 r = reordering_indices(Axis.count, N);
 
 A = A(r,r);

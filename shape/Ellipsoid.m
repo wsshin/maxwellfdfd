@@ -14,7 +14,7 @@
 % * |center|: center of the ellipsoid in the format of |[x y z]|.
 % * |semiaxes|: semiaxes of the ellipse in the format of |[a b c]|.
 % * |dl_max|: maximum grid size allowed in the ellipsoid.  It can be either |[dx
-% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
 
 %%% Example

@@ -84,14 +84,7 @@ classdef PointSrc < Source
 					else  % v == q or r
 						g = GK.dual;
 					end
-					iv = ismembc2(l, grid3d.l{v,g});
-					if iv == 0
-						[~, iv] = min(abs(grid3d.l{v,g} - l));
-						warning('FDS:srcAssign', ...
-							['%s grid in %s-axis of "grid3d" does not have location %e of this %s; ', ...
-							'closest grid vertex at %e will be taken instead.'], ...
-							char(g), char(v), l, class(this), grid3d.l{v,g}(iv));
-					end
+					iv = ind_for_loc(l, v, g, grid3d);
 					index_cell{v} = iv;
 				end
 				dq = grid3d.dl{q, GK.dual}(index_cell{q});

@@ -16,9 +16,9 @@
 % * |intercept|: location of the line in the plane normal to the line.  For
 % |axis == Axis.y|, it is in the format of |[z x]|.
 % * |dl_max|: maximum grid size allowed in the plane.  It can be either |[dx dy
-% dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
-% |dl_max = Inf| is used.  In the directions normal to the |axis| direction,
-% |dl_max| is meaningless.
+% dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned, |dl_max
+% = Inf| is used.  In the directions normal to the |axis| direction, |dl_max| is
+% meaningless.
 
 %%% Example
 %   % Create an instance of Line.

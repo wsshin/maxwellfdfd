@@ -21,7 +21,7 @@
 % |normal_axis == Axis.y|, |a| is the semiaxis in the z-axis and |b| is the
 % semiaxis in the x-axis.
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
-% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
 
 %%% Example

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>PolygonalCylinder</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-04"><meta name="DC.source" content="PolygonalCylinder.m"><style type="text/css">
+      --><title>PolygonalCylinder</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-22"><meta name="DC.source" content="PolygonalCylinder.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>PolygonalCylinder</h1><!--introduction--><p>Concrete subclass of <a href="GenericCylinder.html"><tt>GenericCylinder</tt></a> representing a cylinder with a polygonal cross section.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>PolygonalCylinder</tt> is a Shape for a cylinder whose cross section is a polygon.  It is assumed that the polygon is convex and the mean of its vertices is inside the polygon.  The axis of the cylinder should be aligned with one of the axes of the Cartesian coordinate system.</p><h2>Construction<a name="2"></a></h2><pre>shape = PolygonalCylinder(normal_axis, height, normal_center, point_array)
-shape = PolygonalCylinder(normal_axis, height, normal_center, point_array, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: axis of the cylinder.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>height</tt>: size of the cylinder along its axis.</li><li><tt>normal_center</tt>: center of the axis of the cylinder.  It is a real number.</li><li><tt>radius</tt>: radius of the circle</li><li><tt>point_array</tt>: <tt>n</tt>-by-|2| array of the vertices of the polygon with <tt>n</tt> vertices.  For <tt>normal_axis == Axis.y</tt>, it is in the format of <tt>[z1 x1; ...; zn xn]</tt>.</li><li><tt>dl_max</tt>: maximum grid size allowed in the cylinder.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If not assigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of SectoralCylinder.</span>
+shape = PolygonalCylinder(normal_axis, height, normal_center, point_array, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: axis of the cylinder.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>height</tt>: size of the cylinder along its axis.</li><li><tt>normal_center</tt>: center of the axis of the cylinder.  It is a real number.</li><li><tt>radius</tt>: radius of the circle</li><li><tt>point_array</tt>: <tt>n</tt>-by-|2| array of the vertices of the polygon with <tt>n</tt> vertices.  For <tt>normal_axis == Axis.y</tt>, it is in the format of <tt>[z1 x1; ...; zn xn]</tt>.</li><li><tt>dl_max</tt>: maximum grid size allowed in the cylinder.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If unassigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of SectoralCylinder.</span>
 shape = PolygonalCylinder(Axis.z, 100, 50, [0 0; 50 0; 25 25*sqrt(3)]);  <span class="comment">% cross section is regular triangle</span>
 </pre><pre class="language-matlab"><span class="comment">% Use the constructed shape in maxwell_run().</span>
 [E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'OBJ'</span>, {<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0}, shape, {REMAINING ARGUMENTS});
@@ -97,7 +97,7 @@ shape = PolygonalCylinder(Axis.z, 100, 50, [0 0; 50 0; 25 25*sqrt(3)]);  <span c
 % vertices.  For |normal_axis == Axis.y|, it is in the format of |[z1 x1; ...;
 % zn xn]|.
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
-% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
+% dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
 
 %%% Example
@@ -162,7 +162,7 @@ classdef PolygonalCylinder < GenericCylinder
 			lprim = cell(1, Axis.count);
 			lprim{h} = p_array(1, 1:end-1);
 			lprim{v} = p_array(2, 1:end-1);
-			lprim{n} = [normal_center - height/2, normal_center + height/2];
+			lprim{n} = [-height height]/2 + normal_center;
 			
 			if nargin < 5  % no dl_max
 				super_args = {normal_axis, @lsf2d, lprim};

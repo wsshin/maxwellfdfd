@@ -16,9 +16,8 @@
 % |Axis.y|, |Axis.z|.
 % * |intercept|: location of the plane in the |normal_axis| direction.
 % * |dl_max|: maximum grid size allowed in the plane.  It can be either |[dx dy
-% dz]| or a single real number |dl| for |dx = dy = dz|.  If not assigned,
-% |dl_max = Inf| is used.  In the |normal_axis| direction, |dl_max| is
-% meaningless.
+% dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned, |dl_max
+% = Inf| is used.  In the |normal_axis| direction, |dl_max| is meaningless.
 
 %%% Example
 %   % Create an instance of Plane.

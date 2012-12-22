@@ -171,10 +171,7 @@ classdef TFSFPlaneSrc < Source
 		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
 			assert(~isnan(this.N_bg), '"mat_bg" is not set in this TFSFPlaneSrc.');
 			
-			index_cell = cell(1, Axis.count);
-			for w = Axis.elems
-				index_cell{w} = 1:grid3d.N(w);
-			end
+			index_cell = {':', ':', ':'};
 			Jw_patch = this.J{w_axis};
 		end
 	end
