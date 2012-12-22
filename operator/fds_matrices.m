@@ -108,12 +108,12 @@ for w = Axis.elems
 	if bc(u,Sign.n) == BC.m
 		ind = {':', ':', ':'};
 		ind{u} = 1;
-		mask(ind(:)) = 0;
+		mask(ind{:}) = 0;
 	end
 	if bc(v,Sign.n) == BC.m
 		ind = {':', ':', ':'};
 		ind{v} = 1;
-		mask(ind(:)) = 0;
+		mask(ind{:}) = 0;
 	end
 	mask_m{w} = mask;
 end
@@ -125,7 +125,7 @@ for w = Axis.elems
 	if bc(w,Sign.n) == BC.m
 		ind = {':', ':', ':'};
 		ind{w} = 1;
-		mask(ind(:)) = 0;
+		mask(ind{:}) = 0;
 	end
 	mask_e{w} = mask;
 end

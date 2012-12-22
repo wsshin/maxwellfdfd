@@ -12,6 +12,7 @@
 %  src = LineSrc(axis, intercept)
 %  src = LineSrc(axis, intercept, polarization)
 %  src = LineSrc(axis, intercept, polarization, IorK)
+%  src = LineSrc(axis, intercept, polarization, IorK, ka_Bloch)
 %  src = LineSrc(axis, intercept, polarization, IorK, theta, wvlen)
 % 
 % *Input Arguments*
@@ -26,6 +27,8 @@
 % * |IorK|: for |polarization == axis|, complex amplitude of the current that
 % the dipoles drive; for |polarization ~= axis|, complex amplitude of the sheet
 % current density that the dipoles drive.  If unassigned, |IorK = 1.0| is used.
+% * |ka_Bloch|: Bloch wavevector in the axis of this line.  If unassigned,
+% |ka_Bloch = 0| is used.
 % * |theta|: oblique incidence angle.  |abs(theta)| should not exceed |pi/2|. If
 % unassigned, |theta = 0.0| is used.
 % * |wvlen|: wavelength of the cylindrical wave in the background medium.  It is
@@ -83,15 +86,19 @@ classdef LineSrc < Source & WithBloch
 			end
 			chkarg(istypesizeof(IorK, 'complex'), '"IorK" should be complex.');
 
-
-			if nargin < 6  % no wvlen
-				assert(nargin < 5);  % no theta
-				theta = 0;
-				wvlen = Inf;
+			if nargin < 5  % no theta (or ka_Bloch)
+				ka_Bloch = 0;
+			elseif nargin < 6  % no wvlen
+				ka_Bloch = theta;
+				chkarg(istypesizeof(ka_Bloch, 'real'), '"ka_Bloch" should be real.');
+			else  % with wvlen
+				assert(nargin == 6);
+				chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
+					'"theta" should be polar angle in radian between -pi/2 and pi/2.');
+				chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
+				ka_Bloch = (2*pi/wvlen) * sin(theta);
 			end
-			chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
-				'"theta" should be polar angle in radian between -pi/2 and pi/2.');
-			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
+
 						
 			l = cell(Axis.count, GK.count);
 			[h, v] = cycle(axis);  % h, v ~= axis
@@ -114,10 +121,7 @@ classdef LineSrc < Source & WithBloch
 			this.IorK = IorK;
 
 			this.kBloch = [0 0 0];
-			if this.theta ~= 0
-				kl = (2*pi/wvlen) * sin(this.theta);  % k along line
-				this.kBloch(this.axis) = kl;
-			end
+			this.kBloch(this.axis) = ka_Bloch;
 		end
 				
 		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
