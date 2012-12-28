@@ -251,19 +251,26 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 			if istypesizeof(src, 'ModalSrc')
 				is_modalsrc = true;
 				modalsrc = src;
-				for g = GK.elems
-					Ft2d = modalsrc.Ft2d(g,:);
-
-					cmax = max(abs([Ft2d{Axis.x}.array(:); Ft2d{Axis.y}.array(:); Ft2d{Axis.z}.array(:)]));
-					opts.withabs = true;
-					opts.cmax = cmax;
-
-					for w = Axis.elems
-						figure;
-						set(gcf, 'units','normalized','position',[subsindex(w)/3 subsindex(g)/2 1/3 1/3]);			
-						vis2d(Ft2d{w}, obj_array, opts);
-						drawnow;
-					end
+				opts.withabs = true;
+				
+				E2d = modalsrc.E2d;
+				cmax = max(abs([E2d{Axis.x}.array(:); E2d{Axis.y}.array(:); E2d{Axis.z}.array(:)]));
+				opts.cmax = cmax;
+				for w = Axis.elems
+					figure;
+					set(gcf, 'units','normalized','position',[subsindex(w)/3 1/2 1/3 1/3]);			
+					vis2d(E2d{w}, obj_array, opts);
+					drawnow;
+				end
+				
+				H2d = modalsrc.H2d;
+				cmax = max(abs([H2d{Axis.x}.array(:); H2d{Axis.y}.array(:); H2d{Axis.z}.array(:)]));
+				opts.cmax = cmax;
+				for w = Axis.elems
+					figure;
+					set(gcf, 'units','normalized','position',[subsindex(w)/3 0 1/3 1/3]);			
+					vis2d(H2d{w}, obj_array, opts);
+					drawnow;
 				end
 			end
 		end

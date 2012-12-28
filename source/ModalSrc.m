@@ -57,7 +57,8 @@ classdef ModalSrc < Source
 	properties (SetAccess = private)
 		grid2d  % instance of Grid2d
 		osc  % instance of Oscillation
-		Ft2d  % {Hx2d Hy2d Hz2d; Ex2d Ey2d Ez2d}: cell array of Scalar2d for H and E on this plane
+		E2d  % {Ex2d Ey2d Ez2d}: cell array of Scalar2d for E on this plane
+		H2d  % {Hx2d Hy2d Hz2d}: cell array of Scalar2d for H on this plane
 		Jh  % 2D array J in horizontal direction on this plane: Jx for normal == z
 		Jv  % 2D array J in vertical direction on this plane: Jy for normal == z
 		neff  % effective n
@@ -132,12 +133,11 @@ classdef ModalSrc < Source
 			this.Jh = H_cell{v};
 			this.Jv = -H_cell{h};
 			
-			this.Ft2d = cell(GK.count, Axis.count);
+			this.E2d = cell(Axis.count);
+			this.H2d = cell(Axis.count);
 			for w = Axis.elems
-				this.Ft2d{GK.prim, w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, GK.prim, osc, this.intercept);
-			end
-			for w = Axis.elems
-				this.Ft2d{GK.dual, w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, GK.dual, osc, this.intercept);
+				this.E2d{w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, GK.dual, osc, this.intercept);
+				this.H2d{w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, GK.prim, osc, this.intercept);
 			end
 		end
 		
