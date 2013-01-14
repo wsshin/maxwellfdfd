@@ -176,7 +176,7 @@
 %       'SRC', PointSrc(Axis.x, [0, 0, 200]), ...
 %       inspect_only);
 
-function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
+function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(varargin)
 	DEFAULT_METHOD = 'direct';  % 'direct', 'gpu', 'aws', 'inputfile'
 		
 	% Set solver options.
@@ -221,6 +221,13 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 		chkarg(istypesizeof(solveropts.tol, 'real') && solveropts.tol > 0, ...
 			'solveropts.tol should be positive.');
 	end
+	
+	if ~is_solveropts || ~isfield(solveropts, 'withinterp')
+		solveropts.withinterp = true;
+	else
+		chkarg(istypesizeof(solveropts.withinterp, 'logical'), ...
+			'solveropts.withinterp should be logical.');
+	end
 
 	chkarg(iarg > 0, 'first argument is not correct.');
 
@@ -251,7 +258,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 			if istypesizeof(src, 'ModalSrc')
 				is_modalsrc = true;
 				modalsrc = src;
-				opts.withabs = true;
+				opts.withabs = false;
 				
 				E2d = modalsrc.E2d;
 				cmax = max(abs([E2d{Axis.x}.array(:); E2d{Axis.y}.array(:); E2d{Axis.z}.array(:)]));
@@ -339,16 +346,22 @@ function [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(varargin)
 	end
 	
 	% Construct Scalar3d objects.
-	E_cell = cell(1, Axis.count);
-	H_cell = cell(1, Axis.count);
-	J_cell = cell(1, Axis.count);
-	for w = Axis.elems
-		if ~isempty(E)
-			E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, GK.dual, osc);
+	if solveropts.withinterp
+		E_cell = cell(1, Axis.count);
+		H_cell = cell(1, Axis.count);
+		J_cell = cell(1, Axis.count);
+		for w = Axis.elems
+			if ~isempty(E)
+				E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, GK.dual, osc);
+			end
+			if ~isempty(H)
+				H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, GK.prim, osc);
+			end
+			J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, GK.dual, osc);
 		end
-		if ~isempty(H)
-			H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, GK.prim, osc);
-		end
-		J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, GK.dual, osc);
-	end		
+	else  % solveropts.withinterp == false
+		E_cell = E;
+		H_cell = H;
+		J_cell = J;
+	end
 end

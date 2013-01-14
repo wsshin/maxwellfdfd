@@ -8,7 +8,7 @@ classdef PhysQ < Enumerated
 		mu('permeability', '\mu', 'H/m')
 		E('E-field', 'E', 'V/m')
 		H('H-field', 'H', 'A/m')
-		J('electric current density', 'J', 'A/m^3')
+		J('electric current density', 'J', 'A/m^2')
 		I('electric current', 'I', 'A')
 		S('Poynting vector', 'S', 'W/m^2')
 		P('power', 'P', 'W')
