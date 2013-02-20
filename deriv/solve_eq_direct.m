@@ -28,8 +28,20 @@ A = A(r,r);
 b = b(r);
 HfromE = HfromE(r,r);
 
+% figure; spy(A); xlabel(''); set(gca, 'xtick', []); set(gca, 'ytick', []);
+% [L1, U1] = lu(A);
+% figure; spy(U1); xlabel(''); set(gca, 'xtick', []); set(gca, 'ytick', []);
+% [L2, U2, p, q, R] = lu(A, 'vector');
+% figure; spy(U2); xlabel(''); set(gca, 'xtick', []); set(gca, 'ytick', []);
+
+
 if ~nosolve
-	e = A\b;
+	% Below, [L, U, P, Q, R] = lu(A), rather than [L, U] = lu(A), seems to be
+	% similar to this.  The permutation matrices P and Q can be generated as
+	% vectors by [L, U, p, q, R] = lu(A, 'vector').  Then R(:,p)\A(:,q) = L*U.
+	
+%	spparms('spumoni',1);  % make mldivide(A, b) (= A\b) verbose
+	e = A\b;  
 	h = HfromE * e;
 
 	e = reshape(e, Axis.count, prod(N));
