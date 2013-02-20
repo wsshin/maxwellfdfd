@@ -200,7 +200,7 @@ k = k(end:-1:1);
 wvlen = wvlen(end:-1:1);
 
 %% Calculate the permittivity from n and k following the exp(+i w t) time dependence.
-eps = (n - sqrt(-1)*k).^2;
+eps = (n - 1i*k).^2;
 
 %% Plot n and k.  Compare with Fig.10 on p.753 of Palik.
 nk_wvlen = 1;

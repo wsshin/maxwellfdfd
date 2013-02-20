@@ -15,7 +15,7 @@ k = k.';
 wvlen = wvlen.';
 
 %% Calculate the permittivity from n and k following the exp(+i w t) time dependence.
-eps = (n - sqrt(-1)*k).^2;
+eps = (n - 1i*k).^2;
 
 %% Plot real(eps) and imag(eps).  Compare with Fig.3 on p.4375 of Johnson.
 
