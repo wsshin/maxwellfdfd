@@ -198,11 +198,6 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 		solveropts.method = DEFAULT_METHOD;
 	end
 	
-	if is_solveropts && isequal(solveropts.method, 'aws')
-		chkarg(isfield(solveropts, 'cluster') && isfield(solveropts, 'nodes'), ...
-			'"solveropts" should have "cluster" and "nodes" fields.');
-	end
-
 	if is_solveropts && isequal(solveropts.method, 'inputfile')
 		chkarg(isfield(solveropts, 'filenamebase'), '"solveropts" should have "filenamebase" field.');
 	end
@@ -258,7 +253,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 			if istypesizeof(src, 'ModalSrc')
 				is_modalsrc = true;
 				modalsrc = src;
-				opts.withabs = false;
+				opts.withabs = true;
 				
 				E2d = modalsrc.E2d;
 				cmax = max(abs([E2d{Axis.x}.array(:); E2d{Axis.y}.array(:); E2d{Axis.z}.array(:)]));
@@ -328,12 +323,13 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 				ds_prim = mult_vec(d_prim, s_prim);
 				ds_dual = mult_vec(d_dual, s_dual);
 				E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-				[E, H] = maxwell.solve(solveropts.cluster, solveropts.nodes, ...
-								osc.in_omega0(), ...
+				callback = maxwell(osc.in_omega0(), ...
 								ds_prim, ds_dual, ...
 								mu_edge, eps_face, ...
 								E0, J, ...
 								solveropts.maxit, solveropts.tol);
+				while ~callback(); end
+				[~, E, H] = callback();
 			end
 			
 			E = neg_vec(flip_vec(E));  % pseudovector
