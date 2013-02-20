@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Material</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-22"><meta name="DC.source" content="Material.m"><style type="text/css">
+      --><title>Material</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-02-19"><meta name="DC.source" content="Material.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -65,8 +65,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Material</h1><!--introduction--><p>Class representing an electromagnetic material.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>Material</tt> represents an electromagnetic material with electric permittivity and magnetic permeability.  Users should provide the name and color of the material in the constructor</p><h2>Construction<a name="2"></a></h2><pre>mat = Material(name, color, eps)
-mat = Material(name, color, eps, mu)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>name</tt>: name of the material.  Used to distinguish materials and label them in figures.</li><li><tt>color</tt>: color of the material.  Used to visualize the material in figures. It can be MATLAB's reserved color code characters (e.g., <tt>'r'</tt> for red, <tt>'k'</tt> for black) or an RGB code <tt>[r g b]</tt> where <tt>r</tt>, <tt>g</tt>, <tt>b</tt> are real numbers between 0 and 1.  Use <tt>color = 'none'</tt> to hide the objects made of this material in figures.</li><li><tt>eps</tt>: electric permittivity of the material.</li><li><tt>mu</tt>: magnetic permeability of the material.  If unassigned, the default value <tt>mu = 1</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of Material.</span>
+  </style></head><body><div class="content"><h1>Material</h1><!--introduction--><p>Class representing an electromagnetic material.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>Material</tt> represents an electromagnetic material with electric permittivity and magnetic permeability.  Users should provide the name and color of the material in the constructor</p><h2>Construction<a name="2"></a></h2><pre>mat = Material(name, color, eps, [islossless])
+mat = Material(name, color, eps, mu, [islossless])</pre><p><b>Input Arguments</b></p><div><ul><li><tt>name</tt>: name of the material.  Used to distinguish materials and label them in figures.</li><li><tt>color</tt>: color of the material.  Used to visualize the material in figures. It can be MATLAB's reserved color code characters (e.g., <tt>'r'</tt> for red, <tt>'k'</tt> for black) or an RGB code <tt>[r g b]</tt> where <tt>r</tt>, <tt>g</tt>, <tt>b</tt> are real numbers between 0 and 1.  Use <tt>color = 'none'</tt> to hide the objects made of this material in figures.</li><li><tt>eps</tt>: electric permittivity of the material.</li><li><tt>mu</tt>: magnetic permeability of the material.  If unassigned, the default value <tt>mu = 1</tt> is used.</li><li><tt>islossless</tt>: optional argument.  <tt>true</tt> to ignore the loss or gain in material; <tt>false</tt> otherwise.  The default value is <tt>false</tt>.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of Material.</span>
 vacuum =  Material(<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0);
 </pre><pre class="language-matlab"><span class="comment">% Use the constructed material in maxwell_run().</span>
 [E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'OBJ'</span>, vacuum, Box([0 100; 0 50; 0 20]), {REMAINING ARGUMENTS});
@@ -81,8 +81,8 @@ vacuum =  Material(<span class="string">'vacuum'</span>, <span class="string">'n
 % material in the constructor
 
 %%% Construction
-%  mat = Material(name, color, eps)
-%  mat = Material(name, color, eps, mu)
+%  mat = Material(name, color, eps, [islossless])
+%  mat = Material(name, color, eps, mu, [islossless])
 % 
 % *Input Arguments*
 %
@@ -96,6 +96,8 @@ vacuum =  Material(<span class="string">'vacuum'</span>, <span class="string">'n
 % * |eps|: electric permittivity of the material.
 % * |mu|: magnetic permeability of the material.  If unassigned, the default
 % value |mu = 1| is used.
+% * |islossless|: optional argument.  |true| to ignore the loss or gain in
+% material; |false| otherwise.  The default value is |false|.
 
 %%% Example
 %   % Create an instance of Material.
@@ -117,33 +119,49 @@ classdef Material
 	end
 	
 	methods
-		function this = Material(name, color, eps, mu)
+		function this = Material(name, color, eps, varargin)
+			narginchk(3, 5);
 			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
-			this.name = name;
-			
 			chkarg(istypeof(color, 'char') ...
 				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
 				'"color" should be string or [r g b].');
-			this.color = color;
-			
 			chkarg(istypesizeof(eps, 'complex'), '"eps" should be complex.');
-			this.eps = eps;
 			
-			if nargin < 4  % no mu
-				mu = 1.0;
+			mu_temp = 1.0;
+			islossless = false;
+			if length(varargin) == 2
+				mu_temp = varargin{1};
+				islossless = varargin{2};
+			elseif length(varargin) == 1
+				if istypesizeof(varargin{1}, 'logical')
+					islossless = varargin{1};
+				else
+					mu_temp = varargin{1};
+				end
 			end
-			chkarg(istypesizeof(mu, 'complex'), '"mu" should be complex.');
-			this.mu = mu;
+			
+			chkarg(istypesizeof(mu_temp, 'complex'), '"mu" should be complex.');
+			chkarg(istypesizeof(islossless, 'logical'), '"islossless" should be logical.');
+			
+			if islossless
+				name = [name, ' (lossless)'];
+				eps = real(eps);
+				mu_temp = real(mu_temp);
+			end
+			this.name = name;
+			this.color = color;
+			this.eps = eps;
+			this.mu = mu_temp;
 		end
 	end
 	
 	methods (Static)
-		function material = create(name, color, osc, islossless)
+		function material = create(osc, name, color, islossless)
+			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
 			chkarg(istypesizeof(color, 'char', [1 0]) ...
 				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
 				'"color" should be string or [r g b].');
-			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 			
 			if nargin < 4
 				islossless = false;
@@ -160,11 +178,7 @@ classdef Material
 			n = interp1(param.eV, param.n, eV);
 			k = interp1(param.eV, param.k, eV);
 			epsilon = (n - 1i * k)^2;
-			if islossless
-				epsilon = real(epsilon);
-				name = [name, ' (lossless)'];
-			end
-			material =  Material(name, color, epsilon);
+			material =  Material(name, color, epsilon, islossless);
 		end
 	end
 	
@@ -188,7 +202,10 @@ classdef Material
 			another = another(:);
 			truth = true(n,1);
 			for i = 1:n
-				truth(i)= ~isequal(this(i).name, another(i).name);
+				truth(i)= ~isequal(this(i).name, another(i).name) || ...
+						~isequal(this(i).color, another(i).color) || ...
+						this(i).eps ~= another(i).eps || ...
+						this(i).mu ~= another(i).mu;
 			end
 			truth = reshape(truth, dims);
 		end

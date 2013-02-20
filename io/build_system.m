@@ -71,15 +71,14 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	end
 		
 	function material = create_material(varargin)
+		narg = nargin;
 		if istypesizeof(varargin{end}, 'logical')
-			islossless = varargin{end};
-			varargin = varargin(1:end-1);
-		else
-			islossless = false;
+			narg = narg - 1;
 		end
 		
-		if length(varargin) == 2
-			material = Material.create(varargin{:}, osc, islossless);
+		chkarg(narg >= 2, '# of arguments should be at least 2.')
+		if narg == 2  % data table is specified
+			material = Material.create(osc, varargin{:});
 		else
 			material = Material(varargin{:});
 		end

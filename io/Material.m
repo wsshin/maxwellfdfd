@@ -7,8 +7,8 @@
 % material in the constructor
 
 %%% Construction
-%  mat = Material(name, color, eps)
-%  mat = Material(name, color, eps, mu)
+%  mat = Material(name, color, eps, [islossless])
+%  mat = Material(name, color, eps, mu, [islossless])
 % 
 % *Input Arguments*
 %
@@ -22,6 +22,8 @@
 % * |eps|: electric permittivity of the material.
 % * |mu|: magnetic permeability of the material.  If unassigned, the default
 % value |mu = 1| is used.
+% * |islossless|: optional argument.  |true| to ignore the loss or gain in
+% material; |false| otherwise.  The default value is |false|.
 
 %%% Example
 %   % Create an instance of Material.
@@ -43,33 +45,49 @@ classdef Material
 	end
 	
 	methods
-		function this = Material(name, color, eps, mu)
+		function this = Material(name, color, eps, varargin)
+			narginchk(3, 5);
 			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
-			this.name = name;
-			
 			chkarg(istypeof(color, 'char') ...
 				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
 				'"color" should be string or [r g b].');
-			this.color = color;
-			
 			chkarg(istypesizeof(eps, 'complex'), '"eps" should be complex.');
-			this.eps = eps;
 			
-			if nargin < 4  % no mu
-				mu = 1.0;
+			mu_temp = 1.0;
+			islossless = false;
+			if length(varargin) == 2
+				mu_temp = varargin{1};
+				islossless = varargin{2};
+			elseif length(varargin) == 1
+				if istypesizeof(varargin{1}, 'logical')
+					islossless = varargin{1};
+				else
+					mu_temp = varargin{1};
+				end
 			end
-			chkarg(istypesizeof(mu, 'complex'), '"mu" should be complex.');
-			this.mu = mu;
+			
+			chkarg(istypesizeof(mu_temp, 'complex'), '"mu" should be complex.');
+			chkarg(istypesizeof(islossless, 'logical'), '"islossless" should be logical.');
+			
+			if islossless
+				name = [name, ' (lossless)'];
+				eps = real(eps);
+				mu_temp = real(mu_temp);
+			end
+			this.name = name;
+			this.color = color;
+			this.eps = eps;
+			this.mu = mu_temp;
 		end
 	end
 	
 	methods (Static)
-		function material = create(name, color, osc, islossless)
+		function material = create(osc, name, color, islossless)
+			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
 			chkarg(istypesizeof(color, 'char', [1 0]) ...
 				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
 				'"color" should be string or [r g b].');
-			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 			
 			if nargin < 4
 				islossless = false;
@@ -83,14 +101,12 @@ classdef Material
 			param = load([param_dir, param_file]);  % eV, n, k are loaded
 			chkarg(eV >= param.eV(1) && eV <= param.eV(end), '"eV" should be in the range described by %s', param_file);
 			
+			% Interpolate n and k rather than eps' and eps", because n and k are
+			% measured data.
 			n = interp1(param.eV, param.n, eV);
 			k = interp1(param.eV, param.k, eV);
 			epsilon = (n - 1i * k)^2;
-			if islossless
-				epsilon = real(epsilon);
-				name = [name, ' (lossless)'];
-			end
-			material =  Material(name, color, epsilon);
+			material =  Material(name, color, epsilon, islossless);
 		end
 	end
 	
@@ -114,7 +130,10 @@ classdef Material
 			another = another(:);
 			truth = true(n,1);
 			for i = 1:n
-				truth(i)= ~isequal(this(i).name, another(i).name);
+				truth(i)= ~isequal(this(i).name, another(i).name) || ...
+						~isequal(this(i).color, another(i).color) || ...
+						this(i).eps ~= another(i).eps || ...
+						this(i).mu ~= another(i).mu;
 			end
 			truth = reshape(truth, dims);
 		end

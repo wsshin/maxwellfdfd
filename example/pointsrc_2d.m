@@ -3,6 +3,7 @@ clear all; close all; clear classes; clc;
 %% Set flags.
 isnew = true;
 inspect_only = false;
+filenamebase = mfilename;
 
 %% Solve the system.
 wvlen = 20;
@@ -20,10 +21,10 @@ if isnew
 % 		inspect_only);
 
 	if ~inspect_only
-		save(mfilename, 'E', 'H', 'obj_array');
+		save(filenamebase, 'E', 'H', 'obj_array');
 	end
 else
-	load(mfilename);
+	load(filenamebase);
 end
 
 %% Visualize the solution.
