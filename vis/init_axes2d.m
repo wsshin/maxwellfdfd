@@ -39,6 +39,8 @@ xlabel(axes_handle, str, 'Rotation', 0, 'FontSize', 15);
 str = char(grid2d.axis(v));
 ylabel(axes_handle, str, 'Rotation', 0, 'FontSize', 15); 
 
+set(axes_handle, 'TickDir', 'out');
+
 
 % L0 = scalar3d.gi.L0;
 % dlu = scalar3d.gi.display_length_unit;
