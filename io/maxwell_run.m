@@ -120,7 +120,7 @@
 % used.
 %
 % There is a similar, optional parameter group SOBJ that begins with |'SOBJ'|.
-% SOBJ stands for _scatterer objects_, and it is used to define scatterers for
+% SOBJ stands for _scattering objects_, and it is used to define scatterers for
 % total-field/scattered-field (TF/SF) simulation.  When a TF/SF source is used
 % as a source, the objects defined in SOBJ group are treated as scatterers
 % whereas the objects defined in OBJ group are treated as background objects.

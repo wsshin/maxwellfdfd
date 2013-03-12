@@ -98,7 +98,7 @@ classdef Enumerated
 		function n = int(this)
 			% This function returned n = find(this.elems==this) originally, but
 			% it is modified to handle arguments given as arrays.
-			[~, n] = ismember(this, this.elems);
+			[~, n] = ismember(this, this.elems, 'legacy');
 		end
 		
 		function ind = subsindex(this)
