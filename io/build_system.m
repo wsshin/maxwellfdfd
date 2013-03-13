@@ -234,6 +234,9 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	chkarg(~isempty(osc), 'OSC parameter groups should be set.');
 	chkarg(~isempty(obj_dom), 'DOM parameter groups should be set.');
 	obj_array = [obj_dom, obj_array];
+	if isTFSF && isempty(sobj_array)
+		warning('FDS:objAssign', 'TF/SF source is used, but scatteres are not defined in SOBJ group.');
+	end
 	
 	chkarg(iarg <= narglim, 'more arguments than expected.');	
 	pm.mark('initial setup');
