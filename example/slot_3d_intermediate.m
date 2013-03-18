@@ -1,7 +1,6 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-isnew = true;
 inspect_only = false;
 
 %% Construct parameters.
@@ -29,20 +28,12 @@ src = ModalSrc(Axis.z, 200, 2.0);
 
 
 %% Solve the system.
-if isnew
-	[E, H, obj_array, err] = maxwell_run(...
-		'OSC', osc, ...
-		'DOM', domain_silica, [BC.p BC.p; BC.p BC.p; BC.p BC.p], [200 200 200], ...
-		'OBJ', refined_domain_silica, film1_Ag, film2_Ag, ...
-		'SRC', src, ...
-		inspect_only);
-
-	if ~inspect_only
-		save(mfilename, 'E', 'H', 'obj_array');
-	end
-else
-	load(mfilename);
-end
+[E, H, obj_array, err] = maxwell_run(...
+	'OSC', osc, ...
+	'DOM', domain_silica, [BC.p BC.p; BC.p BC.p; BC.p BC.p], [200 200 200], ...
+	'OBJ', refined_domain_silica, film1_Ag, film2_Ag, ...
+	'SRC', src, ...
+	inspect_only);
 
 %% Visualize the solution.
 if ~inspect_only

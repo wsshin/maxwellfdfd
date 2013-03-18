@@ -1,48 +1,37 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-isnew = true;
 inspect_only = true;
 
 %% Create shapes.
-if isnew
-	a = 420;  % lattice constant
-	t = 0.6*a;  % slab thickness
-	r = 0.29*a;  % hole radius
-	h = sqrt(3)/2*a;  % distance between rows of holes
+a = 420;  % lattice constant
+t = 0.6*a;  % slab thickness
+r = 0.29*a;  % hole radius
+h = sqrt(3)/2*a;  % distance between rows of holes
 
-	ad = 25;  % divider for a
-	td = 10;  % divider for t
-	dd = 10;  % divider for d = 2*r
+ad = 25;  % divider for a
+td = 10;  % divider for t
+dd = 10;  % divider for d = 2*r
 
-	slab = Box([-5.5*a, 5.5*a; -3.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
-	slab_yn = Box([-5.5*a, 5.5*a; -3.5*h, -0.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
-	slab_yp = Box([-5.5*a, 5.5*a; 0.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
+slab = Box([-5.5*a, 5.5*a; -3.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
+slab_yn = Box([-5.5*a, 5.5*a; -3.5*h, -0.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
+slab_yp = Box([-5.5*a, 5.5*a; 0.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
 
-	hole = CircularCylinder(Axis.z, t, [0 0 0], r, [2*r/dd, 2*r/dd, t/td]);
+hole = CircularCylinder(Axis.z, t, [0 0 0], r, [2*r/dd, 2*r/dd, t/td]);
 
-	%% Solve the system.
-	gray = [0.5 0.5 0.5];  % [r g  b]
-	solveropts.method = 'gpu';
+%% Solve the system.
+gray = [0.5 0.5 0.5];  % [r g  b]
+solveropts.method = 'gpu';
 
-% 	[E, H, obj_array, err] = maxwell_run(c, 1e-9, 1550, ...
-	[E, H, obj_array, err] = maxwell_run(...
-		'OSC', 1e-9, 1550, ...
-		'DOM', {'vacuum', 'white', 1.0}, [-5.5*a, 5.5*a; -3.5*h, 3.5*h; -3*t, 3*t], [a/ad, a/ad, t/td], BC.p, [2*a 0 t], ...
-		'OBJ', ...
-			{'Palik/Si', gray}, slab, ...
-			{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yn), ...
-			{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp), ...
-		'SRC', PointSrc(Axis.y, [0, 0, 0]), ...
-		solveropts, inspect_only);
-
-	if ~inspect_only
-		save(mfilename, 'E', 'H', 'obj_array');
-	end
-else
-	load(mfilename);
-end
-
+[E, H, obj_array, err] = maxwell_run(...
+	'OSC', 1e-9, 1550, ...
+	'DOM', {'vacuum', 'white', 1.0}, [-5.5*a, 5.5*a; -3.5*h, 3.5*h; -3*t, 3*t], [a/ad, a/ad, t/td], BC.p, [2*a 0 t], ...
+	'OBJ', ...
+		{'Palik/Si', gray}, slab, ...
+		{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yn), ...
+		{'vacuum', 'white', 1.0}, periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp), ...
+	'SRC', PointSrc(Axis.y, [0, 0, 0]), ...
+	solveropts, inspect_only);
 
 %% Visualize the solution.
 if ~inspect_only

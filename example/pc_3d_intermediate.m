@@ -1,7 +1,6 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-isnew = true;
 inspect_only = false;
 
 %%
@@ -44,21 +43,13 @@ hole_array_vac = Object(hole_array, vac);
 src = PointSrc(Axis.y, [0, 0, 0]);
 
 %% Solve the system.
-if isnew
-	gray = [0.5 0.5 0.5];  % [r g b]
-	[E, H, obj_array, err] = maxwell_run(...
-		'OSC', osc, ...
-		'DOM', domain_vac, BC.p, [2*a 0 t], ...
-		'OBJ', slab_Si, hole_array_vac, ...
-		'SRC', src, ...
-		inspect_only);
-
-	if ~inspect_only
-		save(mfilename, 'E', 'H', 'obj_array');
-	end
-else
-	load(mfilename);
-end
+gray = [0.5 0.5 0.5];  % [r g b]
+[E, H, obj_array, err] = maxwell_run(...
+	'OSC', osc, ...
+	'DOM', domain_vac, BC.p, [2*a 0 t], ...
+	'OBJ', slab_Si, hole_array_vac, ...
+	'SRC', src, ...
+	inspect_only);
 
 %% Visualize the solution.
 if ~inspect_only
