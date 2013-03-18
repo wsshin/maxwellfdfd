@@ -97,7 +97,7 @@ classdef Material
 			
 			maxwell_root = fileparts(fileparts(mfilename('fullpath')));
 			param_dir = [maxwell_root, filesep, 'material', filesep];
-			param_file = [name, '.mat'];
+			param_file = [strrep(name, '/', filesep), '.mat'];
 			param = load([param_dir, param_file]);  % eV, n, k are loaded
 			chkarg(eV >= param.eV(1) && eV <= param.eV(end), '"eV" should be in the range described by %s', param_file);
 			
