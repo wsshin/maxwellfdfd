@@ -1,9 +1,9 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-inspect_only = false;
+inspect_only = true;
 
-%% Construct parameters.
+%% C
 L0 = 1e-9;
 wvlen = 1550;
 unit = PhysUnit(L0);
@@ -26,18 +26,19 @@ film2_Ag = Object(film2, Ag);
 
 src = ModalSrc(Axis.z, 200, 2.0);
 
-
 %% Solve the system.
-[E, H, obj_array, err] = maxwell_run(...
+solveropts.method = 'aws';
+[E, H, obj_array, src_array, J] = maxwell_run(...
 	'OSC', osc, ...
 	'DOM', domain_silica, [BC.p BC.p; BC.p BC.p; BC.p BC.p], [200 200 200], ...
 	'OBJ', refined_domain_silica, film1_Ag, film2_Ag, ...
 	'SRC', src, ...
-	inspect_only);
+	solveropts, inspect_only);
 
 %% Visualize the solution.
 if ~inspect_only
 	figure;
+	clear opts;
 	opts.withabs = true;
-	visall(E{Axis.x}, obj_array, opts);
+	visall(E{Axis.x}, obj_array, src_array, opts);
 end

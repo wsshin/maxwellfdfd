@@ -5,8 +5,8 @@ inspect_only = true;
 
 %% Solve the system.
 gray = [0.5 0.5 0.5];  % [r g b]
-solveropts.method = 'gpu';
-[E, H, obj_array, err] = maxwell_run(...
+solveropts.method = 'aws';
+[E, H, obj_array, src_array, J] = maxwell_run(...
 	'OSC', 1e-9, 1550, ...
 	'DOM', {'Palik/SiO2', 'none'}, [0, 700; 0, 600; -200, 1700], 20, [BC.e, BC.m, BC.p], [0 200; 0 200; 200 200], ...
 	'OBJ', ...
@@ -18,7 +18,8 @@ solveropts.method = 'gpu';
 %% Visualize the solution.
 if ~inspect_only
 	figure;
+	clear opts;
 	opts.withabs = true;
 	opts.withgrid = true;
-	visall(E{Axis.x}, obj_array, opts);
+	visall(E{Axis.x}, obj_array, src_array, opts);
 end

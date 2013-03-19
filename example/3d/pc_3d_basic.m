@@ -20,10 +20,9 @@ slab_yp = Box([-5.5*a, 5.5*a; 0.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
 hole = CircularCylinder(Axis.z, t, [0 0 0], r, [2*r/dd, 2*r/dd, t/td]);
 
 %% Solve the system.
-gray = [0.5 0.5 0.5];  % [r g  b]
-solveropts.method = 'gpu';
-
-[E, H, obj_array, err] = maxwell_run(...
+gray = [0.5 0.5 0.5];  % [r g b]
+solveropts.method = 'aws';
+[E, H, obj_array, src_array, J] = maxwell_run(...
 	'OSC', 1e-9, 1550, ...
 	'DOM', {'vacuum', 'white', 1.0}, [-5.5*a, 5.5*a; -3.5*h, 3.5*h; -3*t, 3*t], [a/ad, a/ad, t/td], BC.p, [2*a 0 t], ...
 	'OBJ', ...
@@ -42,7 +41,7 @@ if ~inspect_only
 	opts.withobjsrc = false;
 %  	opts.withgrid = true;
 % 	opts.withinterp = false;
-	visall(E{Axis.y}, obj_array, opts);
+	visall(E{Axis.y}, obj_array, src_array, opts);
 
 %%
 	Sx = poynting(Axis.x, E{Axis.y}, E{Axis.z}, H{Axis.y}, H{Axis.z}, Axis.x, 100);

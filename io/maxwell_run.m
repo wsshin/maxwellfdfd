@@ -4,7 +4,7 @@
 %%% Syntax
 %  [E_cell, H_cell] = maxwell_run(OSC, DOM, OBJ, SRC, [inspect_only])
 %  [E_cell, H_cell, obj_array, src_array] = maxwell_run(...)
-%  [E_cell, H_cell, obj_array, src_array, err] = maxwell_run(...)
+%  [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(...)
 
 
 %%% Description
@@ -32,9 +32,11 @@
 % and |Source| elements represent the objects and sources placed in the
 % simulation domain, so they can be used to visualize the simulation domain.
 
-% |[E_cell, H_cell, obj_array, src_array, err] = maxwell_run(...)| returns a
-% column vector |err| that records the relative residual errors in the field
-% solutions as the solutions are evolved by the iterative method used in FDS.
+% |[E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(...)| returns
+% the electric current source distribution |J_cell|.  |J_cell| are length-3 row
+% cell arrays whose elements are the x-, y-, and z-components of the electric
+% current source density. Each x-, y-, z-component of the fields are provided as
+% instances of <Scalar3d.html Scalar3d>.
 
 
 %%% Input Parameter Group - OSC

@@ -1,7 +1,7 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-inspect_only = false;
+inspect_only = true;
 
 %%
 L0 = 1e-9;
@@ -9,11 +9,11 @@ wvlen = 1550;
 unit = PhysUnit(L0);
 osc = Oscillation(wvlen, unit);
 
-%%
+%% Create materials.
 vac = Material('vacuum', 'w', 1.0);
 Si = Material.create(osc, 'Palik/Si', [0.5 0.5 0.5]);  % [0.5 0.5 0.5]: gray in RGB
 
-%% Create shapes.
+%% Create objects.
 a = 420;  % lattice constant
 t = 0.6*a;  % slab thickness
 r = 0.29*a;  % hole radius
@@ -40,20 +40,23 @@ hole_yp_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp);
 hole_array = [hole_yn_array, hole_yp_array];
 hole_array_vac = Object(hole_array, vac);
 
+%% Create a source.
 src = PointSrc(Axis.y, [0, 0, 0]);
 
 %% Solve the system.
 gray = [0.5 0.5 0.5];  % [r g b]
-[E, H, obj_array, err] = maxwell_run(...
+solveropts.method = 'aws';
+[E, H, obj_array, src_array, J] = maxwell_run(...
 	'OSC', osc, ...
 	'DOM', domain_vac, BC.p, [2*a 0 t], ...
 	'OBJ', slab_Si, hole_array_vac, ...
 	'SRC', src, ...
-	inspect_only);
+	solveropts, inspect_only);
 
 %% Visualize the solution.
 if ~inspect_only
 	figure;
+	clear opts;
 	opts.cscale = 5e-3;
-	visall(E{Axis.y}, obj_array, opts);
+	visall(E{Axis.y}, obj_array, src_array, opts);
 end
