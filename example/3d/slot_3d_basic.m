@@ -1,7 +1,7 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-inspect_only = false;
+inspect_only = true;
 
 %% Solve the system.
 gray = [0.5 0.5 0.5];  % [r g b]
