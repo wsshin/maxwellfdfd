@@ -70,14 +70,17 @@ classdef Enumerated
 		elems = elems(ind)
 		count = count()
 	end
-	
-	methods(Static)
-		function obj = loadobj(S)
-			% If saveobj() and loadobj() are not implemented, a warning is
-			% issued when loading a saved Enumerated object.
-			obj = Axis(char(S));
-		end
-	end		
+
+%   (Deleted because it uses Axis rather than Enumerated, and also because
+%   loading does not generate warnings without loadobj(); only saveobj() seems
+%   necessary.)
+% 	methods(Static)
+% 		function obj = loadobj(S)
+% 			% If saveobj() and loadobj() are not implemented, a warning is
+% 			% issued when loading a saved Enumerated object.
+% 			obj = Axis(char(S));
+% 		end
+% 	end		
 	
 	methods
 		function this = Enumerated(name)
@@ -98,7 +101,9 @@ classdef Enumerated
 		function n = int(this)
 			% This function returned n = find(this.elems==this) originally, but
 			% it is modified to handle arguments given as arrays.
-			[~, n] = ismember(this, this.elems, 'legacy');
+% 			[~, n] = ismember(this, this.elems, 'legacy');
+% 			[~, n] = ismember(this, this.elems);
+			n = arrayfun(@(x) find(this(1).elems==x), this);
 		end
 		
 		function ind = subsindex(this)
