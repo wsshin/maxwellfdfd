@@ -133,8 +133,8 @@ classdef ModalSrc < Source
 			this.Jh = H_cell{v};
 			this.Jv = -H_cell{h};
 			
-			this.E2d = cell(Axis.count);
-			this.H2d = cell(Axis.count);
+			this.E2d = cell(1, Axis.count);
+			this.H2d = cell(1, Axis.count);
 			for w = Axis.elems
 				this.E2d{w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, GK.dual, osc, this.intercept);
 				this.H2d{w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, GK.prim, osc, this.intercept);

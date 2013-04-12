@@ -71,7 +71,7 @@ if numelems == 1
 end
 
 % Fill gaps between neighboring subgrids.
-rt = 1.5;  % target ratio of geometric sequence; rt = 1.2 to be more strict
+rt = 1.9;  % target ratio of geometric sequence; rt = 1.2 to be more strict
 rmax = 2.0;  % maximum ratio of geometric sequence; rmax = 1.3 to be more strict
 numgrids = length(ds);
 assert(numgrids >= 2);

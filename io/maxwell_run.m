@@ -262,7 +262,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 				opts.cmax = cmax;
 				for w = Axis.elems
 					figure;
-					set(gcf, 'units','normalized','position',[subsindex(w)/3 1/2 1/3 1/3]);			
+					set(gcf, 'units','normalized','position',[(int(w)-1)/3 1/2 1/3 1/3]);			
 					vis2d(E2d{w}, obj_array, opts);
 					drawnow;
 				end
@@ -272,7 +272,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 				opts.cmax = cmax;
 				for w = Axis.elems
 					figure;
-					set(gcf, 'units','normalized','position',[subsindex(w)/3 0 1/3 1/3]);			
+					set(gcf, 'units','normalized','position',[(int(w)-1)/3 0 1/3 1/3]);			
 					vis2d(H2d{w}, obj_array, opts);
 					drawnow;
 				end
@@ -325,6 +325,8 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 				ds_prim = mult_vec(d_prim, s_prim);
 				ds_dual = mult_vec(d_dual, s_dual);
 				E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+% 				E0 = {rand(grid3d.N), rand(grid3d.N), rand(grid3d.N)};
+% 				E0 = {rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N)};
 				callback = maxwell(osc.in_omega0(), ...
 								ds_prim, ds_dual, ...
 								mu_edge, eps_face, ...
