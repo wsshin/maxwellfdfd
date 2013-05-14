@@ -99,6 +99,12 @@ classdef Material
 			param_dir = [maxwell_root, filesep, 'material', filesep];
 			param_file = [strrep(name, '/', filesep), '.mat'];
 			param = load([param_dir, param_file]);  % eV, n, k are loaded
+			
+			if eV < param.eV(1) && eV * (1+1e-6) >= param.eV(1)
+				eV = param.eV(1);
+			elseif eV > param.eV(end) && eV * (1-1e-6) <= param.eV(end)
+				eV = param.eV(end);
+			end
 			chkarg(eV >= param.eV(1) && eV <= param.eV(end), '"eV" should be in the range described by %s', param_file);
 			
 			% Interpolate n and k rather than eps' and eps", because n and k are
