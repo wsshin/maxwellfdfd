@@ -122,18 +122,18 @@ eps_wvlen = 3;
 plotstyle = nk_wvlen;
 switch plotstyle
     case nk_wvlen  % plot n and k
-        loglog(wvlen, n, wvlen, k)
+        loglog(wvlen, n, 'o-', wvlen, k, 'o-')
         %plot(wvlen, n, wvlen, k)
         legend('n', 'k', 'Location', 'SouthEast');
         xlabel 'wavelength (nm)'
         %axis([1e2 1e4 1e-2 1e2])
     case eps_eV  % plot real(eps) and -imag(eps)
-        plot(eV, real(eps), eV, -imag(eps))
+        plot(eV, real(eps), 'o-', eV, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel 'Photon Energy (eV)'
         %axis([0.5 6.5 -7 7]);
     case eps_wvlen
-        plot(wvlen, real(eps), wvlen, -imag(eps))
+        plot(wvlen, real(eps), 'o-', wvlen, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel 'wavelength (nm)'
         %axis([0 1e2 -1e1 1e1])
@@ -141,4 +141,4 @@ end
 
 
 %% Save data.
-save('Si.mat', 'eV', 'n', 'k');
+save(mfilename, 'eV', 'n', 'k');

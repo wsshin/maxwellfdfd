@@ -27,23 +27,23 @@ q_omega = 5;
 plotstyle = eps_eV;
 switch plotstyle
     case nk_wvlen  % plot n and k
-        loglog(wvlen, n, wvlen, k)
+        loglog(wvlen, n, 'o-', wvlen, k, 'o-')
         %plot(wvlen, n, wvlen, k)
         legend('n', 'k', 'Location', 'SouthEast');
         xlabel 'wavelength (nm)'
         %axis([1e2 1e4 1e-2 1e2])
     case eps_eV  % plot real(eps) and -imag(eps)
-        plot(eV, real(eps), eV, -imag(eps))
+        plot(eV, real(eps), 'o-', eV, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel 'Photon Energy (eV)'
         axis([0.5 6.5 -7 7]);
     case eps_wvlen
-        plot(wvlen, real(eps), wvlen, -imag(eps))
+        plot(wvlen, real(eps), 'o-', wvlen, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel 'wavelength (nm)'
         %axis([1e2 1e4 1e-2 1e2])
     case eps_omega
-        plot(2*pi./wvlen, real(eps), 2*pi./wvlen, -imag(eps))
+        plot(2*pi./wvlen, real(eps), 'o-', 2*pi./wvlen, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel '\omega (c/nm)'
     case q_omega
@@ -54,11 +54,11 @@ switch plotstyle
         omega_inter = (omega(2:end) + omega(1:end-1))/2;
         numer = eps1_inter + omega_inter .* (deps1./domega);
         denom = -(imag(eps(2:end)) + imag(eps(1:end-1)));  % extra factor 2
-        plot(2*pi./omega_inter, numer./denom);
+        plot(2*pi./omega_inter, numer./denom, 'o-');
         xlabel 'wavelength (nm)'
         ylabel 'electric Q';
 end
 
 
 %% Save data.
-save('Ag.mat', 'eV', 'n', 'k');
+save(mfilename, 'eV', 'n', 'k');
