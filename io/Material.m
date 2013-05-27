@@ -38,12 +38,15 @@
 classdef Material
 	
 	properties (SetAccess = immutable)
-		name
-		color
 		eps
 		mu
 	end
-	
+
+	properties
+		name
+		color
+	end
+
 	methods
 		function this = Material(name, color, eps, varargin)
 			narginchk(3, 5);
