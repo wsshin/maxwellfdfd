@@ -286,8 +286,15 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 		E = {};
 		H = {};
 	elseif isequal(solveropts.method, 'inputfile')
+		if ~is_solveropts || ~isfield(solveropts, 'E0')
+			solveropts.E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+		else
+			chkarg(istypesizeof(solveropts.E0, 'complexcell', [1 Axis.count], grid3d.N), ...
+				'solveropts.E0 should be length-%d cell array whose each element is %d-by-%d-by-%d array of complex numbers.', ...
+				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+		end
 		write_input(solveropts.filenamebase, osc, grid3d, s_factor, ...
-			eps_node(1:end-1,1:end-1,1:end-1), eps_face, mu_edge, J, solveropts.tol, solveropts.maxit);
+			eps_node(2:end,2:end,2:end), eps_face, mu_edge, J, solveropts.E0, solveropts.tol, solveropts.maxit);
 
 		pm.mark('input file creation');		
 		fprintf('%s finishes. (input file created)\n\n', mfilename);

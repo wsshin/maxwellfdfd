@@ -1,4 +1,4 @@
-function write_input(filenamebase, osc, grid3d, s_factor_cell, eps_node_array, eps_cell, mu_cell, J_cell, tol, maxit)
+function write_input(filenamebase, osc, grid3d, s_factor_cell, eps_node_array, eps_cell, mu_cell, J_cell, E0, tol, maxit)
 
 % Check arguments.
 chkarg(istypesizeof(filenamebase, 'char', [1 0]), '"filenamebase" should be string.');
@@ -96,18 +96,25 @@ for w = Axis.elems
 	
 	for g = GK.elems
 		g_str = char(g);
-		datasetname = ['/d', char(w)', '_', g_str(1:4)];
+		datasetname = ['/d', char(w), '_', g_str(1:4)];
 		complex_array = grid3d.dl{w,g}.';
 		h5create(filename, datasetname, [2 length(complex_array)]);
 		h5write(filename, datasetname, expand_complex(complex_array));
 
-		datasetname = ['/s', char(w)', '_', g_str(1:4)];
+		datasetname = ['/s', char(w), '_', g_str(1:4)];
 		complex_array = s_factor_cell{w,g}.';
 		h5create(filename, datasetname, [2 length(complex_array)]);
 		h5write(filename, datasetname, expand_complex(complex_array));
 	end
 end
 
+%% E0
+cl = 5;  % compression level (0-9, where 0 means no compression)
+dims = [2 Axis.count grid3d.N];
+h5create(filename, '/E0', dims, 'Deflate', cl, 'ChunkSize', dims);
+h5write(filename, '/E0', expand_complex(cell2array(E0, Axis.count)));
+
+%% Rest
 use_petsc = true;
 if use_petsc
 % 	petscfilename = [filenamebase, '.eps_node'];
@@ -170,8 +177,8 @@ end
 % for w = Axis.elems
 % 	for g = GK.elems
 % 		g_str = char(g);
-% 		h5write_complex_array1d(file, ['d', char(w)', '_', g_str(1:4)], grid3d.dl{w,g});
-% 		h5write_complex_array1d(file, ['s', char(w)', '_', g_str(1:4)], s_factor_cell{w,g});
+% 		h5write_complex_array1d(file, ['d', char(w), '_', g_str(1:4)], grid3d.dl{w,g});
+% 		h5write_complex_array1d(file, ['s', char(w), '_', g_str(1:4)], s_factor_cell{w,g});
 % 	end
 % end
 % 

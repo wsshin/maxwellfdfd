@@ -1,4 +1,8 @@
-function [E_cell, H_cell] = read_output(filenamebase)
+function [E_cell, H_cell] = read_output(filenamebase, israw)
+if nargin < 2  % no israw
+	israw = false;
+end
+chkarg(istypesizeof(israw, 'logical'), '"israw" should be logical.');
 chkarg(istypesizeof(filenamebase, 'char', [1 0]), '"filenamebase" should be string.');
 
 inputfile = ['./', filenamebase, '.h5'];
@@ -32,14 +36,25 @@ nD = ndims(E_array);
 E_array = permute(E_array, [2:nD, 1]);
 H_array = permute(H_array, [2:nD, 1]);
 
-E_cell = cell(1, Axis.count);
-H_cell = cell(1, Axis.count);
-ind = cell(1, nD);
-for w = Axis.elems
-	for n = 1:nD
-		ind{n} = ':';
+if israw
+	if nD-1 == Axis.count
+		E_cell = {E_array(:,:,:,Axis.x), E_array(:,:,:,Axis.y), E_array(:,:,:,Axis.z)};
+		H_cell = {H_array(:,:,:,Axis.x), H_array(:,:,:,Axis.y), H_array(:,:,:,Axis.z)};
+	else
+		assert(nD-1 == Dir.count);
+		E_cell = {E_array(:,:,Axis.x), E_array(:,:,Axis.y), E_array(:,:,Axis.z)};
+		H_cell = {H_array(:,:,Axis.x), H_array(:,:,Axis.y), H_array(:,:,Axis.z)};
 	end
-	ind{end} = int(w);
-	E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, GK.dual, osc);
-	H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, GK.prim, osc);
+else
+	E_cell = cell(1, Axis.count);
+	H_cell = cell(1, Axis.count);
+	ind = cell(1, nD);
+	for w = Axis.elems
+		for n = 1:nD
+			ind{n} = ':';
+		end
+		ind{end} = int(w);
+		E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, GK.dual, osc);
+		H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, GK.prim, osc);
+	end
 end
