@@ -173,7 +173,11 @@ classdef ModalSrc < Source
 				dVv = dn .* (dh_dual.' * dv_prim);
 				
 				KA_curr = abs(this.Jh) .* dVh + abs(this.Jv) .* dVv;
-				KA_curr = sum(KA_curr(:));
+				KA_curr = sum(KA_curr(:));  % KA_curr is real
+				Jhv = [this.Jh(:); this.Jv(:)];
+				[~, i_pf] = max(abs(Jhv));
+				phasefactor = Jhv(i_pf)/abs(Jhv(i_pf));
+				KA_curr = KA_curr * phasefactor;  % KA_curr is complex
 				norm_factor = this.KA/KA_curr;  % normalization factor
 				
 				if w_axis == h
