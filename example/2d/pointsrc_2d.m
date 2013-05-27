@@ -20,8 +20,9 @@ wvlen = 20;
 %% Visualize the solution.
 figure
 clear opts
-opts.withinterp = false;
+opts.withinterp = true;
 opts.withobjsrc = true;
+opts.withpml = true;
 % opts.cscale = 1e-2;
 vis2d(E{Axis.z}, Axis.z, 0, obj_array, src_array, opts)
 % vis2d(H{Axis.z}, Axis.z, 0, obj_array, src_array, opts)

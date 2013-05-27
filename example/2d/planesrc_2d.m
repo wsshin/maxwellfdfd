@@ -14,7 +14,7 @@ wvlen = 20;
 % 	'OBJ', {'vacuum', 'none', 1.0}, Plane(Axis.y, flux_loc), ...
 % 	'SRC', PlaneSrc(Axis.x, 0, polarization), ...  % PlaneSrc(plane_normal_axis, intercept, polarization_axis)
 % 	inspect_only);
-% 
+
 % % (incidence in y-direction)
 % polarization = Axis.z;
 % [E, H, obj_array, src_array, J] = maxwell_run(...
@@ -37,6 +37,7 @@ polarization = Axis.z;
 figure
 clear opts;
 opts.withobjsrc = true;
+opts.withinterp = true;
 vis2d(E{polarization}, Axis.z, 0, obj_array, src_array, opts)
 
 %% Calculate the power emanating from the source.

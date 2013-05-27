@@ -1,4 +1,4 @@
-% clear all; close all; clear classes; clc;
+clear all; close all; clear classes; clc;
 
 %% Set flags.
 inspect_only = false;
@@ -29,7 +29,7 @@ gray = [0.5 0.5 0.5];  % [r g b]
 		{'dielectric', gray, 11.56}, periodize_shape(rod, {[a 0 0], [0 a 0], [0 0 t]}, slab_yn), ...
 		{'dielectric', gray, 11.56}, periodize_shape(rod, {[a 0 0], [0 a 0], [0 0 t]}, slab_yp), ...
 	'SRC', PointSrc(Axis.z, [0, 0, 0]), ...
-	solveropts, inspect_only);
+	inspect_only);
 
 %% Visualize the solution.
 if ~inspect_only

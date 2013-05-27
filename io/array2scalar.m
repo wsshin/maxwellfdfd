@@ -37,6 +37,8 @@ else  % grid is Grid2d
 	if nargin < 7  % no intercept
 		intercept = NaN;
 	end
+	chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
+	
 	grid2d = grid;
 	chkarg(istypesizeof(F_array, 'complex', grid2d.N), ...
 		'"F_array" should be %d-by-%d array with complex elements.', grid2d.N(Dir.h), grid2d.N(Dir.v));

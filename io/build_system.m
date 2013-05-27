@@ -67,6 +67,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 		narglim = nargin - 1;
 	else
 	 	pm = ProgMark();
+		varargin = [varargin, {pm}];
 		narglim = nargin;
 	end
 		
