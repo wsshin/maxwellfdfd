@@ -1,7 +1,7 @@
 clear all; close all; clear classes; clc;
 
 %% Gold on pp.130-131 in Section 12 of CRC Handbook of Chemistry and Physics, 92nd Ed., W. M. Haynes (Editor), CRC Press
-%% Store daat in column vectors.
+%% Store data in column vectors.
 eV = [
 0.10
 0.20

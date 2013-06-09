@@ -1,7 +1,7 @@
 clear all; close all; clear classes; clc;
 
 %% Aluminum on pp.126-127 in Section 12 of CRC Handbook of Chemistry and Physics, 92nd Ed., W. M. Haynes (Editor), CRC Press
-%% Store daat in column vectors.
+%% Store data in column vectors.
 eV = [
 0.040
 0.050
