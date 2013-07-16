@@ -53,7 +53,7 @@
 %   src = LineSrc(Axis.z, [0 0]);
 %
 %   % Use the constructed src in maxwell_run().
-%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
 
 %%% See Also
 % <PointSrc.html |PointSrc|>, <PlaneSrc.html |PlaneSrc|>, <maxwell_run.html
@@ -65,7 +65,6 @@ classdef LineSrc < Source & WithBloch
 		axis  % axis of line: one of Axis.x, Axis.y, Axis.z
 		intercept  % [h, v]: location of intercept in transverse plane
 		polarization  % one of Axis.x, Axis.y, Axis.z
-		theta  % emission angle measured from the radial direction toward the line axis
 		kBloch  % Bloch k-vector [kx, ky, kz]
 		IorK  % current I if polarization == axis; sheet current density K otherwise
 	end
@@ -89,7 +88,7 @@ classdef LineSrc < Source & WithBloch
 			if nargin < 5  % no theta (or ka_Bloch)
 				ka_Bloch = 0;
 			elseif nargin < 6  % no wvlen
-				ka_Bloch = theta;
+				ka_Bloch = theta;  % theta is in fact ka_Bloch
 				chkarg(istypesizeof(ka_Bloch, 'real'), '"ka_Bloch" should be real.');
 			else  % with wvlen
 				assert(nargin == 6);
@@ -98,44 +97,45 @@ classdef LineSrc < Source & WithBloch
 				chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
 				ka_Bloch = (2*pi/wvlen) * sin(theta);
 			end
-
-						
-			l = cell(Axis.count, GK.count);
+		
+			lgrid = cell(1, Axis.count);
+			laltgrid = cell(1, Axis.count);
 			[h, v] = cycle(axis);  % h, v ~= axis
-			gk = [GK.dual GK.dual];  % for polarization == axis
 			if polarization == h
-				gk(Dir.h) = GK.prim;
+				laltgrid{h} = intercept(Dir.h);
+				lgrid{v} = intercept(Dir.v);
 			elseif polarization == v
-				gk(Dir.v) = GK.prim;
+				lgrid{h} = intercept(Dir.h);
+				laltgrid{v} = intercept(Dir.v);
+			else  % polarization == axis
+				lgrid{h} = intercept(Dir.h);
+				lgrid{v} = intercept(Dir.v);
 			end
 				
-			l{h, gk(Dir.h)} = intercept(Dir.h);
-			l{v, gk(Dir.v)} = intercept(Dir.v);
 			line = Line(axis, intercept);
-			this = this@Source(l, line);
+			this = this@Source(lgrid, laltgrid, line);
 			
 			this.axis = axis;
 			this.intercept = intercept;
 			this.polarization = polarization;
-			this.theta = theta;
 			this.IorK = IorK;
 
 			this.kBloch = [0 0 0];
 			this.kBloch(this.axis) = ka_Bloch;
 		end
 				
-		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+		function [index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d)
 			grid3d.set_kBloch(this);
 			[h, v, a] = cycle(this.axis);  % h, v: axes in plane normal to this line
 			p = this.polarization;
 			if w_axis ~= p
-				Jw_patch = [];
+				JMw_patch = [];
 				index_cell = cell(1, Axis.count);
 			else  % w_axis == p
 				index_cell = {':', ':', ':'};
 				if p == a
 					% Set index_cell{h} and index_cell{v}.
-					g = GK.dual;
+					g = this.gt;
 					axes = [h v];
 					for d = Dir.elems
 						ind = ind_for_loc(this.intercept(d), axes(d), g, grid3d);
@@ -143,17 +143,17 @@ classdef LineSrc < Source & WithBloch
 					end
 					
 					% Set Jw.
-					dh = grid3d.dl{h, GK.dual}(index_cell{h});
-					dv = grid3d.dl{v, GK.dual}(index_cell{v});
+					dh = grid3d.dl{h,g}(index_cell{h});
+					dv = grid3d.dl{v,g}(index_cell{v});
 					I = this.IorK;
-					Jw = I / (dh * dv);  % I = J * (area)
-					ga = GK.prim;
+					JMw = I / (dh * dv);  % I = J * (area)
+					ga = alter(this.gt);
 				else  % p ~= a
 					% Set index_cell{h}.
 					if h == p
-						g = GK.prim;
+						g = alter(this.gt);
 					else
-						g = GK.dual;
+						g = this.gt;
 					end
 					ind = ind_for_loc(this.intercept(Dir.h), h, g, grid3d);
 					index_cell{h} = ind;
@@ -165,18 +165,18 @@ classdef LineSrc < Source & WithBloch
 					
 					% Set Jw.
 					q = setdiff([h v], p);
-					dq = grid3d.dl{q, GK.dual}(index_cell{q});
+					dq = grid3d.dl{q, this.gt}(index_cell{q});
 					K = this.IorK;
-					Jw = K / dq;
-					ga = GK.dual;
+					JMw = K / dq;
+					ga = this.gt;
 				end
 				
 				% Set Jw_patch.
 				la = grid3d.l{a, ga};
 				ka = this.kBloch(a);
 
-				Jw_patch = Jw .* exp(-1i * (ka .* la)).';
-				Jw_patch = ipermute(Jw_patch, int([a h v]));
+				JMw_patch = JMw .* exp(-1i * (ka .* la)).';
+				JMw_patch = ipermute(JMw_patch, int([a h v]));
 			end
 		end		
 	end

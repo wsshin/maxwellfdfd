@@ -1,10 +1,10 @@
-function ind = ind_for_loc(loc, axis, gk, grid3d)
+function ind = ind_for_loc(loc, axis, gt, grid3d)
 
-ind = ismembc2(loc, grid3d.l{axis,gk});
+ind = ismembc2(loc, grid3d.l{axis,gt});
 if ind == 0
-	[~, ind] = min(abs(grid3d.l{axis,gk} - loc));
+	[~, ind] = min(abs(grid3d.l{axis,gt} - loc));
 	warning('FDS:srcAssign', ...
 		['%s grid in %s-axis of "grid3d" does not have location %s; ', ...
 		'closest grid vertex at %e will be taken instead.'], ...
-		char(gk), char(axis), num2str(loc), grid3d.l{axis,gk}(ind));
+		char(gt), char(axis), num2str(loc), grid3d.l{axis,gt}(ind));
 end

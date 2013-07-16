@@ -181,7 +181,7 @@ classdef Painter2d < handle
 		
 		function prep_data(this)
 			if this.isLpreped
-				this.C = this.scalar2d.data_for_slice(this.withinterp, this.withpml);
+				this.C = this.scalar2d.data_for_pcolor(this.withinterp, this.withpml);
 			else
 				[this.C, this.Xh, this.Yv] = this.scalar2d.data_for_pcolor(this.withinterp, this.withpml);
 			end
@@ -303,13 +303,13 @@ classdef Painter2d < handle
 			n_axis = grid2d.normal_axis;
 			h_axis = grid2d.axis(Dir.h);
 			v_axis = grid2d.axis(Dir.v);
-			dh = min(grid2d.dl{Dir.h, GK.prim});
-			dv = min(grid2d.dl{Dir.v, GK.prim});
+			dh = min(grid2d.dl{Dir.h, GT.prim});
+			dv = min(grid2d.dl{Dir.v, GT.prim});
 			intercept = this.scalar2d.intercept;
 			if this.withinterp
-				l_bound = this.scalar2d.l_data(this.withpml);
+				l_bound = this.scalar2d.lplot(this.withinterp, this.withpml);
 			else
-				l_bound = this.scalar2d.l_pixelbound(this.withpml);
+				l_bound = this.scalar2d.lpixelbound(this.withpml);
 			end
 
 			if this.isswapped

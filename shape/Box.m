@@ -33,7 +33,7 @@ classdef Box < Shape
         function this = Box(bound, dl_max)
 			% bound
 			chkarg(istypesizeof(bound, 'real', [Axis.count, Sign.count]), ...
-				'"bound" should be %d-by-%d array of real elements.', Axis.count, Sign.count);
+				'"bound" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
 			s = diff(bound, 1, 2) ./ 2;  % semisides
 			s = s.';  % row vector
 			chkarg(all(s >= 0), '"bound" should have smaller lower bound than upper bound in all axes.');

@@ -12,9 +12,9 @@ classdef Grid3d < handle
 	% method with zero argument, it is called as grid3d.bc().  When a method
 	% does not take any argument, MATLAB actually allows to call it as if it is
 	% a property, i.e., grid3d.bc.  However, then the component of bc cannot be
-	% accessed through the usual indexing as grid3d.bc(Axis.x, Sign.n), because
-	% the method bc() takes no argument.  By implementing bc as a dependent
-	% property, both grid3d.bc and grid3d.bc(Axis.x, Sign.n) work.
+	% accessed through the usual indexing as grid3d.bc(Axis.x), because the
+	% method bc() takes no argument.  By implementing bc as a dependent
+	% property, both grid3d.bc and grid3d.bc(Axis.x) work.
 	properties (Dependent, SetAccess = immutable)
 		unit  % instance of PhysUnit
 		unitvalue  %  unit value of length
@@ -22,8 +22,8 @@ classdef Grid3d < handle
 		lg  %  {x_prim with ghost, x_dual with ghost; y_prim with ghost, y_dual with ghost; z_prim with ghost, z_dual with ghost};
 		lall  %  {x_prim with ghost, x_dual with extra vertices; y_prim with ghost, y_dual with extra vertices; z_prim with ghost, z_dual with extra vertices};
 		bound  %  {xall_prim(1), xall_prim(end); yall_prim(1), yall_prim(end); zall_prim(1), zall_prim(end)]
-        dl  % {diff(x_prim), diff(x_dual); diff(y_prim), diff(y_dual); diff(z_prim), diff(z_dual)}
-        bc  % [bc_xn, bc_xp; bc_yn, bc_yp; bc_zn, bc_zp]
+        dl  % {diff(x_dual), diff(x_prim); diff(y_dual), diff(y_prim); diff(z_dual), diff(z_prim)}
+        bc  % [bc_x, bc_y, bc_zp]
         N  % [Nx, Ny, Nz]: # of grid cells in the x, y, z directions
 		Ntot  % Nx*Ny*Nz
 		L  % [Lx, Ly, Lz]: size of the domain
@@ -54,7 +54,7 @@ classdef Grid3d < handle
 			Npml = expand2mat(Npml, Axis.count, Sign.count);
 			            
 			if nargin < 4  % no bc
-				bc = BC.m;
+				bc = BC.p;
 			end
 			chkarg(istypeof(bc, 'BC'), 'elements of "bc" should be instances of BC.');
 			chkarg(isexpandable2row(bc, Axis.count), '"bc" should be scalar or length-%d vector.', Axis.count);
@@ -76,27 +76,27 @@ classdef Grid3d < handle
 		end
 		
 		function l = get.l(this)
-			l = cell(Axis.count, GK.count);
+			l = cell(Axis.count, GT.count);
 			for w = Axis.elems
-				for g = GK.elems
+				for g = GT.elems
 					l{w, g} = this.comp(w).l{g};
 				end
 			end
 		end
 			
 		function lg = get.lg(this)
-			lg = cell(Axis.count, GK.count);
+			lg = cell(Axis.count, GT.count);
 			for w = Axis.elems
-				for g = GK.elems
+				for g = GT.elems
 					lg{w, g} = this.comp(w).lg{g};
 				end
 			end
 		end
 
 		function lall = get.lall(this)
-			lall = cell(Axis.count, GK.count);
+			lall = cell(Axis.count, GT.count);
 			for w = Axis.elems
-				for g = GK.elems
+				for g = GT.elems
 					lall{w, g} = this.comp(w).lall{g};
 				end
 			end
@@ -110,18 +110,18 @@ classdef Grid3d < handle
 		end
 		
 		function dl = get.dl(this)
-			dl = cell(Axis.count, GK.count);
+			dl = cell(Axis.count, GT.count);
 			for w = Axis.elems
-				for g = GK.elems
+				for g = GT.elems
 					dl{w, g} = this.comp(w).dl{g};
 				end
 			end
 		end
 		
 		function bc = get.bc(this)
-			bc = BC.empty();
+			bc = BC.empty(0, Axis.count);
 			for w = Axis.elems
-				bc(w,:) = this.comp(w).bc;
+				bc(w) = this.comp(w).bc;
 			end
 		end
 		
@@ -201,14 +201,31 @@ classdef Grid3d < handle
 			end
 		end
 		
-		function lplot_cell = lplot(this, gk, withpml)
-			chkarg(istypesizeof(gk, 'GK') , '"gk" should be instance of GK');
+		function lplot_cell = lplot(this, g, withinterp, withpml)
+			chkarg(istypesizeof(g, 'GT') || istypesizeof(g, 'GT', [1 Axis.count]), '"g" should be instance of GT');
+			if length(g) == 1
+				g = g(ones(1, Axis.count));
+			end
+			chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 			
 			lplot_cell = cell(1, Axis.count);
 			for w = Axis.elems
-				lplot_cell{w} = this.comp(w).lplot(gk, withpml);
+				lplot_cell{w} = this.comp(w).lplot(g(w), withinterp, withpml);
 			end
-		end		
+		end
+		
+		function lpixelbound_cell = lpixelbound(this, g, withpml)
+			chkarg(istypesizeof(g, 'GT') || istypesizeof(g, 'GT', [1 Axis.count]), '"g" should be instance of GT');
+			if length(g) == 1
+				g = g(ones(1, Axis.count));
+			end
+			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
+
+			lpixelbound_cell = cell(1, Axis.count);
+			for w = Axis.elems
+				lpixelbound_cell{w} = this.comp(w).lpixelbound(g(w), withpml);
+			end
+		end
 	end
 end

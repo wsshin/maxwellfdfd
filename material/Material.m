@@ -99,7 +99,7 @@ classdef Material
 			eV = osc.in_eV();
 			
 			maxwell_root = fileparts(fileparts(mfilename('fullpath')));
-			param_dir = [maxwell_root, filesep, 'material', filesep];
+			param_dir = [maxwell_root, filesep, 'dielconst', filesep];
 			param_file = [strrep(name, '/', filesep), '.mat'];
 			param = load([param_dir, param_file]);  % eV, n, k are loaded
 			

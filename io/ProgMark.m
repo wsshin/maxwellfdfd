@@ -17,8 +17,8 @@ classdef ProgMark < handle
 		
 		function mark(this, operation_name)
 			t_curr = toc(this.ticID_0);  % elapsed time until now
-			fprintf('time elapsed: %f sec in total, %f sec for %s\n', ...
-				t_curr, t_curr - this.t_prev, operation_name);
+			fprintf('time elapsed: %s sec in total, %s sec for %s\n', ...
+				num2str(t_curr), num2str(t_curr - this.t_prev), operation_name);
 			this.t_prev = t_curr;
 		end
 	end

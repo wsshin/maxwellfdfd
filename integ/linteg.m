@@ -21,70 +21,66 @@ if isempty(ind_dir)  % all(pt_start == pt_end)
 else
 	dir = dir.elems(ind_dir);  % actual direction
 
+	gt = field.gt_array;
 	li = cell(1, dir.count);
-	for d = setdiff(dir.elems, dir)
-		lall = grid.lall{d, GK.prim};
-		bound = pt_start(d);
-		i = ismembc2(bound, lall);
+	for d = setdiff(dir.elems, dir)  % direction orthogonal to line of integral
+		l = grid.lall{d, gt(d)};
+		coord = pt_start(d);
+		i = ismembc2(coord, l);
 		if i == 0  % bound is not in lall
-			warning('FDS:interp', ['integral limit %s = %f is not aligned with primary grid;', ...
+			warning('FDS:interp', ['integral limit %s = %s is not aligned with %s grid;', ...
 				'"field" value is interpolated at the boundary and line integral will be slightly inaccurate.'], ...
-				char(d), bound);
+				char(d), num2str(coord), char(gt(d)));
 		end
 
-		li{d} = bound;
+		li{d} = coord;
 	end
 	
 
-	lall = grid.lall{dir, GK.prim};
-	ind = NaN(1, Sign.count);
+	r = grid.lall{dir, gt(dir)};
+	ra = grid.lall{dir, alter(gt(dir))};
+	ind_array = NaN(1, Sign.count);
+	ind_dr = NaN(1, Sign.count);
 	limit = [pt_start(dir) pt_end(dir)];
 	limit = sort(limit);  % pt_start(dir) could be larger than pt_end(dir)
 	for s = Sign.elems
 		bound = limit(s);
-		i = ismembc2(bound, lall);
-		if i == 0  % bound is not in lall
-			warning('FDS:interp', ['integral limit %s = %f is not aligned with primary grid;', ...
-				'"field" value is interpolated at the boundary and line integral will be slightly inaccurate.'], ...
-				char(dir), bound);
-		end
-
 		if s == Sign.n
-			ind(s) = find(lall > bound, 1, 'first');
+			ind_array(s) = find(r >= bound, 1, 'first');
+			ind_dr(s) = find(ra > bound, 1, 'first');
 		else  % s == Sign.p
-			ind(s) = find(lall < bound, 1, 'last');
+			ind_array(s) = find(r <= bound, 1, 'last');
+			ind_dr(s) = find(ra < bound, 1, 'last');
 		end
 	end
 	
-	li{dir} = [limit(Sign.n), lall(ind(Sign.n):ind(Sign.p)), limit(Sign.p)];
+	li{dir} = r(ind_array(Sign.n):ind_array(Sign.p));
+	dr = [limit(Sign.n), ra(ind_dr(Sign.n):ind_dr(Sign.p)), limit(Sign.p)];
 	if pt_start(dir) > pt_end(dir)
 		li{dir} = fliplr(li{dir});
+		dr = fliplr(dr);
 	end
+	dr = diff(dr);
 	
-	l = grid.lall(:, GK.prim);
+	l = grid.lall(dir.elems + dir.count*subsindex(gt));
 	if istypesizeof(field, 'Scalar3d')
-		[X, Y, Z] = meshgrid(l{:});
-		[XI, YI, ZI] = meshgrid(li{:});
+		[X, Y, Z] = ndgrid(l{:});
+		[XI, YI, ZI] = ndgrid(li{:});
 
 		V = field.array;
-		V = permute(V, int([Axis.y Axis.x Axis.z]));
-		VI = interp3(X, Y, Z, V, XI, YI, ZI);
-		VI = ipermute(VI, int([Axis.y Axis.x Axis.z]));
+		VI = interpn(X, Y, Z, V, XI, YI, ZI);
 		
 		vals = VI(:);
 	else  % field is Scalar2d
-		[Xh, Yv] = meshgrid(l{:});
-		[XIh, YIv] = meshgrid(li{:});
+		[Xh, Yv] = ndgrid(l{:});
+		[XIh, YIv] = ndgrid(li{:});
 		
 		C = field.array;
-		C = permute(C, int([Dir.v Dir.h]));
-		CI = interp2(Xh, Yv, C, XIh, YIv);
-		CI = ipermute(CI, int([Dir.v Dir.h]));
+		CI = interpn(Xh, Yv, C, XIh, YIv);
 		
 		vals = CI(:);
 	end
 	
-	vals = vals.';  % make vals a row vector
-	val = trapz(li{dir}, vals);
+	val = dr * vals;
 end
 	

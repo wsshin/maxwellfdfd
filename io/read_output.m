@@ -54,7 +54,7 @@ else
 			ind{n} = ':';
 		end
 		ind{end} = int(w);
-		E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, GK.dual, osc);
-		H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, GK.prim, osc);
+		E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, GT.dual, osc);
+		H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, GT.prim, osc);
 	end
 end

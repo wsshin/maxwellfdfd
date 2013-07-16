@@ -73,8 +73,8 @@ else  % withuniform == false: use dynamic grid generation algorithm
 	for j = 1:length(src_array)
 		src = src_array(j);
 		for w = Axis.elems
-			lprim0{w} = [lprim0{w}, src.l{w, GK.prim}];
-			ldual0{w} = [ldual0{w}, src.l{w, GK.dual}];
+			lprim0{w} = [lprim0{w}, src.l{w, GT.prim}];
+			ldual0{w} = [ldual0{w}, src.l{w, GT.dual}];
 		end
 	end
 

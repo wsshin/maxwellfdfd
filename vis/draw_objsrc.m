@@ -7,9 +7,9 @@ chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 
 if withinterp
-	lplot = grid3d.lplot(GK.prim, withpml);
+	lplot = grid3d.lplot(GT.prim, withinterp, withpml);
 else
-	lplot = grid3d.lplot(GK.dual, withpml);
+	lplot = grid3d.lpixelbound(GT.prim, withpml);
 end
 
 patch_handle_array = [];

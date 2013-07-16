@@ -1,0 +1,253 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>istypesizeof</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-07-15"><meta name="DC.source" content="istypesizeof.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>istypesizeof</h1><!--introduction--><p>Check the type and size of an object.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Description</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Syntax<a name="1"></a></h2><pre>truth = istypesizeof(obj, typename)
+truth = istypesizeof(obj, typename, dims)
+truth = istypesizeof(obj, typename, dims, dimselem)</pre><h2>Description<a name="2"></a></h2><p><tt>istypesizeof(obj, typename)</tt> returns <tt>true</tt> if <tt>obj</tt> is a single scalar of the type described by a string <tt>typename</tt>.  It is equivalent to <tt>istypesizeof(obj, typename, [1 1])</tt>.  Exmaples of <tt>typename</tt> are <tt>'int'</tt>, <tt>'real'</tt>, <tt>'complex'</tt>, <tt>'logical'</tt> (for 'true' and 'false'), and the names of classes.</p><p><tt>istypesizeof(obj, typename, dims)</tt> returns <tt>true</tt> if <tt>obj</tt> is an array of the type described by <tt>typename</tt> and <tt>size(obj) == dims</tt>.</p><p><tt>dims</tt> must be a row vector of integers.  Some elements of <tt>dims</tt> can be <tt>0</tt>. In such cases, <tt>istypesizeof(obj, typename, dims)</tt> returns <tt>true</tt> no matter how many elements are in the dimensions associated with <tt>0</tt> in <tt>dims</tt>.  For example, <tt>istypesizeof(obj, typename, [1 0])</tt> returns <tt>true</tt> if <tt>obj</tt> is a row vector of any length, and <tt>istypesizeof(obj, typename, [0 1])</tt> returns <tt>true</tt> if <tt>obj</tt> is a column vector of any length.</p><p>To test if <tt>obj</tt> is a cell array whose elements are scalars or arrays of a specific type, a <i>cell type</i> can be specified as <tt>typename</tt>.  A <i>cell type</i> is a conventional type name followed by 'cell', such as <tt>'intcell'</tt>, <tt>'realcell'</tt>, <tt>'complexcell'</tt>.</p><p><tt>istypesizeof(obj, typename, dims, dimselem)</tt> has an additional parameter <tt>dimselem</tt> that is effective only when <tt>typename</tt> is a cell type.  <tt>dimselem</tt> specifies the size of each element of the cell. For example, <tt>istypesizeof(obj, 'realcell', [2 3], [1 0])</tt> tests if <tt>obj</tt> is a 2-by-3 cell array whose each element is a row vector with real elements.</p><p>For <tt>obj == []</tt>, the function returns <tt>true</tt> for any <tt>typename</tt> that is a non-cell type and any <tt>dims</tt>. For <tt>obj == {}</tt>, the function returns <tt>true</tt> for any <tt>typename</tt> that is a cell type and any <tt>dims</tt>.</p><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Test if obj is a scalar.</span>
+obj = 3+4i; type = <span class="string">'complex'</span>;
+fprintf(<span class="string">'Test 1: is the object a %s scalar?  '</span>, type);
+<span class="keyword">if</span> istypesizeof(obj, type)
+    fprintf(<span class="string">'Yes.\n'</span>);
+<span class="keyword">else</span>
+    fprintf(<span class="string">'No.\n'</span>);
+<span class="keyword">end</span>
+</pre><pre class="language-matlab"><span class="comment">% Test if obj is an array of a specific size.</span>
+obj = rand(17, 17); type = <span class="string">'real'</span>;
+[m, n] = size(obj);
+fprintf(<span class="string">'Test 2: is the object a %s array of size %d-by-%d?  '</span>, type, m, n);
+<span class="keyword">if</span> istypesizeof(obj, type, [n n]);
+    fprintf(<span class="string">'Yes.\n'</span>);
+<span class="keyword">else</span>
+    fprintf(<span class="string">'No.\n'</span>);
+<span class="keyword">end</span>
+</pre><pre class="language-matlab"><span class="comment">% Test if obj is a cell array whose elements are scalars or arrays of Axis.</span>
+obj = {Axis.x, [Axis.y, Axis.z]; Axis.y, [Axis.z Axis.y; Axis.x, Axis.y]}; type = <span class="string">'Axiscell'</span>;
+[m, n] = size(obj);
+fprintf(<span class="string">'Test 3: is the object a cell of size %d-by-%d whose elements are scalars or arrays of %s?  '</span>, m, n, type);
+<span class="keyword">if</span> istypesizeof(obj, type, [m n]);
+    fprintf(<span class="string">'Yes.\n'</span>);
+<span class="keyword">else</span>
+    fprintf(<span class="string">'No.\n'</span>);
+<span class="keyword">end</span>
+</pre><pre class="language-matlab"><span class="comment">% Test if obj is a cell array whose elements are real arrays of a specific size.</span>
+n = 3;
+elem1 = rand(n, n); elem2 = rand(n, n); elem3 = rand(n, n); elem4 = rand(n, n);
+obj = {elem1, elem2; elem3, elem4}; type = <span class="string">'realcell'</span>;
+[m, n] = size(obj);
+[me, ne] = size(elem1);
+fprintf(<span class="string">'Test 4: is the object a cell of size %d-by-%d whose elements are %s arrays of size %d-by-%d?  '</span>, m, n, type, me, ne);
+<span class="keyword">if</span> istypesizeof(obj, type, [m n]);
+    fprintf(<span class="string">'Yes.\n'</span>);
+<span class="keyword">else</span>
+    fprintf(<span class="string">'No.\n'</span>);
+<span class="keyword">end</span>
+</pre><h2>See Also<a name="4"></a></h2><p><a href="istypeof.html">istypeof</a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% istypesizeof
+% Check the type and size of an object.
+
+%%% Syntax
+%  truth = istypesizeof(obj, typename)
+%  truth = istypesizeof(obj, typename, dims)
+%  truth = istypesizeof(obj, typename, dims, dimselem)
+
+%%% Description
+% |istypesizeof(obj, typename)| returns |true| if |obj| is a single scalar of
+% the type described by a string |typename|.  It is equivalent to
+% |istypesizeof(obj, typename, [1 1])|.  Exmaples of |typename| are |'int'|,
+% |'real'|, |'complex'|, |'logical'| (for 'true' and 'false'), and the names of classes.
+%
+% |istypesizeof(obj, typename, dims)| returns |true| if |obj| is an array of the
+% type described by |typename| and |size(obj) == dims|.
+%
+% |dims| must be a row vector of integers.  Some elements of |dims| can be |0|.
+% In such cases, |istypesizeof(obj, typename, dims)| returns |true| no matter
+% how many elements are in the dimensions associated with |0| in |dims|.  For
+% example, |istypesizeof(obj, typename, [1 0])| returns |true| if |obj| is a row
+% vector of any length, and |istypesizeof(obj, typename, [0 1])| returns |true|
+% if |obj| is a column vector of any length.
+%
+% To test if |obj| is a cell array whose elements are scalars or arrays of a
+% specific type, a _cell type_ can be specified as |typename|.  A _cell type_ is
+% a conventional type name followed by 'cell', such as |'intcell'|,
+% |'realcell'|, |'complexcell'|.
+%
+% |istypesizeof(obj, typename, dims, dimselem)| has an additional parameter
+% |dimselem| that is effective only when |typename| is a cell type.  |dimselem|
+% specifies the size of each element of the cell. For example,
+% |istypesizeof(obj, 'realcell', [2 3], [1 0])| tests if |obj| is a 2-by-3 cell
+% array whose each element is a row vector with real elements.
+%
+% For |obj == []|, the function returns |true| for any |typename| that is a
+% non-cell type and any |dims|. For |obj == {}|, the function returns |true| for
+% any |typename| that is a cell type and any |dims|.
+
+%%% Example
+%   % Test if obj is a scalar.
+%   obj = 3+4i; type = 'complex';
+%   fprintf('Test 1: is the object a %s scalar?  ', type);
+%   if istypesizeof(obj, type)
+%       fprintf('Yes.\n');
+%   else
+%       fprintf('No.\n');
+%   end
+%
+%   % Test if obj is an array of a specific size.
+%   obj = rand(17, 17); type = 'real';
+%   [m, n] = size(obj);
+%   fprintf('Test 2: is the object a %s array of size %d-by-%d?  ', type, m, n);
+%   if istypesizeof(obj, type, [n n]);
+%       fprintf('Yes.\n');
+%   else
+%       fprintf('No.\n');
+%   end
+%
+%   % Test if obj is a cell array whose elements are scalars or arrays of Axis.
+%   obj = {Axis.x, [Axis.y, Axis.z]; Axis.y, [Axis.z Axis.y; Axis.x, Axis.y]}; type = 'Axiscell';
+%   [m, n] = size(obj);
+%   fprintf('Test 3: is the object a cell of size %d-by-%d whose elements are scalars or arrays of %s?  ', m, n, type);
+%   if istypesizeof(obj, type, [m n]);
+%       fprintf('Yes.\n');
+%   else
+%       fprintf('No.\n');
+%   end
+%
+%   % Test if obj is a cell array whose elements are real arrays of a specific size.
+%   n = 3;
+%   elem1 = rand(n, n); elem2 = rand(n, n); elem3 = rand(n, n); elem4 = rand(n, n);
+%   obj = {elem1, elem2; elem3, elem4}; type = 'realcell';
+%   [m, n] = size(obj);
+%   [me, ne] = size(elem1);
+%   fprintf('Test 4: is the object a cell of size %d-by-%d whose elements are %s arrays of size %d-by-%d?  ', m, n, type, me, ne);
+%   if istypesizeof(obj, type, [m n]);
+%       fprintf('Yes.\n');
+%   else
+%       fprintf('No.\n');
+%   end
+
+%%% See Also
+% <istypeof.html istypeof>
+
+function truth = istypesizeof(obj, typename, dims, dimselem)
+
+chkarg(ischar(typename), '"typename" should be string.');
+iscelltype = false;
+if ~isempty(strfind(typename, 'cell'))
+	typename = strrep(typename, 'cell', '');
+	iscelltype = true;
+end
+
+if nargin < 3  % no dims
+	dims = [1 1];
+end
+chkarg(isrow(dims) && istypeof(dims, 'int'), ...
+	'"dims" should be row vector with integer elements.');
+
+size_obj = size(obj);
+if length(size_obj) < length(dims)
+	% An m-dimensional tensor can be seen as an n-dimensional tensor as well for n >= m.
+	temp = size_obj;
+	size_obj = ones(1, length(dims));
+	size_obj(1:length(temp)) = temp;
+end
+
+if isempty(obj) && ~all(dims)  % if some element of "dims" is zero, allow empty "obj"
+	truth = true;
+elseif length(size_obj) ~= length(dims)
+	truth = false;
+else
+	assert(length(size_obj) == length(dims));
+	ind_zero = find(dims == 0);
+	dims(ind_zero) = size_obj(ind_zero);
+
+	if ~all(size_obj == dims)
+		truth = false;
+	elseif iscelltype
+		truth = iscell(obj);
+		obj = obj(:);		
+		if nargin < 4  % no dimselem
+			for i = 1:length(obj)
+				if ~truth
+					break
+				end
+				truth = truth && istypeof(obj{i}, typename);
+			end
+		else
+			for i = 1:length(obj)
+				if ~truth
+					break
+				end
+				truth = truth && istypesizeof(obj{i}, typename, dimselem);
+			end			
+		end
+	else
+		truth = istypeof(obj, typename);
+	end
+end
+
+##### SOURCE END #####
+--></body></html>

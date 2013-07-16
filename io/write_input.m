@@ -4,10 +4,10 @@ function write_input(filenamebase, osc, grid3d, s_factor_cell, eps_node_array, e
 chkarg(istypesizeof(filenamebase, 'char', [1 0]), '"filenamebase" should be string.');
 chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
-chkarg(istypesizeof(s_factor_cell, 'complexcell', [Axis.count GK.count], [1 0]), ...
-	'"s_factor_cell" should be %d-by-%d cell array whose each element is row vector with complex elements', Axis.count, GK.count);
+chkarg(istypesizeof(s_factor_cell, 'complexcell', [Axis.count GT.count], [1 0]), ...
+	'"s_factor_cell" should be %d-by-%d cell array whose each element is row vector with complex elements', Axis.count, GT.count);
 for w = Axis.elems
-	for g = GK.elems
+	for g = GT.elems
 		chkarg(istypesizeof(s_factor_cell{w,g}, 'complex', [1 grid3d.N(w)]), '"s_factor_cell{%d,%d} should be length-%d.', int(w), int(g), grid3d.N(w));
 	end
 end
@@ -90,11 +90,11 @@ h5write(filename, '/e_ikL', expand_complex(e_ikL.'));
 
 for w = Axis.elems
 	datasetname = ['/', char(w), '_prim'];
-	real_array = grid3d.lall{w,GK.prim}.';
+	real_array = grid3d.lall{w,GT.prim}.';
 	h5create(filename, datasetname, length(real_array));
 	h5write(filename, datasetname, real_array);
 	
-	for g = GK.elems
+	for g = GT.elems
 		g_str = char(g);
 		datasetname = ['/d', char(w), '_', g_str(1:4)];
 		complex_array = grid3d.dl{w,g}.';
@@ -175,7 +175,7 @@ end
 % % Write complex arrays to the input file.
 % file = H5F.create(filename, 'H5F_ACC_TRUNC', 'H5P_DEFAULT', 'H5P_DEFAULT');
 % for w = Axis.elems
-% 	for g = GK.elems
+% 	for g = GT.elems
 % 		g_str = char(g);
 % 		h5write_complex_array1d(file, ['d', char(w), '_', g_str(1:4)], grid3d.dl{w,g});
 % 		h5write_complex_array1d(file, ['s', char(w), '_', g_str(1:4)], s_factor_cell{w,g});

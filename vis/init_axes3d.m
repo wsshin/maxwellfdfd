@@ -7,9 +7,9 @@ chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 hold(axes_handle, 'on');
 
 if withinterp
-	lplot = grid3d.lplot(GK.prim, withpml);
+	lplot = grid3d.lplot(GT.prim, withinterp, withpml);
 else
-	lplot = grid3d.lplot(GK.dual, withpml);
+	lplot = grid3d.lpixelbound(GT.prim, withpml);
 end
 axis(axes_handle, [lplot{Axis.x}([1 end]), lplot{Axis.y}([1 end]), lplot{Axis.z}([1 end])]);
 daspect(axes_handle, [1 1 1]);  % axis(ha, 'image');

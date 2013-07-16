@@ -87,7 +87,8 @@ for i = 2:numgrids
 		filler = fill_targeted_geometric(dl_n, gap, dl_target, dl_p, rt, rmax);
 	catch err
 		exception = MException('FDS:gridGen', ['grid generation failed between subgrids ', ...
-			mat2str(curr{1}), ' and ', mat2str(next{1}), ' with target dl = %f: %s'], curr{2}, err.message);
+			mat2str(curr{1}), ' and ', mat2str(next{1}), ' with target dl = %s: %s'], ...
+			num2str(curr{2}), err.message);
 		throw(exception);
 	end
 	
@@ -132,7 +133,7 @@ truth = isempty(find_stiff_ddl(dl_array, rt));
 
 function filler = fill_constant(dl_min, dl_max, gap, rt, rmax)
 chkarg(dl_min <= dl_max || isequal_approx(dl_min, dl_max), ...
-	'"dl_min = %f" should not be greater than "dl_max = %f".', dl_min, dl_max);
+	'"dl_min = %s" should not be greater than "dl_max = %s".', num2str(dl_min), num2str(dl_max));
 chkarg(is_smooth([dl_min, dl_max], rt), '"dl_min" and "dl_max" should be similar.');
 
 L = gap(2) - gap(1);
@@ -167,7 +168,7 @@ function filler = fill_targeted_geometric_sym(dl_sym, gap, dl_t, rt, rmax)
 % rmax: maximum ratio of geometric sequence
 
 chkarg(dl_t >= dl_sym || isequal_approx(dl_t, dl_sym), ...
-	'"dl_t = %f" should be equal to or greater than "dl_sym = %f".', dl_t, dl_sym);
+	'"dl_t = %s" should be equal to or greater than "dl_sym = %s".', num2str(dl_t), num2str(dl_sym));
 
 L = gap(2) - gap(1);
 chkarg(L > 0, 'second element of "gap" should be greater than the first element.');
@@ -243,7 +244,8 @@ function filler = fill_targeted_geometric(dl_n, gap, dl_t, dl_p, rt, rmax)
 % rmax: maximum ratio of geometric sequence
 
 chkarg((dl_t >= dl_n || isequal_approx(dl_t, dl_n)) && (dl_t >= dl_p || isequal_approx(dl_t, dl_p)), ...
-	'"dl_t = %f" should be equal to or greater than "dl_n = %f" and "dl_p = %f".', dl_t, dl_n, dl_p);
+	'"dl_t = %s" should be equal to or greater than "dl_n = %s" and "dl_p = %s".', ...
+	num2str(dl_t), num2str(dl_n), num2str(dl_p));
 
 L = gap(2) - gap(1);
 chkarg(L > 0, 'second element of "gap" should be greater than the first element.');

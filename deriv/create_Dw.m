@@ -5,20 +5,27 @@ function Dw = create_Dw(w, N, f1, fg)
 % This function creates the forward derivative matrix.  For the backward
 % derivative matrix, take the transpose or conjugate transpose appropriately.
 
-chkarg(istypesizeof(w, 'Axis'), '"w" should be instance of Axis.');
-chkarg(istypesizeof(N, 'int', [1 Axis.count]), '"N" should be length-%d row vector with integer elements.');
+chkarg(istypesizeof(w, 'Axis') || istypesizeof(w, 'Dir'), '"w" should be instance of Axis or Dir.');
+chkarg(istypesizeof(N, 'int', [1 w.count]), '"N" should be length-%d row vector with integer elements.', w.count);
 chkarg(istypesizeof(fg, 'complex'), '"nL" should be complex.');
 
 
-shift = zeros(1, Axis.count);
+shift = zeros(1, w.count);
 shift(w) = 1;
 
 % Get the displaced spatial markers.
 ind_next = @(n, s) mod((1:n) + s - 1, n) + 1;
-[i_next, j_next, k_next] = ndgrid(...
-	ind_next(N(Axis.x), shift(Axis.x)), ...
-	ind_next(N(Axis.y), shift(Axis.y)), ...
-	ind_next(N(Axis.z), shift(Axis.z)));
+if istypeof(w, 'Axis')
+	[i_next, j_next, k_next] = ndgrid(...
+		ind_next(N(Axis.x), shift(Axis.x)), ...
+		ind_next(N(Axis.y), shift(Axis.y)), ...
+		ind_next(N(Axis.z), shift(Axis.z)));
+else
+	[i_next, j_next] = ndgrid(...
+		ind_next(N(Dir.h), shift(Dir.h)), ...
+		ind_next(N(Dir.v), shift(Dir.v)));
+	k_next = 1;
+end
 
 % Translate spatial indices into matrix indices.
 M = prod(N);

@@ -20,7 +20,7 @@ chkarg(istypesizeof(mu_node_array, 'complex', grid3d.N), ...
 
 ldual = cell(1, Axis.count);  % locations of cell centers
 for w = Axis.elems
-	ldual{w} = grid3d.l{w, GK.dual};  % grid3d.l rather than grid3d.lg
+	ldual{w} = grid3d.l{w, GT.dual};  % grid3d.l rather than grid3d.lg
 end
 
 ind = cell(1, Axis.count);  % indices
@@ -63,7 +63,7 @@ end
 % Extend eps and mu to the ghost points considering the boundary conditions.
 for w = Axis.elems
 	ind_g = {':',':',':'};
-	if grid3d.bc(w, Sign.n) == BC.p
+	if grid3d.bc(w) == BC.p
 		ind_g{w} = grid3d.N(w);
 	else
 		ind_g{w} = 1;

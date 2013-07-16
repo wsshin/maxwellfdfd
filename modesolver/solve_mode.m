@@ -8,7 +8,11 @@ end
 
 if isequal(strategy, 'beta')
 	beta_guess = val;
-	[v, lambda] = eigs(A, 1, -beta_guess^2);
+	
+	% eigs() generates an error if the shifte matrix is sigular, i.e., if the
+	% shift value is actually an eigenvalue of A.  To prevent such an error,
+	% perturb the shift value by adding eps.
+	[v, lambda] = eigs(A, 1, -beta_guess^2 + eps);  % gamma^2 = (i beta)^2
 	beta = sqrt(-lambda);  % this guantees real(beta) >= 0
 else
 	assert(isequal(strategy, 'modeindex'));
