@@ -206,7 +206,8 @@ eps = (n - 1i*k).^2;
 nk_wvlen = 1;
 eps_eV = 2;
 eps_wvlen = 3;
-plotstyle = nk_wvlen;
+abseps_eV = 4;
+plotstyle = abseps_eV;
 switch plotstyle
     case nk_wvlen  % plot n and k
         loglog(wvlen, n, 'o-', wvlen, k, 'o-')
@@ -224,8 +225,12 @@ switch plotstyle
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel 'wavelength (nm)'
         %axis([0 1e2 -1e1 1e1])
+    case abseps_eV  % plot real(eps) and -imag(eps)
+        loglog(eV, abs(real(eps)), 'o-', eV, -imag(eps), 'o-')
+        legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
+        xlabel 'Photon Energy (eV)'
 end
 
 
 %% Save data.
-save(mfilename, 'eV', 'n', 'k');
+% save(mfilename, 'eV', 'n', 'k');
