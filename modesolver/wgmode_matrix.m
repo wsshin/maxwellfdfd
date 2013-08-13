@@ -84,7 +84,11 @@ if pml == PML.u
 end
 
 % Create differential operators
-s = Sign.p;
+if ge == GT.prim
+	s = Sign.n;
+else
+	s = Sign.p;
+end
 Ds = create_Ds(s, ge, dl_cell, grid2d);
 Da = create_Ds(alter(s), ge, dl_cell, grid2d);
 
@@ -124,8 +128,8 @@ MU_n = spdiags(mu_n(:), 0, N, N);
 %     + EPS_vv_hh * [DvEn; -DhEn] * (INV_EPS_nn * [-DvHh, DhHv]) ...
 %     - [DhHn; DvHn] * (MU_nn \ ([DhHh, DvHv] * MU_hh_vv));
 A = -omega^2 * EPS_vh * MU_hv ...
-    + EPS_vh * [Ds{Dir.v}; -Ds{Dir.h}] * (INV_EPS_n * [-Da{Dir.v}, Da{Dir.h}]) ...
-    - [Da{Dir.h}; Da{Dir.v}] * (MU_n \ ([Ds{Dir.h}, Ds{Dir.v}] * MU_hv));
+    + EPS_vh * [Da{Dir.v}; -Da{Dir.h}] * (INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}]) ...
+    - [Ds{Dir.h}; Ds{Dir.v}] * (MU_n \ ([Da{Dir.h}, Da{Dir.v}] * MU_hv));
 
 % ez_array = (DxHy*hy.array(:) - DyHx*hx.array(:))./eps_zz(:)/omega/sqrt(-1);
 % ex_array = (sqrt(-1)*omega*(mu_yy(:).*hy.array(:)) - DxEz*ez.array(:))./gamma;
@@ -135,10 +139,10 @@ A = -omega^2 * EPS_vh * MU_hv ...
 % Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-DvEh DhEv];  % Hn from Et
 % gEh_HvEn = [1i*omega*MU_v -DhEn];  % gamma*Eh from Hv, En
 % gEv_HhEn = [-1i*omega*MU_h -DvEn];  % gamma*Ev from Hh, En
-En_Ht = (1/(omega*1i)) * INV_EPS_n * [-Da{Dir.v}, Da{Dir.h}];  % En from Ht
-Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-Ds{Dir.v} Ds{Dir.h}];  % Hn from Et
-gEh_HvEn = [1i*omega*MU_v -Ds{Dir.h}];  % gamma*Eh from Hv, En
-gEv_HhEn = [-1i*omega*MU_h -Ds{Dir.v}];  % gamma*Ev from Hh, En
+En_Ht = (1/(omega*1i)) * INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}];  % En from Ht
+Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-Da{Dir.v} Da{Dir.h}];  % Hn from Et
+gEh_HvEn = [1i*omega*MU_v -Da{Dir.h}];  % gamma*Eh from Hv, En
+gEv_HhEn = [-1i*omega*MU_h -Da{Dir.v}];  % gamma*Ev from Hh, En
 
 
 % Z = sparse(N,N);
