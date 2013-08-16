@@ -65,7 +65,7 @@ classdef Source < handle & matlab.mixin.Heterogeneous
 			chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 			
 			try
-				[index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d);  % Cw_patch: current source
+				[index_cell, JMw_patch] = this.generate_kernel(w_axis, grid3d);  % Cw_patch: current source
 			catch err
 				exception = MException('FDS:srcAssign', 'Source assignment failed.');
 				throw(addCause(exception, err));

@@ -1,7 +1,7 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-inspect_only = true;
+inspect_only = false;
 
 %% Solve the system.
 solveropts.eqtype = EquationType(FT.e, GT.prim);
@@ -21,11 +21,11 @@ wvlen = 20;
 %% Visualize the solution.
 figure
 clear opts
-opts.withinterp = false;
+% opts.withinterp = false;
 opts.withobjsrc = true;
-opts.withpml = false;
+% opts.withpml = false;
 % opts.withabs = true;
-opts.cmax = 1e-2;
+% opts.cmax = 1e-2;
 vis2d(E{Axis.z}, Axis.z, 0.5, obj_array, src_array, opts)
 % vis2d(H{Axis.x}, Axis.z, 0.5, obj_array, src_array, opts)
 

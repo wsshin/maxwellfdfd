@@ -338,11 +338,11 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 				end
 				
 				if tfsfsrc.gt == ge
-					eqtype_tfsf = EquationType(FT.e, ge);
+					eqtype_tfsf = EquationType(FT.e, ge);  % for SRCJ, create E-field eq
 				else
-					eqtype_tfsf = EquationType(FT.h, ge);
+					eqtype_tfsf = EquationType(FT.h, ge);  % for SRCM, create H-field eq
 				end
-				A = create_eq(eqtype_tfsf, osc.in_omega0(), eps_cell, mu_cell, s_factor_cell, JM, JM, grid3d);
+				A = create_eq(eqtype_tfsf, pml, osc.in_omega0(), eps_cell, mu_cell, s_factor_cell, JM, JM, grid3d);
 							
 				x0 = [F0{Axis.x}(:); F0{Axis.y}(:); F0{Axis.z}(:)];
 				r = reordering_indices(Axis.count, grid3d.N);
