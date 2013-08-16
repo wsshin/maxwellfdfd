@@ -51,7 +51,7 @@ classdef ModalSrc < Source
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
 		intercept  % intercept between plane and normal axis
 		KA  % surface integral of surface current density K; for z-normal plane, volume integral of (|Jx|+|Jy|)
-		neff_guess;  % estimated effective refractive index
+		opts  % options to control method to calculate mode
 	end
 	
 	properties (SetAccess = private)
@@ -72,11 +72,31 @@ classdef ModalSrc < Source
 	end
 	
 	methods
-		function this = ModalSrc(normal_axis, intercept, neff_guess, KA)
+		function this = ModalSrc(normal_axis, intercept, opts, KA)
 			chkarg(istypesizeof(normal_axis, 'Axis'), ...
 				'"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
-			chkarg(istypesizeof(neff_guess, 'complex'), '"neff" should be complex.');
+			
+			if nargin < 3  % no opts
+				opts.clue = 'order';
+				opts.modeorder = 1;  % fundamental mode
+			end
+			chkarg(istypesizeof(opts, 'struct'), '"opts" should be structure.');
+
+			chkarg(isequal(opts.clue, 'guess') || isequal(opts.clue, 'order'), ...
+				'"opts.clue" should be ''guess'' or ''order'' (string).');
+			if isequal(opts.clue, 'guess')
+				chkarg(isfield(opts, 'neff') && istypesizeof(opts.neff, 'complex'), ...
+					'"opts.neff" should be complex.');
+				% if opts.clue == 'guess', opts can have additional field
+				% opts.H2d.
+			else  % opts.clue == 'order'
+				if ~isfield(opts, 'order')
+					opts.order = 1;  % fundamental mode
+				end
+				chkarg(istypesizeof(opts.order, 'int') && opts.order > 0, ...
+					'"opts.order" should be positive integer.');
+			end
 			
 			if nargin < 4  % no KA
 				KA = 1.0;
@@ -91,7 +111,7 @@ classdef ModalSrc < Source
 			
 			this.normal_axis = normal_axis;
 			this.intercept = intercept;
-			this.neff_guess = neff_guess;
+			this.opts = opts;
 			this.KA = KA;
 			this.JMh = [];
 			this.JMv = [];

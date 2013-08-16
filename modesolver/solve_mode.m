@@ -1,98 +1,81 @@
-function [v, beta] = solve_mode(A, strategy, val, tol)
+function [v, beta] = solve_mode(A, strategy, sval, v_guess)
 
-chkarg(isequal(strategy, 'beta') || isequal(strategy, 'modeindex'), '"strategy" should be ''beta'' or ''modeindex''.');
-
-if nargin < 4  % no tol
-	tol = 1e-6;
+chkarg(isequal(strategy, 'beta') || isequal(strategy, 'modeorder'), '"strategy" should be ''beta'' or ''modeorder''.');
+if isequal(strategy, 'beta')
+	chkarg(istypesizeof(sval, 'complex'), '"sval" should be "beta" (complex).');
+else  % strategy == 'modeorder'
+	chkarg(istypesizeof(sval, 'int') && sval > 0, '"sval" should be "modeorder" (positive integer).');
 end
 
 if isequal(strategy, 'beta')
-	beta_guess = val;
+	beta_guess = sval;
 	
 	% eigs() generates an error if the shifte matrix is sigular, i.e., if the
 	% shift value is actually an eigenvalue of A.  To prevent such an error,
 	% perturb the shift value by adding eps.
-	[v, lambda] = eigs(A, 1, -beta_guess^2 + eps);  % gamma^2 = (i beta)^2
-	beta = sqrt(-lambda);  % this guantees real(beta) >= 0
-else
-	assert(isequal(strategy, 'modeindex'));
-	mode_index = val;
-	if isreal(A)
-		[beta, v] = solve_mode_real(A, mode_index, tol, eps);
-	else
-		[beta_guess, ~] = solve_mode_real(A, mode_index, tol, 1e-2);
-		[v, lambda] = eigs(A, 1, -real(beta_guess)^2);	
-		beta = sqrt(-lambda);  % this guantees real(beta) >= 0
+	[v, l] = eigs(A, 1, -beta_guess^2 + eps);  % gamma^2 = (i beta)^2
+	beta = sqrt(-l);  % this guantees real(beta) >= 0
+else  % strategy == modeorder
+	modeorder = sval;
+	assert(isreal(A));
+	[beta, v] = solve_mode_real(A, modeorder, 1e-10);
+	
+% 	if isreal(A)
+% 		[beta, v] = solve_mode_real(A, modeorder, 1e-10);
+% 	else
+% 		[beta_guess, v] = solve_mode_real(real(A), modeorder, 1e-4);
+% 		opts.v0 = v_guess;
+% 		[v, l] = eigs(A, 1, -real(beta_guess)^2, opts);	
+% 
+% 		% Perform the Rayleight quotient iteration on A with x as an initial guess for
+% 		% the deiserd eigenvector.  (This process can be justified only for sufficiently
+% 		% small loss.)
+% 		l_prev = -real(beta_guess)^2;
+% 		l = v' * A * v;
+% 		i = 0;
+% 		n = length(A);
+% 		tol = 1e-13;
+% 		while abs((l - l_prev) / l) > tol && i < 20
+% 			fprintf('%s\n', num2str(abs((l - l_prev) / l)));
+% 			i = i + 1;
+% 			l_prev = l;
+% 			v = (A - l * speye(n)) \ v;
+% 			v = v / norm(v);  % v is normalized
+% 			l = v' * A * v;
+% 		end
+		beta = sqrt(-l);  % this guantees real(beta) >= 0
 	end
-%	[beta, v] = solve_mode_real2(A, mode_index);
 end
 
-function [beta, v] = solve_mode_real(A, mode_index, tol_extreme, tol_eigs)
+function [beta, v] = solve_mode_real(A, modeorder, tol_power)
 % Assume that eigenvalues are all real, or at least quite close to real.  This
 % is the case when the system has small loss.
 
-chkarg(istypesizeof(mode_index, 'int') && mode_index >= 1, '"mode_index" should be positive integer.');
+chkarg(istypesizeof(modeorder, 'int') && modeorder > 0, '"modeorder" should be positive integer.');
 
-% Solve for largest-magnitude eigenvalue. 
-%
-% Find the largest magnitude of eigenvalues, and assume that this is the largest
-% eigenvalue itself; if the frequency and loss of the system are small enough,
-% the magnitude approximates the eigenvalue well.  We do this in order to solve
-% for the most negative eigenvalues below, from which we can select the appropriate
-% propagating mode.
-lambda_max = max_eig_magnitude(A, tol_extreme);
-lambda_max = lambda_max * 2;  % overestimate the maximum eigenvalue
+% Solve for the largest-magnitude eigenvalue.
+lmax = eig_largest_mag(A, tol_power);
 
 % Shift the matrix and find the "mode_index" largest-magnitude eigenvalues and
 % the corresponding eigenvectors.
-B = A - lambda_max * speye(size(A,1));
+B = A - lmax * speye(length(A));
 
-lambda_min = -max_eig_magnitude(B, tol_extreme);  % note the (-) sign
-if nargin < 4  % no tol_eigs
-	opts.tol = eps;
-else
-	opts.tol = tol_eigs;
+if modeorder == 1
+	[l, v] = eig_largest_mag(B, tol_power);
+else  % modeorder >= 2
+	[V, L] = eigs(B, modeorder);
+	ls = diag(L);
+	[~, ind] = sort(ls);  % most negative eigenvalues first.
+
+	l = ls(modeorder);
+	v = V(:,ind(modeorder));
 end
-[V, D] = eigs(B, max(mode_index*2, 7), lambda_min, opts);  % calculate enough eigenvalues
-% [V, D] = eigs(B, max(mode_index*2, 7), 'lm', opts);  % calculate enough eigenvalues
-lambdas = diag(D);
 
-betas = sqrt(-(lambdas + lambda_max));  % lambda = (i*beta)^2; betas have positive real parts.
-[~, ind] = sort(real(betas), 'descend');
-
-beta = betas(ind(mode_index));
-v = V(:, ind(mode_index));
-
-function [beta, v] = solve_mode_real2(A, mode_index)
-% Assume that eigenvalues are all real, or at least quite close to real.  This
-% is the case when the system has small loss.
-
-chkarg(istypesizeof(mode_index, 'int') && mode_index >= 1, '"mode_index" should be positive integer.');
-
-% Solve for largest-magnitude eigenvalue. 
-%
-% Find the largest magnitude of eigenvalues, and assume that this is the largest
-% eigenvalue itself; if the frequency and loss of the system are small enough,
-% the magnitude approximates the eigenvalue well.  We do this in order to solve
-% for the most negative eigenvalues below, from which we can select the appropriate
-% propagating mode.
-%lambda_max = eigs(A, 1);
-lambda_max = max_eig_magnitude(A, 1e-7);
-
-% Shift the matrix and find the "mode_index" largest-magnitude eigenvalues and
-% the corresponding eigenvectors.
-B = A - lambda_max * speye(size(A,1));
-
-opts.tol = 1e-14;
-[V, D] = eigs(B, mode_index, 'lm', opts); 
-lambdas = diag(D);
-assert(all(lambdas <= 0));
-
-beta = sqrt(lambdas(mode_index) + lambda_max)/1i;
-v = V(:, mode_index);
+beta = sqrt(-(l + lmax));
+v = v / norm(v);
 
 
-function lambda_max = max_eig_magnitude(A, tol)
+function [lmax, vmax] = eig_largest_mag(A, tol_power)
 m = length(A);
 if isreal(A)
 	vmax = rand(m, 1);
@@ -101,14 +84,17 @@ else
 	vmax = reshape(vmax, m, 2);
 	vmax = vmax(:,1) + 1i * vmax(:,2);
 end
+vmax = vmax / norm(vmax);  % vmax is normalized
 
-lambda = norm(vmax);
-relerr = Inf;
-while relerr >= tol
-	vmax = vmax/lambda;
-	vmax = A*vmax;
-	lambda_old = lambda;
-	lambda = norm(vmax);
-	relerr = abs(lambda - lambda_old)/lambda_old;  % lambda_old > 0
+% Calculate the maximum eigenvalue by power iteration.
+lmax_prev = Inf;
+vmax_next = A * vmax;
+lmax = vmax' * vmax_next;  % Rayleigh quotient
+vmax_next = vmax_next / norm(vmax_next);  % vmax_next is normalized
+while abs((lmax - lmax_prev) / lmax) > tol_power
+	vmax = vmax_next;
+	lmax_prev = lmax;
+	vmax_next = A * vmax;
+	lmax = vmax' * vmax_next;
+	vmax_next = vmax_next / norm(vmax_next);  % vmax_next is normalized
 end
-lambda_max = lambda;

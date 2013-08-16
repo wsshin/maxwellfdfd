@@ -66,6 +66,25 @@ classdef Scalar2d
 			l_cell = this.grid2d.lpixelbound(this.gt_array, withpml);
 		end
 		
+		function [array, l_cell] = data_expanded(this)
+			l_cell = this.grid2d.lall(Dir.elems + Dir.count*subsindex(this.gt_array));
+			array = this.array;
+		end
+		
+		function [array, l_cell] = data_original(this)
+			l_cell = this.grid2d.l(Dir.elems + Dir.count*subsindex(this.gt_array));
+			ind = cell(1, Dir.count);
+			
+			for d = Dir.elems
+				if this.gt_array(d) == GT.prim
+					ind{d} = 1:this.grid2d.N(d);
+				else  % this.gt_array(d) == GT.dual
+					ind{d} = 2:(this.grid2d.N(d)+1);
+				end
+			end
+			array = this.array(ind{:});
+		end
+		
 		function [C, X, Y] = data_for_pcolor(this, withinterp, withpml)
 			chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');

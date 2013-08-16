@@ -46,6 +46,25 @@ classdef Scalar3d
             this.name = name;
 		end
 		
+		function [array, l_cell] = data_expanded(this)
+			l_cell = this.grid3d.all(Axis.elems + Axis.count*subsindex(this.gt_array));
+			array = this.array;
+		end
+		
+		function [array, l_cell] = data_original(this)
+			l_cell = this.grid3d.l(Axis.elems + Axis.count*subsindex(this.gt_array));
+			ind = cell(1, Axis.count);
+			
+			for w = Axis.elems
+				if this.gt_array(w) == GT.prim
+					ind{w} = 1:this.grid3d.N(w);
+				else  % this.gt_array(w) == GT.dual
+					ind{w} = 2:(this.grid3d.N(w)+1);
+				end
+			end
+			array = this.array(ind{:});
+		end
+		
 		function val = value(this, point)
 			chkarg(istypesizeof(point, 'real', [0, Axis.count]), ...
 				'"point" should be 2D array with %d columns.', Axis.count);
