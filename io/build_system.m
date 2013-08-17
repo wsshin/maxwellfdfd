@@ -293,8 +293,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	N = grid3d.N;
 	fprintf('\t[Nx Ny Nz] = %s\n', mat2str(N));
 	
-	% Try to detect 3D simulation that users might have intented to make 2D, and
-	% generate a warning.
+	% Generate a warning when a seemingly 2D simulation is defined on a 3D grid.
 	[~, imin] = min(N);
 	n = Axis.elems(imin);
 	[h, v] = cycle(n);
