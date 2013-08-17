@@ -290,8 +290,18 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	else
 		pm.mark('dynamic grid generation');
 	end
-	fprintf('\t[Nx Ny Nz] = %s\n', mat2str(grid3d.N));
-
+	N = grid3d.N;
+	fprintf('\t[Nx Ny Nz] = %s\n', mat2str(N));
+	
+	% Try to detect 3D simulation that users might have intented to make 2D, and
+	% generate a warning.
+	[~, imin] = min(N);
+	n = Axis.elems(imin);
+	[h, v] = cycle(n);
+	if N(n)/N(h) < 0.1 && N(n)/N(v) < 0.1 && N(n) >= 2  % possible user mistake
+		warning(['If this a 2D structure, N%s should be 1; ', ...
+			'check d%s''s of objects and locations of sources'], char(n), char(n));
+	end
 
 	% Construct material parameters.
 	if ~isepsgiven
