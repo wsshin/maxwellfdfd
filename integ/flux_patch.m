@@ -12,8 +12,11 @@ chkarg(issorted(rect(Dir.h,:)) && issorted(rect(Dir.v,:)), 'each row of "rect" s
 chkarg(grid2d.contains(rect.'), '"rect" should be contained in grid.');
 
 gt = scalar2d.gt_array;
-l = grid2d.lall(Dir.elems + Dir.count*subsindex(gt));
-la = grid2d.lall(Dir.elems + Dir.count*subsindex(alter(gt)));
+% l = grid2d.lall(Dir.elems + Dir.count*subsindex(gt));
+% la = grid2d.lall(Dir.elems + Dir.count*subsindex(alter(gt)));
+
+la = scalar2d.lpixelbound(true);  % true: include PML
+array = scalar2d.data_original();
 
 ind_array = NaN(Dir.count, Sign.count);
 dl = cell(1, Dir.count);
@@ -29,19 +32,19 @@ for d = Dir.elems
 		end
 			
 		if s == Sign.n
-			ind_array(d,s) = find(l{d} >= bound, 1, 'first');
 			ind_dl(s) = find(la{d} > bound, 1, 'first');
+			ind_array(d,s) = ind_dl(s) - 1;
 		else  % s == Sign.p
-			ind_array(d,s) = find(l{d} <= bound, 1, 'last');
 			ind_dl(s) = find(la{d} < bound, 1, 'last');
+			ind_array(d,s) = ind_dl(s);
 		end
 	end
-	dl{d} = [rect(d,Sign.n), l{d}(ind_dl(Sign.n):ind_dl(Sign.p)), rect(d,Sign.p)];
+	dl{d} = [rect(d,Sign.n), la{d}(ind_dl(Sign.n):ind_dl(Sign.p)), rect(d,Sign.p)];
 	dl{d} = diff(dl{d});
 end
 
 % Calculate the Rieman sum.
-array = scalar2d.array(...
+array = array(...
 	ind_array(Dir.h,Sign.n):ind_array(Dir.h,Sign.p), ...
 	ind_array(Dir.v,Sign.n):ind_array(Dir.v,Sign.p));
 
