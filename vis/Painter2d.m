@@ -303,8 +303,12 @@ classdef Painter2d < handle
 			n_axis = grid2d.normal_axis;
 			h_axis = grid2d.axis(Dir.h);
 			v_axis = grid2d.axis(Dir.v);
-			dh = min(grid2d.dl{Dir.h, GT.prim});
-			dv = min(grid2d.dl{Dir.v, GT.prim});
+% 			dh = min(grid2d.dl{Dir.h, GT.prim});
+% 			dv = min(grid2d.dl{Dir.v, GT.prim});
+			dlmin = NaN(Dir.count, 1);
+			for d = Dir.elems
+				dlmin(d) = min(grid2d.dl{d, GT.dual}, [], 2);
+			end
 			intercept = this.scalar2d.intercept;
 			if this.withinterp
 				l_bound = this.scalar2d.lplot(this.withinterp, this.withpml);
@@ -319,9 +323,10 @@ classdef Painter2d < handle
 				h_axis = v_axis;
 				v_axis = temp;
 				
-				temp = dh;
-				dh = dv;
-				dv = temp;
+% 				temp = dh;
+% 				dh = dv;
+% 				dv = temp;
+				dlmin = flipud(dlmin);
 			end
 			
 			bound_g = [l_bound{Dir.h}([1 end]); l_bound{Dir.v}([1 end])];
@@ -362,8 +367,9 @@ classdef Painter2d < handle
 					end
 
 					bound = shape.bound([h_axis v_axis],:);
-					bound(Dir.h,:) = bound(Dir.h,:) + [-dh dh];
-					bound(Dir.v,:) = bound(Dir.v,:) + [-dv dv];
+% 					bound(Dir.h,:) = bound(Dir.h,:) + [-dh dh];
+% 					bound(Dir.v,:) = bound(Dir.v,:) + [-dv dv];
+					bound = bound + [-dlmin, dlmin];
 					
 					bound(:,Sign.n) = max([bound(:,Sign.n), bound_g(:,Sign.n)], [], 2);  % prevent -Inf bound
 					bound(:,Sign.p) = min([bound(:,Sign.p), bound_g(:,Sign.p)], [], 2);  % prevent +Inf bound

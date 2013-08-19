@@ -259,7 +259,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwel
 	if inspect_only  % inspect objects and sources
 		figure;
 		set(gcf, 'units','normalized','position',[0.5 0 0.5 0.5]);			
-		withpml = false;
+		withpml = true;
 		visobjsrc(grid3d, obj_array, src_array, withpml);
 		drawnow
 		pm.mark('domain visualization');

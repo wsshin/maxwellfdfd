@@ -21,7 +21,7 @@ classdef Grid3d < handle
         l  % {x_prim, x_dual; y_prim, y_dual; z_prim, z_dual}
 		lg  %  {x_prim with ghost, x_dual with ghost; y_prim with ghost, y_dual with ghost; z_prim with ghost, z_dual with ghost};
 		lall  %  {x_prim with ghost, x_dual with extra vertices; y_prim with ghost, y_dual with extra vertices; z_prim with ghost, z_dual with extra vertices};
-		bound  %  {xall_prim(1), xall_prim(end); yall_prim(1), yall_prim(end); zall_prim(1), zall_prim(end)]
+		bound  %  [xall_prim(1), xall_prim(end); yall_prim(1), yall_prim(end); zall_prim(1), zall_prim(end)]
         dl  % {diff(x_dual), diff(x_prim); diff(y_dual), diff(y_prim); diff(z_dual), diff(z_prim)}
         bc  % [bc_x, bc_y, bc_zp]
         N  % [Nx, Ny, Nz]: # of grid cells in the x, y, z directions
