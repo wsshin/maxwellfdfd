@@ -121,27 +121,25 @@ classdef Scalar2d
 			
 			lall = this.grid2d.lall(Dir.elems + Dir.count*subsindex(this.gt_array));
 			ind = cell(1, Dir.count);
-			need_interp = false;
 			for d = Dir.elems
-				ind{d} = ismembc2(point(d), lall{d});
-				if ind{d} == 0
-					indw = find(lall{d} < point(d), 1, 'last');
-					ind{d} = [indw indw+1];
-					need_interp = true;
+				indd = ismembc2(point(d), lall{d});
+				if indd == 0
+					indd = find(lall{d} < point(d), 1, 'last');
+					ind{d} = [indd, indd+1];
+				elseif indd == 1
+					ind{d} = [indd, indd+1];
+				else  % indd == end
+					ind{d} = [indd-1, indd];
 				end
 			end
 			
-			if ~need_interp
-				val = this.array(ind{:});
-			else
-				l = cell(1, Dir.count);
-				for d = Dir.elems
-					l{d} = lall{d}(ind{d});
-				end
-				[X, Y] = ndgrid(l{:});
-				C = this.array(ind{:});
-				val = interp2(X, Y, C, point(Dir.h), point(Dir.v));
+			l = cell(1, Dir.count);
+			for d = Dir.elems
+				l{d} = lall{d}(ind{d});
 			end
+			[X, Y] = ndgrid(l{:});
+			C = this.array(ind{:});
+			val = interpn(X, Y, C, point(Dir.h), point(Dir.v));
 		end		
 	end		
 end

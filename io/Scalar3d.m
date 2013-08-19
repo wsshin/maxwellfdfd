@@ -72,27 +72,25 @@ classdef Scalar3d
 			
 			lall = this.grid3d.lall(Axis.elems + Axis.count*subsindex(this.gt_array));
 			ind = cell(1, Axis.count);
-			need_interp = false;
 			for w = Axis.elems
-				ind{w} = ismembc2(point(w), lall{w});
-				if ind{w} == 0
+				indw = ismembc2(point(w), lall{w});
+				if indw == 0
 					indw = find(lall{w} < point(w), 1, 'last');
-					ind{w} = [indw indw+1];
-					need_interp = true;
+					ind{w} = [indw, indw+1];
+				elseif indw == 1
+					ind{w} = [indw, indw+1];
+				else  % indw == end
+					ind{w} = [indw-1, indw];
 				end
 			end
 			
-			if ~need_interp
-				val = this.array(ind{:});
-			else
-				l = cell(1, Axis.count);
-				for w = Axis.elems
-					l{w} = lall{w}(ind{w});
-				end
-				[X, Y, Z] = ndgrid(l{:});
-				V = this.array(ind{:});
-				val = interpn(X, Y, Z, V, point(Axis.x), point(Axis.y), point(Axis.z));
+			l = cell(1, Axis.count);
+			for w = Axis.elems
+				l{w} = lall{w}(ind{w});
 			end
+			[X, Y, Z] = ndgrid(l{:});
+			V = this.array(ind{:});
+			val = interpn(X, Y, Z, V, point(Axis.x), point(Axis.y), point(Axis.z));
 		end
 	end		
 end
