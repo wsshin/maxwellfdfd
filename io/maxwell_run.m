@@ -40,7 +40,8 @@
 
 
 %%% Input Parameter Group - OSC
-% OSC group begins with |'OSC'| and ends with one of the followings:
+% OSC group specifies oscillation parameters.  The group begins with |'OSC'| and
+% ends with one of the followings:
 %
 % * |L0, wvlen|  
 % * |osc|
@@ -56,7 +57,8 @@
 
 
 %%% Input Parameter Group - DOM
-% DOM group begins with |'DOM'| and ends with one of the followings:
+% DOM group specifies domain parameters.  The group begins with |'DOM'| and ends
+% with one of the followings:
 %
 % * |material, box, dl, bc, Lpml, [withuniformgrid]|
 % * |domain, dl, bc, Lpml, [withuniformgrid]|
@@ -98,7 +100,8 @@
 
 
 %%% Input Parameter Group - OBJ and SOBJ
-% OBJ group begins with |'OBJ'| and ends with one of the followings:
+% OBJ group specifies obect parameters.  The group begins with |'OBJ'| and ends
+% with one of the followings:
 %
 % * |material_1, shapes_1, ..., material_N, shapes_N|
 % * |obj_1, ..., obj_N|
@@ -130,7 +133,9 @@
 
 
 %%% Input Parameter Group - SRC
-% SRC group begins with |'SRC'| and ends with
+% SRC group specifies current source parameters. Depending on whether the
+% sources are electric or magnetic, the group begins with |'SRCJ'| or |'SRCM'|
+% and ends with
 %
 % * |src_1, ..., src_M|
 %
@@ -175,7 +180,7 @@
 %       'OBJ', ...
 %           {['Palik', filesep, 'SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
 %           {['CRC', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
-%       'SRC', PointSrc(Axis.x, [0, 0, 200]), ...
+%       'SRCJ', PointSrc(Axis.x, [0, 0, 200]), ...
 %       inspect_only);
 
 function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwell_run(varargin)
