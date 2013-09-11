@@ -4,10 +4,8 @@ chkarg(istypesizeof(s, 'Sign'), '"s" should be instance of Sign.');  % Ds = Df (
 chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');  % ge: grid type for the E-field
 chkarg(istypesizeof(gridnd, 'Grid2d') || istypesizeof(gridnd, 'Grid3d'), '"gridnd" should be instance of Grid2d or Grid3d.');
 
-is3D = true;
 v = Axis.x;
 if istypesizeof(gridnd, 'Grid2d')
-	is3D = false;
 	v = Dir.h;
 end
 
@@ -16,15 +14,6 @@ N = gridnd.N;
 
 %% Get the relevant derivative matrices.
 g = GT.elems(s);  % curl, divergence, gradient all uses dl_dual for forward difference and dl_prim for backward difference
-
-if is3D
-	[dx, dy, dz] = ndgrid(dl_cell{Axis.x,g}, dl_cell{Axis.y,g}, dl_cell{Axis.z,g});
-	dl = {dx, dy, dz};
-else
-	[dh, dv] = ndgrid(dl_cell{Dir.h,g}, dl_cell{Dir.v,g});
-	dl = {dh, dv};
-end
-
 bc = gridnd.bc;
 
 % Basic setup of Df and Db.  Here, masking of f1 to zero is not performed.  It
@@ -63,8 +52,9 @@ else  % Ds == Db
 	end
 end
 
-my_diag = @(z) spdiags(z(:), 0, numel(z), numel(z));
+dl = cell(1, v.count);
+[dl{:}] = ndgrid(dl_cell{:,g});
 
 for w = v.elems
-	Ds_cell{w} = my_diag(dl{w}.^-1) * Ds_cell{w};
+	Ds_cell{w} = create_spdiag(dl{w}.^-1) * Ds_cell{w};
 end

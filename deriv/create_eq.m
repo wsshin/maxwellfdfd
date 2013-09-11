@@ -72,7 +72,7 @@ j = j(r);
 m = m(r);
 pm = pm(r);
 
-PM = spdiags(pm, 0, length(pm), length(pm));
+PM = create_spdiag(pm);
 
 test_vector_identity = false;
 if test_vector_identity
@@ -84,8 +84,8 @@ if test_vector_identity
 end
 
 if eqtype.f == FT.e
-	INV_MU = spdiags(1./mu, 0, length(mu), length(mu));  % when mu has Inf, "MU \ Mat" complains about singularity
-	EPS = spdiags(eps, 0, length(eps), length(eps));
+	INV_MU = create_spdiag(1./mu);  % when mu has Inf, "MU \ Mat" complains about singularity
+	EPS = create_spdiag(eps);
 
 	A = PM * (Cm * INV_MU * Ce) * PM - omega^2 * EPS;
 	hfcn_A = @(e) pm .* (Cm * ((Ce * (pm .* e)) ./ mu)) - omega^2 * (eps .* e);
@@ -95,8 +95,8 @@ if eqtype.f == FT.e
 	
 	hfcn_GfromF = @(e) (Ce * e + m) ./ (-1i*omega*mu);
 else  % eqtype.f == FT.h
-	INV_EPS = spdiags(1./eps, 0, length(eps), length(eps));  % when mu has Inf, "MU \ Mat" complains about singularity
-	MU = spdiags(mu, 0, length(mu), length(mu));
+	INV_EPS = create_spdiag(1./eps);  % when mu has Inf, "MU \ Mat" complains about singularity
+	MU = create_spdiag(mu);
 
 	A = (Ce * INV_EPS * Cm) - omega^2 * MU;
 	hfcn_A = @(h) Ce * ((Cm * h) ./ eps) - omega^2 * (mu .* h);

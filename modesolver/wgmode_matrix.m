@@ -35,6 +35,10 @@ h = grid2d.axis(Dir.h);
 v = grid2d.axis(Dir.v);
 n = grid2d.normal_axis;
 
+g3d = Grid3d(grid3d.unit, ...
+	{grid2d.lall{Dir.h,GT.prim}, grid2d.lall{Dir.v,GT.prim}, [0 1]}, ...
+	[grid2d.Npml; 0 0], [grid2d.bc, BC.p]);
+
 dims = int([h, v, n]);
 eps_cell{Axis.x} = permute(eps_cell{Axis.x}, dims);
 eps_cell{Axis.y} = permute(eps_cell{Axis.y}, dims);
@@ -114,35 +118,65 @@ Da = create_Ds(alter(s), ge, dl_cell, grid2d);
 %
 % See Sec. II of G. Veronis and S. Fan, Journal of Lightwave Technology, vol.
 % 25, no. 9, pp.2511--2521.
-N = prod(grid2d.N);
 eps_vh = [eps_v(:); eps_h(:)];
-EPS_vh = spdiags(eps_vh, 0, 2*N, 2*N);
-INV_EPS_n = spdiags(1./eps_n(:), 0, N, N);  % when eps_nn has Inf, "EPS_nn \ Mat" complains about singularity
-INV_MU_n = spdiags(1./mu_n(:), 0, N, N);
-MU_hv = spdiags([mu_h(:); mu_v(:)], 0, 2*N, 2*N);
-MU_h = spdiags(mu_h(:), 0, N, N);
-MU_v = spdiags(mu_v(:), 0, N, N);
-MU_n = spdiags(mu_n(:), 0, N, N);
+EPS_vh = create_spdiag(eps_vh);
+INV_EPS_n = create_spdiag(1./eps_n(:));  % avoid ill-defined "EPS_nn \ Mat" operation when eps_nn has Inf
+INV_MU_n = create_spdiag(1./mu_n(:));
+MU_hv = create_spdiag([mu_h(:); mu_v(:)]);
+MU_h = create_spdiag(mu_h(:));
+MU_v = create_spdiag(mu_v(:));
+MU_n = create_spdiag(mu_n(:));
 
-% A = -omega^2 * EPS_vv_hh * MU_hh_vv ...
-%     + EPS_vv_hh * [DvEn; -DhEn] * (INV_EPS_nn * [-DvHh, DhHv]) ...
-%     - [DhHn; DvHn] * (MU_nn \ ([DhHh, DvHv] * MU_hh_vv));
+if ge == GT.prim
+	[ind_ME, ind_MH] = create_masks(ge, g3d);
+else
+	[ind_MH, ind_ME] = create_masks(ge, g3d);
+end
+
+ind_MH = reshape(ind_MH, [], Axis.count);
+ind_MHh = ind_MH(:, Axis.x);
+ind_MHv = ind_MH(:, Axis.y);
+ind_MHn = ind_MH(:, Axis.z);
+
+ind_ME = reshape(ind_ME, [], Axis.count);
+ind_MEh = ind_ME(:, Axis.x);
+ind_MEv = ind_ME(:, Axis.y);
+ind_MEn = ind_ME(:, Axis.z);
+
+DhHh = Da{Dir.h}; DhHh(:,ind_MHh) = 0;
+DvHv = Da{Dir.v}; DvHv(:,ind_MHv) = 0;
+
+DhHv = Ds{Dir.h}; DhHv(:,ind_MHv) = 0;
+DvHh = Ds{Dir.v}; DvHh(:,ind_MHh) = 0;
+
+DhEn = Da{Dir.h}; DhEn(:,ind_MEn) = 0;
+DvEn = Da{Dir.v}; DvEn(:,ind_MEn) = 0;
+
+DhHn = Ds{Dir.h}; DhHn(:,ind_MHn) = 0;
+DvHn = Ds{Dir.v}; DvHn(:,ind_MHn) = 0;
+
+DhEv = Da{Dir.h}; DhEv(:,ind_MEv) = 0;
+DvEh = Da{Dir.v}; DvEh(:,ind_MEh) = 0;
+
 A = -omega^2 * EPS_vh * MU_hv ...
-    + EPS_vh * [Da{Dir.v}; -Da{Dir.h}] * (INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}]) ...
-    - [Ds{Dir.h}; Ds{Dir.v}] * (MU_n \ ([Da{Dir.h}, Da{Dir.v}] * MU_hv));
+    + EPS_vh * [DvEn; -DhEn] * (INV_EPS_n * [-DvHh, DhHv]) ...
+    - [DhHn; DvHn] * (MU_n \ ([DhHh, DvHv] * MU_hv));
+% A = -omega^2 * EPS_vh * MU_hv ...
+%     + EPS_vh * [Da{Dir.v}; -Da{Dir.h}] * (INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}]) ...
+%     - [Ds{Dir.h}; Ds{Dir.v}] * (MU_n \ ([Da{Dir.h}, Da{Dir.v}] * MU_hv));
 
 % ez_array = (DxHy*hy.array(:) - DyHx*hx.array(:))./eps_zz(:)/omega/sqrt(-1);
 % ex_array = (sqrt(-1)*omega*(mu_yy(:).*hy.array(:)) - DxEz*ez.array(:))./gamma;
 % ey_array = (-sqrt(-1)*omega*(mu_xx(:).*hx.array(:)) - DyEz*ez.array(:))./gamma;
 
-% En_Ht = (1/(omega*1i)) * INV_EPS_n * [-DvHh DhHv];  % En from Ht
-% Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-DvEh DhEv];  % Hn from Et
-% gEh_HvEn = [1i*omega*MU_v -DhEn];  % gamma*Eh from Hv, En
-% gEv_HhEn = [-1i*omega*MU_h -DvEn];  % gamma*Ev from Hh, En
-En_Ht = (1/(omega*1i)) * INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}];  % En from Ht
-Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-Da{Dir.v} Da{Dir.h}];  % Hn from Et
-gEh_HvEn = [1i*omega*MU_v -Da{Dir.h}];  % gamma*Eh from Hv, En
-gEv_HhEn = [-1i*omega*MU_h -Da{Dir.v}];  % gamma*Ev from Hh, En
+En_Ht = (1/(omega*1i)) * INV_EPS_n * [-DvHh DhHv]; En_Ht(ind_MEn,:) = 0;  % En from Ht
+Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-DvEh DhEv]; Hn_Et(ind_MHn,:) = 0;  % Hn from Et
+gEh_HvEn = [1i*omega*MU_v -DhEn]; gEh_HvEn(ind_MEh,:) = 0;  % gamma*Eh from Hv, En
+gEv_HhEn = [-1i*omega*MU_h -DvEn]; gEv_HhEn(ind_MEv,:) = 0;  % gamma*Ev from Hh, En
+% En_Ht = (1/(omega*1i)) * INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}];  % En from Ht
+% Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-Da{Dir.v}, Da{Dir.h}];  % Hn from Et
+% gEh_HvEn = [1i*omega*MU_v -Da{Dir.h}];  % gamma*Eh from Hv, En
+% gEv_HhEn = [-1i*omega*MU_h -Da{Dir.v}];  % gamma*Ev from Hh, En
 
 
 % Z = sparse(N,N);
@@ -150,21 +184,24 @@ gEv_HhEn = [-1i*omega*MU_h -Da{Dir.v}];  % gamma*Ev from Hh, En
 % gEt_Ht = [gEh_HvEn Z Z; Z Z gEv_HhEn] * [Z I; En_Ht; I Z; En_Ht];
 
 
+
 % We should make sure that eigenvectors' elements corresponding to infinitely
 % large elements of eps_vv_hh are zero.  If the corresponding rows and columns
-% are zeros except for the diagonal elements, and if the diagonal elements are
-% not equal to the eigenvalue, then the relevant elements of the eigenvectors
-% are zeros.  The eigenvalue is gamma^2 = (1/L + 1i*beta)^2 = (1/L)^2 - beta^2 +
-% 2i*beta.  Should it be real, beta = 0 and the eigenvalue (1/L)^2 cannot be
+% are zeros except for the diagonal elements, and if the corresponding diagonal
+% elements are not equal to the eigenvalue, then the relevant elements of the
+% eigenvectors are zeros.  The eigenvalue is gamma^2 = (1/L + 1i*beta)^2 =
+% (1/L)^2 - beta^2 + 2i*beta.  Should it be real, beta = 0 and the eigenvalue
+% (1/L)^2 cannot be negative, so we set the corresponding diagonal elements
 % negative.
 ind_pec = isinf(abs(eps_vh));
-pec_mask = ones(size(ind_pec));
-pec_mask(ind_pec) = 0;
-PM = spdiags(pec_mask, 0, length(pec_mask), length(pec_mask));
+% pec_mask(ind_pec) = 0;
+% PM = create_spdiag(pec_mask);
 
 diagvec = full(diag(A));
 diagvec(ind_pec) = -1;
-A = PM * A * PM;
+% A = PM * A * PM;
+A(:,ind_pec) = 0;
+A(ind_pec,:) = 0;
 A = spdiags(diagvec, 0, A);
 
 % % To force the H field components normal to the Et = 0 boundary to be 0, mask
@@ -182,6 +219,15 @@ A = spdiags(diagvec, 0, A);
 % 
 % Mask = spdiags([mask_hx(:); mask_hy(:)], 0, 2*N, 2*N);
 % A = Mask*A;
+
+ind_mask_h = [ind_MHh(:); ind_MHv(:)];
+% A(ind_maskh, :) = 0;
+% diagvec = full(diag(A));
+% diagvec(ind_maskh) = -1;
+% % A = PM * A * PM;
+A(:,ind_mask_h) = 0;
+A(ind_mask_h,:) = 0;
+% A = spdiags(diagvec, 0, A);
 
 % Reorder the indices of the elements of A to reduce the bandwidth of A.
 r = reordering_indices(Dir.count, grid2d.N);

@@ -136,7 +136,7 @@ end
 opts.tol = eps;  % MATLAB default value; just to make sure opts exists
 
 use_eigs = false;
-if use_eigs
+if ~isfield(modalsrc.opts, 'H2d')  || use_eigs
 	% eigs() generates an error if the shifte matrix is sigular, i.e., if the shift
 	% value is actually an eigenvalue of A.  To prevent such an error, perturb the
 	% shift value by adding eps.
