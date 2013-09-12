@@ -26,15 +26,13 @@ chkarg(istypesizeof(M_cell, 'complexcell', [1 Axis.count], N), ...
 r = reordering_indices(Axis.count, N);
 
 % Construct curls
-dl_cell = grid3d.dl;
+dl_factor_cell = [];
 if pml == PML.sc
-	for g = GT.elems
-		dl_cell(:,g) = mult_vec(s_factor_cell(:,g), dl_cell(:,g));
-	end
+	dl_factor_cell = s_factor_cell;
 end
 
 ge = eqtype.ge;
-[Ce, Cm] = create_curls(ge, dl_cell, grid3d);
+[Ce, Cm] = create_curls(ge, dl_factor_cell, grid3d);
 
 % Construct material parameters
 if pml == PML.u
@@ -76,7 +74,7 @@ PM = create_spdiag(pm);
 
 test_vector_identity = false;
 if test_vector_identity
-	[Dive, Divm] = create_divs(ge, dl_cell, grid3d);
+	[Dive, Divm] = create_divs(ge, dl_factor_cell, grid3d);
 	Dive = Dive(:,r);
 	Divm = Divm(:,r);
 	fprintf('norm(Dive * Cm, 1) = %e\n', norm(Dive * Cm, 1));

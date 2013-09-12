@@ -79,7 +79,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	ge = arg;
 
 	iarg = iarg + 1; arg = varargin{iarg};
-	chkarg(istypesizeof(arg, 'PML'), 'argument #%d should be "ge" (GT).', iarg);
+	chkarg(istypesizeof(arg, 'PML'), 'argument #%d should be "pml" (PML).', iarg);
 	pml = arg;
 	
 	function material = create_material(varargin)

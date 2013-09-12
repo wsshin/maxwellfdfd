@@ -68,23 +68,24 @@ mu_n = mu_cell{n}(:,:,ind_n);
 % chkarg(all(all(mu_hh == mu_hh_prev)) && all(all(mu_vv == mu_vv_prev)), ...
 % 	'"mu_face_cell" is not homogeneous in the "normal_axis" direction at "intercept".')
 
-% Create dl_cell
-dl_cell = grid3d.dl([h v],:);
+% Create dl_factor_cell.
+dl_factor_cell = [];
 if pml == PML.sc
-	for g = GT.elems
-		dl_cell(:,g) = mult_vec(dl_cell(:,g), s_factor_cell([h v],g));
-	end
+	dl_factor_cell = s_factor_cell([h v],:);
 end
 
 % Create eps and mu matrices.
 if pml == PML.u
-	eps_h = eps_h .* s_factor_cell{v,ge} ./ s_factor_cell{h,alter(ge)};
-	eps_v = eps_v .* s_factor_cell{h,ge} ./ s_factor_cell{v,alter(ge)};
-	eps_n = eps_n .* s_factor_cell{h,ge} .* s_factor_cell{v,ge};
+	[smh, smv] = ndgrid(s_factor_cell{h, alter(ge)}, s_factor_cell{v, alter(ge)});
+	[seh, sev] = ndgrid(s_factor_cell{h, ge}, s_factor_cell{v, ge});
 	
-	mu_h = mu_h .* s_factor_cell{v,alter(ge)} ./ s_factor_cell{h,ge};
-	mu_v = mu_v .* s_factor_cell{h,alter(ge)} ./ s_factor_cell{v,ge};
-	mu_n = mu_n .* s_factor_cell{h,alter(ge)} .* s_factor_cell{v,alter(ge)};
+	eps_h = eps_h .* sev ./ smh;
+	eps_v = eps_v .* seh ./ smv;
+	eps_n = eps_n .* seh .* sev;
+	
+	mu_h = mu_h .* smv ./ seh;
+	mu_v = mu_v .* smh ./ sev;
+	mu_n = mu_n .* smh .* smv;
 end
 
 % Create differential operators
@@ -93,8 +94,8 @@ if ge == GT.prim
 else
 	s = Sign.p;
 end
-Ds = create_Ds(s, ge, dl_cell, grid2d);
-Da = create_Ds(alter(s), ge, dl_cell, grid2d);
+Ds = create_Ds(s, ge, dl_factor_cell, grid2d);
+Da = create_Ds(alter(s), ge, dl_factor_cell, grid2d);
 
 
 % DhHh = create_Ds(s, ge, dl_cell, grid2d);

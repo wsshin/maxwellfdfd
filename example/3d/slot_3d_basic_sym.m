@@ -6,6 +6,7 @@ inspect_only = true;
 %% Solve the system.
 gray = [0.5 0.5 0.5];  % [r g b]
 solveropts.method = 'aws';
+solveropts.pml = PML.u;
 % solveropts.eqtype = EquationType(FT.e, GT.dual);
 modeopts.clue = 'guess';
 modeopts.neff = 2;

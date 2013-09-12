@@ -1,4 +1,4 @@
-function Ds_cell = create_Ds(s, ge, dl_cell, gridnd)
+function Ds_cell = create_Ds(s, ge, dl_factor_cell, gridnd)
 
 chkarg(istypesizeof(s, 'Sign'), '"s" should be instance of Sign.');  % Ds = Df (or Df) when s == Sign.p (or Sign.n)
 chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');  % ge: grid type for the E-field
@@ -8,6 +8,8 @@ v = Axis.x;
 if istypesizeof(gridnd, 'Grid2d')
 	v = Dir.h;
 end
+chkarg(isempty(dl_factor_cell) || istypesizeof(dl_factor_cell, 'complexcell', [v.count GT.count], [1 0]), ...
+	'"dl_factor_cell" should be empty, or %d-by-%d cell array whose each element is row vector with real elements.', v.count, GT.count);
 
 %% Get the shape.
 N = gridnd.N;
@@ -53,7 +55,12 @@ else  % Ds == Db
 end
 
 dl = cell(1, v.count);
-[dl{:}] = ndgrid(dl_cell{:,g});
+if isempty(dl_factor_cell)
+	[dl{:}] = ndgrid(gridnd.dl{:,g});
+else
+	dl_cell = mult_vec(dl_factor_cell(:,g), gridnd.dl(:,g));
+	[dl{:}] = ndgrid(dl_cell{:});
+end
 
 for w = v.elems
 	Ds_cell{w} = create_spdiag(dl{w}.^-1) * Ds_cell{w};

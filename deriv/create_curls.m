@@ -1,13 +1,14 @@
-function [Ce, Cm] = create_curls(ge, dl_cell, grid3d)
+function [Ce, Cm] = create_curls(ge, dl_factor_cell, grid3d)
 
 chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');  % ge: grid type for the E-field
-chkarg(istypesizeof(dl_cell, 'complexcell', [Axis.count GT.count], [1 0]), ...
-	'"dl_cell" should be %d-by-%d cell array whose each element is row vector with real elements.');
+chkarg(isempty(dl_factor_cell) || istypesizeof(dl_factor_cell, 'complexcell', [Axis.count GT.count], [1 0]), ...
+	'"dl_factor_cell" should be empty, or %d-by-%d cell array whose each element is row vector with real elements.', Axis.count, GT.count);
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 
+
 %% Create Df and Db.
-Df = create_Ds(Sign.p, ge, dl_cell, grid3d);
-Db = create_Ds(Sign.n, ge, dl_cell, grid3d);
+Df = create_Ds(Sign.p, ge, dl_factor_cell, grid3d);
+Db = create_Ds(Sign.n, ge, dl_factor_cell, grid3d);
 
 %% Create mask matrices.
 [ind_Mp, ind_Md] = create_masks(ge, grid3d);
