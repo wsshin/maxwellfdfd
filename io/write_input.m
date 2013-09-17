@@ -117,15 +117,15 @@ h5write(filename, '/E0', expand_complex(cell2array(E0, Axis.count)));
 %% Rest
 use_petsc = true;
 if use_petsc
-% 	petscfilename = [filenamebase, '.eps_node'];
-% 	eps_node_array = cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count);
-% 	if isreal(eps_node_array)
-% 		eps_node_array = complex(eps_node_array);
-% 	end
-% % 	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
-% 	PetscBinaryWrite(petscfilename, eps_node_array(:));
-% 	gzip(petscfilename);
-% 	delete(petscfilename);
+	petscfilename = [filenamebase, '.eps_node'];
+	eps_node_array = cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count);
+	if isreal(eps_node_array)
+		eps_node_array = complex(eps_node_array);
+	end
+% 	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
+	PetscBinaryWrite(petscfilename, eps_node_array(:));
+	gzip(petscfilename);
+	delete(petscfilename);
 
 	petscfilename = [filenamebase, '.eps'];
 	eps_array = cell2array(eps_cell, Axis.count);
