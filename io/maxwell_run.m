@@ -313,8 +313,8 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwel
 				'solveropts.E0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
 				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 		end
-		write_input(solveropts.filenamebase, osc, grid3d, s_factor, ...
-			eps_node(2:end,2:end,2:end), eps, mu, J, solveropts.E0, solveropts.tol, solveropts.maxit);
+		write_input(solveropts.filenamebase, solveropts.eqtype, osc, grid3d, s_factor, ...
+			eps_node(2:end,2:end,2:end), eps, mu, J, M, solveropts.E0, solveropts.tol, solveropts.maxit);
 
 		pm.mark('input file creation');		
 		fprintf('%s finishes. (input file created)\n\n', mfilename);

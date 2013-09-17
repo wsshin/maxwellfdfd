@@ -1,7 +1,8 @@
-function write_input(filenamebase, osc, grid3d, s_factor_cell, eps_node_array, eps_cell, mu_cell, J_cell, E0, tol, maxit)
+function write_input(filenamebase, eqtype, osc, grid3d, s_factor_cell, eps_node_array, eps_cell, mu_cell, J_cell, M_cell, E0, tol, maxit)
 
 % Check arguments.
 chkarg(istypesizeof(filenamebase, 'char', [1 0]), '"filenamebase" should be string.');
+chkarg(istypesizeof(eqtype, 'EquationType'), '"eqtype" should be instance of EquationType.');
 chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 chkarg(istypesizeof(s_factor_cell, 'complexcell', [Axis.count GT.count], [1 0]), ...
@@ -21,6 +22,9 @@ chkarg(istypesizeof(mu_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 chkarg(istypesizeof(J_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 	'"J_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
+	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+chkarg(istypesizeof(M_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
+	'"M_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
 	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 chkarg(istypesizeof(tol, 'real') && tol > 0, '"tol" should be positive.');
 chkarg(istypesizeof(maxit, 'int') && maxit > 0, '"maxit" should be positive integer.');
@@ -51,6 +55,12 @@ end
 % BC[Naxis][Nsign] is used in C, the fastest-varying index should be the index
 % for signs, so MATLAB arrays should be prepared so that signs vary along the
 % column direction.
+h5create(filename, '/f', 1);
+h5write(filename, '/f', double(subsindex(eqtype.f)));
+
+h5create(filename, '/ge', 1);
+h5write(filename, '/ge', double(subsindex(eqtype.ge)));
+
 h5create(filename, '/omega', 1);
 h5write(filename, '/omega', double(osc.in_omega0()));
 
@@ -66,7 +76,7 @@ h5create(filename, '/N', Axis.count);
 h5write(filename, '/N', double(grid3d.N.'));
 
 % h5create(filename, '/bc', [Sign.count Axis.count], 'Datatype', 'int64');
-h5create(filename, '/bc', [Sign.count Axis.count]);
+h5create(filename, '/bc', Axis.count);
 % h5write(filename, '/bc', int64(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
 h5write(filename, '/bc', double(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
 
@@ -117,15 +127,15 @@ h5write(filename, '/E0', expand_complex(cell2array(E0, Axis.count)));
 %% Rest
 use_petsc = true;
 if use_petsc
-% 	petscfilename = [filenamebase, '.eps_node'];
-% 	eps_node_array = cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count);
-% 	if isreal(eps_node_array)
-% 		eps_node_array = complex(eps_node_array);
-% 	end
-% % 	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
-% 	PetscBinaryWrite(petscfilename, eps_node_array(:));
-% 	gzip(petscfilename);
-% 	delete(petscfilename);
+	petscfilename = [filenamebase, '.eps_node'];
+	eps_node_array = cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count);
+	if isreal(eps_node_array)
+		eps_node_array = complex(eps_node_array);
+	end
+% 	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
+	PetscBinaryWrite(petscfilename, eps_node_array(:));
+	gzip(petscfilename);
+	delete(petscfilename);
 
 	petscfilename = [filenamebase, '.eps'];
 	eps_array = cell2array(eps_cell, Axis.count);
@@ -137,7 +147,7 @@ if use_petsc
 	gzip(petscfilename);
 	delete(petscfilename);
 
-	petscfilename = [filenamebase, '.J'];
+	petscfilename = [filenamebase, '.srcJ'];
 	J_array = cell2array(J_cell, Axis.count);
 	if isreal(J_array)
 		J_array = complex(J_array);
@@ -147,7 +157,17 @@ if use_petsc
 	gzip(petscfilename);
 	delete(petscfilename);
 
-% 	J_array2 = PetscBinaryRead([filenamebase, '.J'], 'complex', true);
+	petscfilename = [filenamebase, '.srcM'];
+	M_array = cell2array(M_cell, Axis.count);
+	if isreal(M_array)
+		M_array = complex(M_array);
+	end
+% 	PetscBinaryWrite(petscfilename, M_array(:), 'indices', 'int64');
+	PetscBinaryWrite(petscfilename, M_array(:));
+	gzip(petscfilename);
+	delete(petscfilename);
+	
+	% 	J_array2 = PetscBinaryRead([filenamebase, '.J'], 'complex', true);
 % 	norm(1i*J_array(:)-J_array2)
 % 	eps_array2 = PetscBinaryRead([filenamebase, '.eps'], 'complex', true);
 % 	eps_array2 = PetscBinaryRead([filenamebase, '.eps'], true);
@@ -170,6 +190,10 @@ else
 	h5create(filename, '/J', dims, 'Deflate', cl, 'ChunkSize', dims);
 % 	h5create(filename, '/J', dims);
 	h5write(filename, '/J', expand_complex(cell2array(J_cell, Axis.count)));
+
+	h5create(filename, '/M', dims, 'Deflate', cl, 'ChunkSize', dims);
+% 	h5create(filename, '/M', dims);
+	h5write(filename, '/M', expand_complex(cell2array(M_cell, Axis.count)));
 end
 
 % % Write complex arrays to the input file.
