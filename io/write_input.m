@@ -118,12 +118,6 @@ for w = Axis.elems
 	end
 end
 
-%% E0
-cl = 5;  % compression level (0-9, where 0 means no compression)
-dims = [2 Axis.count grid3d.N];
-h5create(filename, '/E0', dims, 'Deflate', cl, 'ChunkSize', dims);
-h5write(filename, '/E0', expand_complex(cell2array(E0, Axis.count)));
-
 %% Rest
 use_petsc = true;
 if use_petsc
@@ -194,6 +188,9 @@ else
 	h5create(filename, '/M', dims, 'Deflate', cl, 'ChunkSize', dims);
 % 	h5create(filename, '/M', dims);
 	h5write(filename, '/M', expand_complex(cell2array(M_cell, Axis.count)));
+
+	h5create(filename, '/E0', dims, 'Deflate', cl, 'ChunkSize', dims);
+	h5write(filename, '/E0', expand_complex(cell2array(E0, Axis.count)));
 end
 
 % % Write complex arrays to the input file.
