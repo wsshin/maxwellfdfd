@@ -366,12 +366,42 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		% Add sobj_array to the already-generated eps and mu.
 		[eps_node_array, mu_node_array] = assign_material_node(grid3d, sobj_array, ...
 			eps_node_array(1:end-1, 1:end-1, 1:end-1), mu_node_array(1:end-1, 1:end-1, 1:end-1));  % (Nx+1) x (Ny+1) x (Nz+1)
-		eps_cell = mean_material_node(ge, eps_node_array);
-		mu_cell = mean_material_node(alter(ge), mu_node_array);
+		eps_cell = mean_material_node(ge, eps_node_array);  % Nx x Ny x Nz
+		mu_cell = mean_material_node(alter(ge), mu_node_array);  % Nx x Ny x Nz
 
 		pm.mark('TF/SF source assignment');
 	end
 	obj_array = [obj_array, sobj_array];
+	
+	if ge == GT.prim
+% 		eps_node_cell = eps_cell;
+% 		for w = Axis.elems
+% 			ind_g = {':',':',':'};
+% 			if grid3d.bc(w) == BC.p
+% 				ind_g{w} = grid3d.N(w);
+% 			else
+% 				ind_g{w} = 1;
+% 			end
+% 			eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
+% 		end
+% 		eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
+% 		eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
+% 		eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
+% 		
+% 		eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
+
+% 		eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
+% 					+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
+% 					+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
+% 					+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
+
+		eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
+					+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
+					+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
+					+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
+	else
+		eps_node_array = eps_node_array(2:end,2:end,2:end);
+	end
 
 	% Construct sources.
 	J_cell = assign_source(grid3d, srcj_array);
