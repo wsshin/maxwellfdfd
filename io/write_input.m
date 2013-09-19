@@ -1,4 +1,4 @@
-function write_input(filenamebase, eqtype, osc, grid3d, s_factor_cell, eps_node_array, eps_cell, mu_cell, J_cell, M_cell, E0, tol, maxit)
+function write_input(filenamebase, eqtype, osc, grid3d, s_factor_cell, eps_node_array, eps_cell, mu_cell, J_cell, M_cell, F0_cell, tol, maxit)
 
 % Check arguments.
 chkarg(istypesizeof(filenamebase, 'char', [1 0]), '"filenamebase" should be string.');
@@ -25,6 +25,9 @@ chkarg(istypesizeof(J_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 chkarg(istypesizeof(M_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 	'"M_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
+	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+chkarg(ischar(F0_cell) || istypesizeof(F0_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
+	'"F0_cell" should be string, or length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
 	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 chkarg(istypesizeof(tol, 'real') && tol > 0, '"tol" should be positive.');
 chkarg(istypesizeof(maxit, 'int') && maxit > 0, '"maxit" should be positive integer.');
@@ -70,27 +73,42 @@ h5write(filename, '/lambda', double(osc.in_L0()));
 h5create(filename, '/L0', 1);
 h5write(filename, '/L0', double(osc.unit.value(PhysQ.L)));
 
+GEN_ZERO = 0;  GEN_RAND = 1; GEN_GIVEN = 2;
+if ischar(F0_cell)
+	if isequal(F0_cell, 'zero')
+		x0_type = GEN_ZERO;
+	else
+		assert(isequal(F0_cell, 'rand'));
+		x0_type = GEN_RAND;
+	end
+else  % F0_cell is cell
+	x0_type = GEN_GIVEN;
+end
+h5create(filename, '/x0_type', 1);
+h5write(filename, '/x0_type', double(x0_type));
+
 % h5create(filename, '/N', Axis.count, 'Datatype', 'int64');
-h5create(filename, '/N', Axis.count);
 % h5write(filename, '/N', int64(grid3d.N.'));
+% h5create(filename, '/bc', Axis.count, 'Datatype', 'int64');
+% h5write(filename, '/bc', int64(subsindex(grid3d.bc.')));
+% h5create(filename, '/Npml', [Sign.count Axis.count], 'Datatype', 'int64');
+% h5write(filename, '/Npml', int64(grid3d.Npml.'));
+% h5create(filename, '/maxit', 1, 'Datatype', 'int64');
+% h5write(filename, '/maxit', int64(maxit));
+
+h5create(filename, '/N', Axis.count);
 h5write(filename, '/N', double(grid3d.N.'));
 
-% h5create(filename, '/bc', [Sign.count Axis.count], 'Datatype', 'int64');
 h5create(filename, '/bc', Axis.count);
-% h5write(filename, '/bc', int64(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
 h5write(filename, '/bc', double(subsindex(grid3d.bc.')));  % not int(grid3d.bc.')
 
-% h5create(filename, '/Npml', [Sign.count Axis.count], 'Datatype', 'int64');
 h5create(filename, '/Npml', [Sign.count Axis.count]);
-% h5write(filename, '/Npml', int64(grid3d.Npml.'));
 h5write(filename, '/Npml', double(grid3d.Npml.'));
 
 h5create(filename, '/tol', 1);
 h5write(filename, '/tol', double(tol));
 
-% h5create(filename, '/maxit', 1, 'Datatype', 'int64');
 h5create(filename, '/maxit', 1);
-% h5write(filename, '/maxit', int64(maxit));
 h5write(filename, '/maxit', double(maxit));
 
 % Write complex values.
@@ -118,19 +136,22 @@ for w = Axis.elems
 	end
 end
 
-%% Rest
+%% Write the remaining quantities.
 use_petsc = true;
+write_eps_node = false;
 if use_petsc
-	petscfilename = [filenamebase, '.eps_node'];
-	eps_node_array = cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count);
-	if isreal(eps_node_array)
-		eps_node_array = complex(eps_node_array);
+	if write_eps_node
+		petscfilename = [filenamebase, '.eps_node'];
+		eps_node_array = cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count);
+		if isreal(eps_node_array)
+			eps_node_array = complex(eps_node_array);
+		end
+	% 	PetscBinaryWrite(petscfilename, eps_node_array(:), 'indices', 'int64');
+		PetscBinaryWrite(petscfilename, eps_node_array(:));
+		gzip(petscfilename);
+		delete(petscfilename);
 	end
-% 	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
-	PetscBinaryWrite(petscfilename, eps_node_array(:));
-	gzip(petscfilename);
-	delete(petscfilename);
-
+	
 	petscfilename = [filenamebase, '.eps'];
 	eps_array = cell2array(eps_cell, Axis.count);
 	if isreal(eps_array)
@@ -160,6 +181,18 @@ if use_petsc
 	PetscBinaryWrite(petscfilename, M_array(:));
 	gzip(petscfilename);
 	delete(petscfilename);
+
+	if ~ischar(F0_cell)  % F0_cell is cell
+		petscfilename = [filenamebase, '.F0'];
+		F0_array = cell2array(F0_cell, Axis.count);
+		if isreal(F0_array)
+			F0_array = complex(F0_array);
+		end
+	% 	PetscBinaryWrite(petscfilename, F0_array(:), 'indices', 'int64');
+		PetscBinaryWrite(petscfilename, F0_array(:));
+		gzip(petscfilename);
+		delete(petscfilename);
+	end
 	
 	% 	J_array2 = PetscBinaryRead([filenamebase, '.J'], 'complex', true);
 % 	norm(1i*J_array(:)-J_array2)
@@ -170,10 +203,12 @@ else
 	cl = 5;  % compression level (0-9, where 0 means no compression)
 	dims = [2 Axis.count grid3d.N];
 
-	% h5create(filename, '/eps_node', dims, 'Deflate', cl, 'ChunkSize', dims);
-	% h5write(filename, '/eps_node', ...
-	% 	expand_complex(cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count)));
-
+	if write_eps_node
+		h5create(filename, '/eps_node', dims, 'Deflate', cl, 'ChunkSize', dims);
+		h5write(filename, '/eps_node', ...
+			expand_complex(cell2array({eps_node_array, eps_node_array, eps_node_array}, Axis.count)));
+	end
+	
 	h5create(filename, '/eps', dims, 'Deflate', cl, 'ChunkSize', dims);
 % 	h5create(filename, '/eps', dims);
 	h5write(filename, '/eps', expand_complex(cell2array(eps_cell, Axis.count)));
@@ -189,8 +224,10 @@ else
 % 	h5create(filename, '/M', dims);
 	h5write(filename, '/M', expand_complex(cell2array(M_cell, Axis.count)));
 
-	h5create(filename, '/E0', dims, 'Deflate', cl, 'ChunkSize', dims);
-	h5write(filename, '/E0', expand_complex(cell2array(E0, Axis.count)));
+	if ~isempty(F0_cell)
+		h5create(filename, '/F0', dims, 'Deflate', cl, 'ChunkSize', dims);
+		h5write(filename, '/F0', expand_complex(cell2array(F0_cell, Axis.count)));
+	end	
 end
 
 % % Write complex arrays to the input file.
