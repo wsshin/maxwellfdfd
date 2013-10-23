@@ -41,6 +41,7 @@ classdef Painter2d < handle
 		cscale
         withgrid
 		withcolorbar
+		linewidth
 	end
 	
 	methods
@@ -57,6 +58,7 @@ classdef Painter2d < handle
 			this.cscale = 1.0;
 			this.withgrid = false;
 			this.withcolorbar = false;
+			this.linewidth = 1.0;
 						
 			this.isCpreped = false;
 			this.isLpreped = false;
@@ -177,6 +179,11 @@ classdef Painter2d < handle
 		function set.withcolorbar(this, truth)
 			chkarg(istypesizeof(truth, 'logical'), '"truth" should be logical.');
 			this.withcolorbar = truth;
+		end
+		
+		function set.linewidth(this, linewidth)
+			chkarg(istypesizeof(linewidth, 'real') && linewidth > 0, '"cscale" should be positive.');
+			this.linewidth = linewidth;
 		end
 		
 		function prep_data(this)
@@ -369,7 +376,8 @@ classdef Painter2d < handle
 					bound = shape.bound([h_axis v_axis],:);
 % 					bound(Dir.h,:) = bound(Dir.h,:) + [-dh dh];
 % 					bound(Dir.v,:) = bound(Dir.v,:) + [-dv dv];
-					bound = bound + [-dlmin, dlmin];
+% 					bound = bound + [-dlmin, dlmin];
+					bound = bound + 2*[-dlmin, dlmin];
 					
 					bound(:,Sign.n) = max([bound(:,Sign.n), bound_g(:,Sign.n)], [], 2);  % prevent -Inf bound
 					bound(:,Sign.p) = min([bound(:,Sign.p), bound_g(:,Sign.p)], [], 2);  % prevent +Inf bound
@@ -380,16 +388,16 @@ classdef Painter2d < handle
 					h = ezplot(axes_handle, lsf2d, [bound(Dir.h,:), bound(Dir.v,:)]);
 					warning('on', 'MATLAB:contour:ConstantData');
 					set(h, 'Color', color);
-% 					set(h, 'LineWidth', 2);
+					set(h, 'LineWidth', this.linewidth);
 					if i > nobj  % source
 						if istypesizeof(shape, 'Point')
 							set(h, 'LineWidth', 3);
 						elseif istypesizeof(shape, 'Line')
-							if n_axis == shape.axis
-								set(h, 'LineWidth', 3);
+% 							if n_axis == shape.axis
+% 								set(h, 'LineWidth', 3);
 % 							else
 % 								set(h, 'LineStyle', ':');
-							end
+% 							end
 % 						elseif istypesizeof(shape, 'Plane')
 % 							set(h, 'LineStyle', ':');
 						end
