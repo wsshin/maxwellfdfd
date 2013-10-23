@@ -47,7 +47,7 @@ classdef Scalar3d
 		end
 		
 		function [array, l_cell] = data_expanded(this)
-			l_cell = this.grid3d.all(Axis.elems + Axis.count*subsindex(this.gt_array));
+			l_cell = this.grid3d.lall(Axis.elems + Axis.count*subsindex(this.gt_array));
 			array = this.array;
 		end
 		
