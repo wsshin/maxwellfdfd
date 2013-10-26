@@ -1,5 +1,5 @@
 function s_factor_cell = generate_s_factor(omega, grid3d, m, R)
-% For example, s_factor_cell{Axis.x, GK.dual} is the s-factor multiplied to Ex
+% For example, s_factor_cell{Axis.x, GT.dual} is the s-factor multiplied to Ex
 % (or eps_ww).
 
 chkarg(istypesizeof(omega, 'complex'), '"omega" should be complex.');
@@ -18,7 +18,7 @@ else
 end
 
 
-s_factor_cell = cell(Axis.count, GK.count);
+s_factor_cell = cell(Axis.count, GT.count);
 for w = Axis.elems
 	Nw = grid3d.N(w);
 
@@ -28,7 +28,7 @@ for w = Axis.elems
 	Lpmls = grid3d.Lpml(w,:);  % thicknesses of PML
 	Lpml_n = Lpmls(Sign.n); Lpml_p = Lpmls(Sign.p);
 
-	for g = GK.elems
+	for g = GT.elems
 		s_factor = ones(1, Nw);
 		l = grid3d.l{w, g};  % length(l) == Nw, rather than Nw+1.
 		for i = 1:Nw

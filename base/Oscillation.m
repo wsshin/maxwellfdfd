@@ -1,7 +1,5 @@
+% Oscillation is a class containing the information on the operation frequency.
 classdef Oscillation
-	% Oscillation is a class containing the information on the operation
-	% frequency.
-	
     properties (SetAccess = immutable, GetAccess = private)
         wvlen  % vacuum wavelength
 	end

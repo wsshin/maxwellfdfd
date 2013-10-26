@@ -9,7 +9,9 @@ classdef PhysQ < Enumerated
 		E('E-field', 'E', 'V/m')
 		H('H-field', 'H', 'A/m')
 		J('electric current density', 'J', 'A/m^2')
+		M('magnetic current density', 'M', 'V/m^2')
 		I('electric current', 'I', 'A')
+		V('electric voltage', 'V', 'V')
 		S('Poynting vector', 'S', 'W/m^2')
 		P('power', 'P', 'W')
 	end
@@ -31,7 +33,7 @@ classdef PhysQ < Enumerated
 	
 	methods (Static)
 		function elems = elems(ind)
-			elems = [PhysQ.arbitrary, PhysQ.L, PhysQ.omega, PhysQ.eps, PhysQ.mu, PhysQ.E, PhysQ.H, PhysQ.J, PhysQ.I, PhysQ.S, PhysQ.P];
+			elems = [PhysQ.arbitrary, PhysQ.L, PhysQ.omega, PhysQ.eps, PhysQ.mu, PhysQ.E, PhysQ.H, PhysQ.J, PhysQ.M, PhysQ.I, PhysQ.V, PhysQ.S, PhysQ.P];
 			if nargin > 0  % ind
 				elems = elems(ind);
 			end

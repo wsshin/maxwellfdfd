@@ -9,26 +9,35 @@ grid3d = scalar3d.grid3d;
 chkarg(grid3d.comp(n).contains(intercept), ...
 	'"intercept" should be contained in %s-axis range.', char(n));
 
-hall = grid3d.lall{h, GK.prim};
-vall = grid3d.lall{v, GK.prim};
-nall = grid3d.lall{n, GK.prim};
+lall = grid3d.lall(Axis.elems + Axis.count*subsindex(scalar3d.gt_array));
+nall = lall{n};
 
-in = ismembc2(intercept, nall);
-if in == 0
-	warning('FDS:interp', 'slice at %s = %f is not primary grid plane; fields are interpolated.', char(n), intercept);
+ind = {':', ':', ':'};
+indn = ismembc2(intercept, nall);
+if indn ~= 0
+	ind{n} = indn;
+	array = scalar3d.array(ind{:});
+else
+% 	warning('FDS:interp', 'slice at %s = %s is not grid plane where %s is defined; fields are interpolated.', ...
+% 		char(n), num2str(intercept), scalar3d.name);
+
+	indn = find(nall < intercept, 1, 'last');
+	ind{n} = [indn indn+1];
+
+	V = scalar3d.array(ind{:});
+	l = lall;
+	l{n} = nall(ind{n});
+	[Xh, Yv, Zn] = ndgrid(l{:});
+
+	li = lall;
+	li{n} = intercept;
+	[XIh, YIv, ZIn] = ndgrid(li{:});
+
+	array = interpn(Xh, Yv, Zn, V, XIh, YIv, ZIn);
 end
 
-li = {hall, vall, intercept};
-[XIh, YIv, ZIn] = meshgrid(li{:});
-
-V = scalar3d.array;
-V = permute(V, int([v h n]));  % [v h n] rather than [h v n]
-l = {hall, vall, nall};
-[Xh, Yv, Zn] = meshgrid(l{:});
-
-array = interp3(Xh, Yv, Zn, V, XIh, YIv, ZIn);
-array = ipermute(array, int([Dir.v Dir.h]));
+array = permute(array, int([h v n]));
 assert(ndims(array) == Dir.count);
 
 grid2d = Grid2d(grid3d, n);
-scalar2d = Scalar2d(array, grid2d, scalar3d.osc, scalar3d.physQcell, scalar3d.name, intercept);
+scalar2d = Scalar2d(array, grid2d, scalar3d.gt_array([h v]), scalar3d.osc, scalar3d.physQcell, scalar3d.name, intercept);

@@ -11,35 +11,41 @@ chkarg(istypesizeof(rect, 'real', [2 2]), '"rect" should be %d-by-%d array with 
 chkarg(issorted(rect(Dir.h,:)) && issorted(rect(Dir.v,:)), 'each row of "rect" should be sorted in ascending order.');
 chkarg(grid2d.contains(rect.'), '"rect" should be contained in grid.');
 
-l = grid2d.lall(:, GK.prim);
-[Xh, Yv] = meshgrid(l{:});
+gt = scalar2d.gt_array;
+% l = grid2d.lall(Dir.elems + Dir.count*subsindex(gt));
+% la = grid2d.lall(Dir.elems + Dir.count*subsindex(alter(gt)));
 
-li = cell(1, Dir.count);
+la = scalar2d.lpixelbound(true);  % true: include PML
+array = scalar2d.data_original();
+
+ind_array = NaN(Dir.count, Sign.count);
+dl = cell(1, Dir.count);
 for d = Dir.elems
-	ind = NaN(1, Sign.count);
+	ind_dl = NaN(1, Sign.count);
 	for s = Sign.elems
 		bound = rect(d, s);
-		i = ismembc2(bound, l{d});
+		i = ismembc2(bound, la{d});
 		if i == 0  % bound is not in l{d}
-			warning('FDS:interp', ['patch boundary %s = %f is not aligned with primary grid;', ...
-				'Poynting vector is interpolated at the boundary and flux will be slightly inaccurate.'], ...
-				char(grid2d.axis(d)), bound);
+			warning('FDS:interp', ['patch boundary %s = %s is not aligned with %s grid;', ...
+				'flux will be slightly inaccurate.'], ...
+				char(grid2d.axis(d)), num2str(bound), char(alter(gt(d))));
 		end
 			
 		if s == Sign.n
-			ind(s) = find(l{d} > bound, 1, 'first');
+			ind_dl(s) = find(la{d} > bound, 1, 'first');
+			ind_array(d,s) = ind_dl(s) - 1;
 		else  % s == Sign.p
-			ind(s) = find(l{d} < bound, 1, 'last');
+			ind_dl(s) = find(la{d} < bound, 1, 'last');
+			ind_array(d,s) = ind_dl(s);
 		end
 	end
-	li{d} = [rect(d,Sign.n), l{d}(ind(Sign.n):ind(Sign.p)), rect(d,Sign.p)];
+	dl{d} = [rect(d,Sign.n), la{d}(ind_dl(Sign.n):ind_dl(Sign.p)), rect(d,Sign.p)];
+	dl{d} = diff(dl{d});
 end
-[XIh, YIv] = meshgrid(li{:});
 
-C = scalar2d.array;
-C = permute(C, int([Dir.v, Dir.h]));
-CI = interp2(Xh, Yv, C, XIh, YIv);
-CI = ipermute(CI, int([Dir.v, Dir.h]));
+% Calculate the Rieman sum.
+array = array(...
+	ind_array(Dir.h,Sign.n):ind_array(Dir.h,Sign.p), ...
+	ind_array(Dir.v,Sign.n):ind_array(Dir.v,Sign.p));
 
-phi = trapz(li{Dir.h}, CI, int(Dir.h));  % integrate along horizontal direction
-phi = trapz(li{Dir.v}, phi);  % integrate along vertical direction
+phi = dl{Dir.h} * array * dl{Dir.v}.';

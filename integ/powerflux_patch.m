@@ -64,8 +64,8 @@ end
 % 
 % chkarg(grid2d.contains(rect.'), '"rect" should be contained in grid.');
 % 
-% hall = grid2d.lall{Dir.h, GK.prim};
-% vall = grid2d.lall{Dir.v, GK.prim};
+% hall = grid2d.lall{Dir.h, GT.prim};
+% vall = grid2d.lall{Dir.v, GT.prim};
 % [Xh, Yv] = meshgrid(hall, vall);
 % 
 % in = find(hall > hbound(Sign.n), 1, 'first');

@@ -8,8 +8,8 @@ classdef Grid1d < handle
 		unit  % instance of PhysUnit
 		unitvalue  %  unit value of length
         l  % {locations for primary vertices, locations for dual vertices}
-        dl  % {dl at primary vertex, dl at dual vertex} == { diff( l{GK.dual} ), diff( l{GK.prim} ) }
-        bc  % [BC at (-) end, BC at (+) end]
+        dl  % {dl at primary vertex, dl at dual vertex} == { diff( l{GT.dual} ), diff( l{GT.prim} ) }
+        bc  % instance of BC
         N  % number of grid cells
 		L  % length of the grid (domain)
         Npml  % [Npml at (-) end, Npml at (+) end]
@@ -47,11 +47,7 @@ classdef Grid1d < handle
 			this.Npml = Npml_array;
 			            
 			chkarg(istypesizeof(bc, 'BC'), '"bc" should be instance of BC.');
-			if bc == BC.p
-				this.bc = [bc bc];
-			else
-				this.bc = [bc BC.m];
-			end
+			this.bc = bc;
 			
 			chkarg(istypesizeof(lprim_array, 'real', [1 0]), ...
 				'"lprim_array" should be row vector with real elements.');
@@ -65,10 +61,10 @@ classdef Grid1d < handle
 			ldual = NaN(1, this.N+1);
 			ldual(2:(this.N+1)) = (lprim(1:end-1) + lprim(2:end)) / 2;
 
-			if this.bc(Sign.n) == BC.p  % this.bc(Sign.p) == BC.p
+			if this.bc == BC.p
 				ldual(1) = ldual(end) - (lprim(end)-lprim(1));  % lprim(end) - lprim(1) == ldual(end) - ldual(1)
 				this.ldual_ext = ldual(2) + (lprim(end)-lprim(1));  % lprim(end) - lprim(1) = ldual_ext - ldual(2)
-			else  % this.bc(Sign.p) == BC.m
+			else
 				ldual(1) = lprim(1) - (ldual(2)-lprim(1));  % lprim(1) - ldual(1) == ldual(2) - lprim(1)
 				this.ldual_ext = lprim(end) + (lprim(end) - ldual(end));  % ldual_ext - lprim(end) = lprim(end) - ldual(end)
 			end
@@ -87,15 +83,15 @@ classdef Grid1d < handle
 		end
 		
 		function lg = get.lg(this)
-			lg = {[this.l{GK.prim}, this.lghost(GK.prim)], [this.lghost(GK.dual), this.l{GK.dual}]};
+			lg = {[this.l{GT.prim}, this.lghost(GT.prim)], [this.lghost(GT.dual), this.l{GT.dual}]};
 		end
 		
 		function lall = get.lall(this)
-			lall = {this.lg{GK.prim}, [this.lg{GK.dual}, this.ldual_ext]};
+			lall = {this.lg{GT.prim}, [this.lg{GT.dual}, this.ldual_ext]};
 		end
 		
 		function bound = get.bound(this)
-			bound = this.lall{GK.prim}([1 end]);
+			bound = this.lall{GT.prim}([1 end]);
 		end
 		
 		function set_kBloch(this, blochSrc)
@@ -106,22 +102,56 @@ classdef Grid1d < handle
 		function truth = contains(this, l)
 			% This function can handle "l" as an array.
 			chkarg(istypesizeof(l, 'real', [0 1]), '"l" should be column vector with real elements.');
-			truth = (l >= this.lall{GK.prim}(1)) & (l <= this.lall{GK.prim}(end));  % &: elementwise AND operator
+			truth = (l >= this.lall{GT.prim}(1)) & (l <= this.lall{GT.prim}(end));  % &: elementwise AND operator
 		end
 		
 		function bound_plot = bound_plot(this, withpml)
-			lplot = this.lplot(GK.prim, withpml);
-			bound_plot = lplot([1 end]);
+			if withpml
+				bound_plot = this.bound;
+			else
+				bound_plot = this.lpml;
+			end
 		end
 		
-		function lplot = lplot(this, gk, withpml)
-			chkarg(istypesizeof(gk, 'GK') , '"gk" should be instance of GK');
+		function lplot = lplot(this, g, withinterp, withpml)
+			% Return the locations where data are evaluated for plotting.  If
+			% the data do not include the boundaries of the simulation domain (or
+			% the PML interfaces for "withpml == false"), the boundary points
+			% are added to ensure that the plot is drawn from boundary to
+			% boundary.
+			chkarg(istypesizeof(g, 'GT') , '"g" should be instance of GT');
+			chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 			
-			lplot = this.lall{gk};
+			if g == GT.prim
+				lplot = this.lall{g};
+			else  % g == GT.dual
+				lplot = this.l{g};
+			end
+			
 			if ~withpml
 				lplot = lplot(1+this.Npml(Sign.n):end-this.Npml(Sign.p));
 			end
+			
+			if g == GT.dual && withinterp
+				lbound = this.bound_plot(withpml);
+				lplot = [lbound(1), lplot, lbound(end)];
+			end
+		end
+		
+		function lpixelbound = lpixelbound(this, g, withpml)
+			% Return the locations of boundaries of pixels drawn.  For data at
+			% primary grid points, the pixel centers are in the simulation
+			% domain including the boundary.  For data at dual grid points, the
+			% pixel centers are in the simulation domain excluding the boundary.
+			chkarg(istypesizeof(g, 'GT') , '"g" should be instance of GT');
+			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
+
+			lpixelbound = this.lall{alter(g)};
+			if ~withpml
+				lpixelbound = lpixelbound(1+this.Npml(Sign.n):end-this.Npml(Sign.p));
+			end
+			
 		end
 	end
 end

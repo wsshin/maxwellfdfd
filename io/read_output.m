@@ -12,6 +12,8 @@ hfile = ['./', filenamebase, '.H.h5'];
 lambda = h5read(inputfile, '/lambda');
 L0 = h5read(inputfile, '/L0');
 Npml = h5read(inputfile, '/Npml').';
+ge = h5read(inputfile, '/ge');
+ge = GT.elems(ge+1);
 bc = BC.elems(h5read(inputfile, '/bc').' + 1);
 bc = bc(:, Sign.n).';
 
@@ -54,7 +56,7 @@ else
 			ind{n} = ':';
 		end
 		ind{end} = int(w);
-		E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, GK.dual, osc);
-		H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, GK.prim, osc);
+		E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, FT.e, ge, osc);
+		H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, FT.h, alter(ge), osc);
 	end
 end

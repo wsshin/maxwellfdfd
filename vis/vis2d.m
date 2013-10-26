@@ -143,6 +143,10 @@ end
 if no_opts || ~isfield(opts, 'phase')
 	opts.phase = 0;
 end
+if no_opts || ~isfield(opts, 'linewidth')
+	opts.linewidth = 1.0;
+end
+
 
 p = Painter2d();
 p.scalar2d = scalar2d;
@@ -156,6 +160,7 @@ p.cscale = opts.cscale;
 p.cmax = opts.cmax;
 p.withcolorbar = opts.withcolorbar;
 p.phase_angle = opts.phase;
+p.linewidth = opts.linewidth;
 
 p.init_display();
 p.draw_slice();

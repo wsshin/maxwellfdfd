@@ -20,7 +20,7 @@
 % * <Axis.html |Axis|>: Catesion axes
 % * <BC.html |BC|>: boundary conditions
 % * <Dir.html |Dir|>: horizontal and vertical directions
-% * <GK.html |GK|>: grid kinds
+% * <GT.html |GT|>: grid kinds
 % * <PhysQ.html |PhysQ|>: physical quantities
 % * <PML.html |PML|>: PML kinds
 % * <Sign.html |Sign|>: negative and positive signs
@@ -110,6 +110,10 @@ classdef Enumerated
 			ind = int(this) - 1;
 		end
 		
+		function c = plus(this, another)
+				c = int(this) + double(another);
+		end
+				
 		function [sorted, ind] = sort(this, varargin)
 			n = length(this);
 			nums = NaN(1, n);

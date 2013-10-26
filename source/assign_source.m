@@ -1,19 +1,20 @@
-function J_cell = assign_source(grid3d, source_array)
+function JM_cell = assign_source(grid3d, src_array)
+
 
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid.');
-chkarg(istypesizeof(source_array, 'Source', [1 0]), ...
-	'"source_array" should be row vector of instances of Source.');
+chkarg(istypesizeof(src_array, 'Source', [1 0]), ...
+	'"src_array" should be row vector of instances of Source.');
 
-J_cell = cell(1, Axis.count);
+JM_cell = cell(1, Axis.count);
 for w = Axis.elems
-	J_cell{w} = zeros(grid3d.N);
+	JM_cell{w} = zeros(grid3d.N);
 end
 
-for src = source_array
+for src = src_array
 	for w = Axis.elems
-		[ind, Jw_patch] = src.generate(w, grid3d);
-		if ~isempty(Jw_patch)
-			J_cell{w}(ind{:}) = J_cell{w}(ind{:}) + Jw_patch;  % superpose sources
+		[ind, JMw_patch] = src.generate(w, grid3d);
+		if ~isempty(JMw_patch)
+			JM_cell{w}(ind{:}) = JM_cell{w}(ind{:}) + JMw_patch;  % superpose sources
 		end
 	end
 end

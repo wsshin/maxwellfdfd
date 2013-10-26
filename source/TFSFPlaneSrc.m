@@ -10,7 +10,7 @@
 
 %%% Construction
 %  src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis)
-%  src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, E0)
+%  src = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, F0)
 % 
 % *Input Arguments*
 %
@@ -20,12 +20,13 @@
 % can be either one of |Axis.x|, |Axis.y|, |Axis.z|, or |[kx ky kz]|.  The
 % latter does not have to be normalized, i.e., |norm([kx ky kz])| does not have
 % to be |1|.
-% * |polarization_axis|: axis of the polarization of the _E_-field of the plane
-% wave.  It can be either one of |Axis.x|, |Axis.y|, |Axis.z|, or |[Ex Ey Ez]|.
-% The latter does not have to be normalized, i.e., |norm([Ex Ey Ez])| does not
-% have to be |1|.
-% * |E0|: complex amplitude of the plane wave measure at the origin.  If not
-% assigned, the default value |E0 = 1| is used.
+% * |polarization_axis|: axis of the polarization of the _F_-field (the _E_- or
+% _H_-field depending on whether the source is used as 'SRCJ' or 'SRCM') of the
+% plane wave.  It can be either one of |Axis.x|, |Axis.y|, |Axis.z|, or |[Fx Fy
+% Fz]|. The latter does not have to be normalized, i.e., |norm([Fx Fy Fz])| does
+% not have to be |1|.
+% * |F0|: complex amplitude of the plane wave measure at the origin. If not
+% assigned, the default value |F0 = 1| is used.
 
 
 %%% Methods
@@ -34,12 +35,12 @@
 % a SRC paarmeter in <maxwell_run.html |maxwell_run|>, the material used as the
 % default material of the simulation domain, i.e., the material assigned in the
 % DOM parameter group, is taken automatically.
-% * |E_cell = create_incidentE(this, osc, grid3d)|: returns |{Ex_array,
-% Ey_array, Ez_array}| that has the _E_-field of the plane wave inside the total
+% * |F_cell = create_incidentF(this, osc, grid3d)|: returns |{Fx_array,
+% Fy_array, Fz_array}| that has the _F_-field of the plane wave inside the total
 % field box region.  When |TFSFPlaneSrc| is used as a SRC parameter in
 % <maxwell_run.html |maxwell_run|>, <maxwell_run.html |maxwell_run|> calls this
-% function to construct |J| that creates the _E_-field inside the total field
-% box.
+% function to construct |J| or |M| that creates the _F_-field inside the total
+% field box.
 
 %%% Note
 % |TFSFPlaneSrc| is similar to <PlaneSrc.html |PlaneSrc|>, but has a few
@@ -65,7 +66,7 @@
 %   src =  TFSFPlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
 %
 %   % Use the constructed src in maxwell_run().
-%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
 
 %%% See Also
 % <PlaneSrc.html |PlaneSrc|>, <ModalSrc.html |ModalSrc|>, <maxwell_run.html |maxwell_run|>
@@ -74,35 +75,38 @@ classdef TFSFPlaneSrc < Source
 		
 	properties (SetAccess = immutable)
 		khat  % [nx, ny, nz]: unit vector along k-vector of plane wave
-		Ehat  % [px, py, pz]: unit vector along polarization direction
-		E0  % complex amplitude of plane wave
+		Fhat  % [px, py, pz]: unit vector along polarization direction
+		F0  % complex amplitude of plane wave
 	end
 	
 	properties (SetAccess = private)
 		N_bg  % complex refractive index of background medium
-		grid3d  % Grid3d instance used to set up E and J
-		J  % {Jx_array, Jy_array, Jz_array}: J generating plane wave in TF/SF box
+		grid3d  % Grid3d instance used to set up F and J or M
+		JM  % {JMx_array, JMy_array, JMz_array}: J or M generating plane wave in TF/SF box
 	end
 	
 	methods
-		function this = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, E0)
+		function this = TFSFPlaneSrc(bound, propagation_axis, polarization_axis, F0)
 			chkarg(istypesizeof(bound, 'real', [Axis.count, Sign.count]), ...
-				'"bound" should be %d-by-%d array of real elements.', Axis.count, Sign.count);
+				'"bound" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
 			chkarg(istypesizeof(propagation_axis, 'Axis') || istypesizeof(propagation_axis, 'real', [1, Axis.count]), ...
 				'"propagation_axis" should be instance of Axis or length-%d row vector with real elements.', Axis.count);
 			chkarg(istypesizeof(polarization_axis, 'Axis') || istypesizeof(polarization_axis, 'real', [1, Axis.count]), ...
 				'"polarization_axis" should be instance of Axis or length-%d row vector with real elements.', Axis.count);
 			
 			if nargin < 4
-				E0 = 1;
+				F0 = 1;
 			end
-			chkarg(istypesizeof(E0, 'complex'), '"E0" should be complex.');
+			chkarg(istypesizeof(F0, 'complex'), '"F0" should be complex.');
 			
-			l = cell(Axis.count, GK.count);
+			lgrid = cell(1, Axis.count);
+			laltgrid = cell(1, Axis.count);
 			for w = Axis.elems
-				l{w,GK.prim} = bound(w,:);
+				lgrid{w} = bound(w,:);
 			end
-			this = this@Source(l, Box(bound));
+			
+			forceprim = true;
+			this = this@Source(lgrid, laltgrid, Box(bound), forceprim);
 
 			this.khat = propagation_axis;
 			if istypesizeof(propagation_axis, 'Axis')
@@ -111,16 +115,16 @@ classdef TFSFPlaneSrc < Source
 			end
 			this.khat = this.khat / norm(this.khat);
 			
-			this.Ehat = polarization_axis;
+			this.Fhat = polarization_axis;
 			if istypesizeof(polarization_axis, 'Axis')
-				this.Ehat = zeros(1, Axis.count);
-				this.Ehat(polarization_axis) = 1;
+				this.Fhat = zeros(1, Axis.count);
+				this.Fhat(polarization_axis) = 1;
 			end
-			this.Ehat = this.Ehat / norm(this.Ehat);
+			this.Fhat = this.Fhat / norm(this.Fhat);
 			
-			chkarg(this.khat * this.Ehat.' < 1e-12, '"normal_axis" and "polarization_axis" should be orthogonal.');
+			chkarg(this.khat * this.Fhat.' < 1e-12, '"normal_axis" and "polarization_axis" should be orthogonal.');
 			
-			this.E0 = E0;
+			this.F0 = F0;
 			this.N_bg = NaN;
 			this.grid3d = Grid3d.empty();
 		end
@@ -130,23 +134,23 @@ classdef TFSFPlaneSrc < Source
 			this.N_bg = sqrt(material.eps * material.mu);
 		end
 		
-		function E_cell = create_incidentE(this, osc, grid3d)
+		function F_cell = create_incidentF(this, osc, grid3d)
 			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 			chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 			this.grid3d = grid3d;
 
-			E_cell = cell(1, Axis.count);
+			F_cell = cell(1, Axis.count);
 			l = cell(1, Axis.count);
 			bound = this.shape.bound;
 			ind = cell(1, Axis.count);
-			k = this.khat * 2*pi * this.N_bg / osc.in_L0();  % k*n = (2*pi*n/lambda)
+			k = this.khat * 2*pi * this.N_bg / osc.in_L0();  % k = (2*pi*n/lambda)
 			for w = Axis.elems
-				E_cell{w} = zeros(grid3d.N);
+				F_cell{w} = zeros(grid3d.N);
 				
 				[p, q] = cycle(w);
-				l{p} = grid3d.l{p, GK.dual};
-				l{q} = grid3d.l{q, GK.dual};
-				l{w} = grid3d.l{w, GK.prim};
+				l{p} = grid3d.l{p, this.gt};
+				l{q} = grid3d.l{q, this.gt};
+				l{w} = grid3d.l{w, alter(this.gt)};
 				
 				for v = Axis.elems
 					ind_n = find(l{v} >= bound(v,Sign.n), 1, 'first');
@@ -155,24 +159,24 @@ classdef TFSFPlaneSrc < Source
 				end
 				
 				[X, Y, Z] = ndgrid(l{Axis.x}(ind{Axis.x}), l{Axis.y}(ind{Axis.y}), l{Axis.z}(ind{Axis.z}));
-				E_cell{w}(ind{:}) = (this.E0 * this.Ehat(w)) * exp(1i * (k(Axis.x)*X + k(Axis.y)*Y + k(Axis.z)*Z));
+				F_cell{w}(ind{:}) = (this.F0 * this.Fhat(w)) * exp(1i * (k(Axis.x)*X + k(Axis.y)*Y + k(Axis.z)*Z));
 			end
 		end
 		
-		function setJ(this, J_cell, grid3d)
-			chkarg(isequal(grid3d, this.grid3d), 'same "grid3d" should be used as in create_incidentE().');
-			chkarg(istypesizeof(J_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
-				'"J_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
+		function setJM(this, JM_cell, grid3d)
+			chkarg(isequal(grid3d, this.grid3d), 'same "grid3d" should be used as in create_incidentF().');
+			chkarg(istypesizeof(JM_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
+				'"JM_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
 				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 			
-			this.J = J_cell;
+			this.JM = JM_cell;
 		end
 		
-		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+		function [index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d)
 			assert(~isnan(this.N_bg), '"mat_bg" is not set in this TFSFPlaneSrc.');
 			
 			index_cell = {':', ':', ':'};
-			Jw_patch = this.J{w_axis};
+			JMw_patch = this.JM{w_axis};
 		end
 	end
 end

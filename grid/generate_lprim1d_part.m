@@ -62,7 +62,7 @@ if ~isempty(common)
 end
 
 % [l_array, ind] = sort([lprim0_array, ldual0_array]);
-% g_array = [GK.prim(ones(size(lprim0_array))), GK.dual(ones(size(ldual0_array)))];
+% g_array = [GT.prim(ones(size(lprim0_array))), GT.dual(ones(size(ldual0_array)))];
 % g_array = g_array(ind);
 % n = length(l_array);s
 

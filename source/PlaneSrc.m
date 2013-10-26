@@ -10,6 +10,7 @@
 %%% Construction
 %  src = PlaneSrc(normal_axis, intercept, polarization)
 %  src = PlaneSrc(normal_axis, intercept, polarization, K)
+%  src = PlaneSrc(normal_axis, intercept, polarization, K, k_Bloch)
 %  src = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)
 % 
 % *Input Arguments*
@@ -26,8 +27,11 @@
 % therefore it is measured in the counterclockwise direction from the z-axis in
 % the zx plane.
 % * |K|: amplitude of the surface current density that the dipoles drive.
-% * |theta|: oblique incidence angle.  |abs(theta)| should not exceed |pi/2|
-% because the waves are emitted from the both sides of the plane.
+% * |kt_Bloch|: in-plane Bloch wavevector.  If unassigned, |kt_Bloch = [0 0]| is
+% used.
+% * |theta|: oblique incidence angle measured from |normal_axis|.  |abs(theta)|
+% should not exceed |pi/2| because the waves are emitted from the both sides of
+% the plane.
 % * |wvlen|: wavelength of the plane wave in the background medium.  It is
 % required to set up the Bloch boundary condition for oblique incidence.
 % |wvlen| is not the vacuum wavelength used in the frequency-domain Maxwell's
@@ -46,7 +50,7 @@
 %   src =  PlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
 %
 %   % Use the constructed src in maxwell_run().
-%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
 
 %%% See Also
 % <PointSrc.html |PointSrc|>, <PointSrcM.html |PointSrcM|>, <TFSFPlaneSrc.html
@@ -58,27 +62,27 @@ classdef PlaneSrc < Source & WithBloch
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
 		intercept  % intercept between plane and normal axis
 		phi  % angle of polarization with respect to first Cartesian direction in this plane
-		theta  % emission angle in the plane normal to polarization: (+) toward normal x polarization, (-) toward -normal x polarization
 		kBloch  % Bloch k-vector [kx, ky, kz]
 		K  % surface current density
 	end
 	
 	methods
-		function this = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)
+		function this = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)  % refractive index would be better rather than wvlen
 			chkarg(istypesizeof(normal_axis, 'Axis'), ...
 				'"normal_axis" should be instance of Axis.');
-			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
-			
+			[p, q] = cycle(normal_axis);
+
+			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');			
 			chkarg(istypesizeof(polarization, 'Axis') || istypesizeof(polarization, 'real'), ...
 				'"polarization" should be instance of Axis or angle in radian.');
+			phi_ = polarization;
 			if istypesizeof(polarization, 'Axis')
 				chkarg(polarization ~= normal_axis, '"polarization" should be orthogonal to "normal_axis".');
-				[p, q] = cycle(normal_axis);
 				if polarization == p
-					polarization = 0;
+					phi_ = 0;
 				else
 					assert(polarization == q);
-					polarization = pi/2;
+					phi_ = pi/2;
 				end
 			end
 			
@@ -87,48 +91,50 @@ classdef PlaneSrc < Source & WithBloch
 			end
 			chkarg(istypesizeof(K, 'complex'), '"K" should be complex.');
 
-			if nargin < 6  % no wvlen
-				assert(nargin < 5);  % no theta
-				theta = 0;
-				wvlen = Inf;
+			if nargin < 5  % no theta (or k_Bloch)
+				kt_Bloch = [0 0];
+			elseif nargin < 6  % no wvlen
+				kt_Bloch = theta;  % theta is in fact kt_Bloch
+				chkarg(istypesizeof(kt_Bloch, 'real', [1 Dir.count]), ...
+					'"kt_Bloch" should be length-%d row vector with real elements.', Dir.count);
+			else  % with wvlen
+				assert(nargin == 6);
+				chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
+					'"theta" should be polar angle in radian between -pi/2 and pi/2.');
+				chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
+				kt_Bloch = NaN(1, Dir.count);
+				kt = (2*pi/wvlen) * sin(theta);  % k tangential to plane
+				kp = kt * cos(phi_ + pi/2);
+				kq = kt * sin(phi_ + pi/2);
+				kt_Bloch(Dir.h) = kp;
+				kt_Bloch(Dir.v) = kq;
 			end
-			chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
-				'"theta" should be polar angle in radian between -pi/2 and pi/2.');
-			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
-						
-			l = cell(Axis.count, GK.count);
-			l{normal_axis, GK.dual} = intercept;
+			
+			lgrid = cell(1, Axis.count);
+			laltgrid = cell(1, Axis.count);
+			lgrid{normal_axis} = intercept;
 			plane = Plane(normal_axis, intercept);
-			this = this@Source(l, plane);
+			this = this@Source(lgrid, laltgrid, plane);
 			
 			this.normal_axis = normal_axis;
 			this.intercept = intercept;
-			this.phi = polarization;
-			this.theta = theta;
+			this.phi = phi_;
 			this.K = K;
-
 			this.kBloch = [0 0 0];
-			if this.theta ~= 0
-				[p, q] = cycle(this.normal_axis);
-				kt = (2*pi/wvlen) * sin(this.theta);  % k tangential to plane
-				kp = kt * cos(this.phi + pi/2);
-				kq = kt * sin(this.phi + pi/2);
-				this.kBloch(p) = kp;
-				this.kBloch(q) = kq;
-			end
+			this.kBloch([p q]) = kt_Bloch;
 		end
 		
-		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+		function [index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d)
 			grid3d.set_kBloch(this);
 			if w_axis == this.normal_axis
-				Jw_patch = [];
+				JMw_patch = [];
 				index_cell = cell(1, Axis.count);
 			else
 				n = this.normal_axis;
 				w = w_axis;
 				v = setdiff(Axis.elems, [n, w]);
 				
-				g = GK.dual;
+				g = this.gt;
 				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				dn = grid3d.dl{n,g}(ind_n);
 				J = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
@@ -140,12 +146,12 @@ classdef PlaneSrc < Source & WithBloch
 				end
 				
 				if Jw == 0
-					Jw_patch = [];
+					JMw_patch = [];
 					index_cell = cell(1, Axis.count);
 				else
 					%  Set Jw_patch.
-					lw = grid3d.l{w, GK.prim};
-					lv = grid3d.l{v, GK.dual};
+					lw = grid3d.l{w, alter(g)};
+					lv = grid3d.l{v, g};
 					kw = this.kBloch(w);
 					kv = this.kBloch(v);
 
@@ -156,8 +162,8 @@ classdef PlaneSrc < Source & WithBloch
 % 						Jw_patch = Jw .* (exp(-1i * (kv .* lv)).' * exp(-1i * (kw .* lw)));
 % 					end
 
-					Jw_patch = Jw .* (exp(-1i * (kw .* lw)).' * exp(-1i * (kv .* lv)));
-					Jw_patch = ipermute(Jw_patch, int([w v n]));
+					JMw_patch = Jw .* (exp(-1i * (kw .* lw)).' * exp(-1i * (kv .* lv)));
+					JMw_patch = ipermute(JMw_patch, int([w v n]));
 
 					% Set index_cell.
 					index_cell = {':', ':', ':'};

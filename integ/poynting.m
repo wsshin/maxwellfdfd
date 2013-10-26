@@ -6,7 +6,7 @@ iarg = 0;
 iarg = iarg + 1; polarization = varargin{iarg};
 chkarg(istypesizeof(polarization, 'Axis'), '"argument %d should be "polarization" (instance of Axis).', iarg);
 
-if istypesizeof(varargin{2}, 'Scalar3d')
+if istypesizeof(varargin{iarg+1}, 'Scalar3d')
 	iarg = iarg + 1; Ep3d = varargin{iarg};
 	chkarg(istypesizeof(Ep3d, 'Scalar3d'), '"argument %d should be "Ep3d" (instance of Scalar3d)."', iarg);
 
@@ -57,8 +57,52 @@ else
 		'instances of Scalar2d do not have same grid2d.');
 end
 
-array = real(Ep2d.array .* conj(Hq2d.array) - Eq2d.array .* conj(Hp2d.array)) / 2;
+% Interpolate fields at face centers of unit cells.
+pi = grid2d.l{Dir.h,GT.dual};
+qi = grid2d.l{Dir.v,GT.dual};
+[PI, QI] = ndgrid(pi, qi);
+
+ep = interp_Scalar2d(Ep2d, grid2d, PI, QI);
+eq = interp_Scalar2d(Eq2d, grid2d, PI, QI);
+hp = interp_Scalar2d(Hp2d, grid2d, PI, QI);
+hq = interp_Scalar2d(Hq2d, grid2d, PI, QI);
+
+array = real(ep .* conj(hq) - eq .* conj(hp)) / 2;
+
+% Attach extra points.
+for d = Dir.elems
+	array = attach_extra_S(array, d, grid2d);
+end
+
 osc = Ep2d.osc;
 physQ = PhysQ.S;
+gt_array = [GT.dual, GT.dual];  % face centers
 
-S_scalar2d = Scalar2d(array, grid2d, osc, physQ, [physQ.symbol, '_', char(polarization)], intercept);
+% Resume here.
+% The attached values to array should be the same as the ones inside the array
+% if BC is not periodic.
+S_scalar2d = Scalar2d(array, grid2d, gt_array, osc, physQ, [physQ.symbol, '_', char(polarization)], intercept);
+
+
+function array = interp_Scalar2d(scalar2d, grid2d, PI, QI)
+chkarg(istypesizeof(PI, 'complex', grid2d.N), '"PI" should be %d-by-%d array with complex numbers.');
+chkarg(istypesizeof(QI, 'complex', grid2d.N), '"QI" should be %d-by-%d array with complex numbers.');
+
+l = grid2d.lall(Dir.elems + Dir.count*subsindex(scalar2d.gt_array));
+
+[P, Q] = ndgrid(l{:});
+array = interpn(P, Q, scalar2d.array, PI, QI);
+
+
+function array = attach_extra_S(array, d, grid2d)
+ind_n = {':', ':'};
+ind_p = {':', ':'};
+bc_d = grid2d.bc(d);
+if bc_d == BC.p
+	ind_n{d} = grid2d.N(d);
+	ind_p{d} = 1;
+else  % bc_d == BC.e or BC.m
+	ind_n{d} = 1;
+	ind_p{d} = grid2d.N(d);	
+end
+array = cat(int(d), array(ind_n{:}), array, array(ind_p{:}));  % Bloch phases in S are ignored due to conj(H)

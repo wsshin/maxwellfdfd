@@ -1,32 +1,8 @@
-function [E, H, A, b, HfromE] = solve_eq_direct(omega, eps_face_cell, mu_edge_cell, s_factor_cell, J_cell, grid3d, nosolve)
+function [E, H] = solve_eq_direct(eqtype, pml, omega, eps_cell, mu_cell, s_factor_cell, J_cell, M_cell, grid3d)
 
-if nargin < 7  % no nosolve
-	nosolve = false;
-end
+% [A1, A2, eps, mu, b] = fds_matrices(omega, eps_cell, mu_cell, s_factor_cell, J_cell, grid3d);
 
-[A1, A2, mu, eps, b] = fds_matrices(omega, eps_face_cell, mu_edge_cell, s_factor_cell, J_cell, grid3d);
-
-% Mask elements corresponding to PEC.
-ind_pec = isinf(abs(eps));
-eps(ind_pec) = 1;
-pec_mask = ones(size(ind_pec));
-pec_mask(ind_pec) = 0;
-PM = spdiags(pec_mask, 0, length(pec_mask), length(pec_mask));
-
-INV_MU = spdiags(1./mu, 0, length(mu), length(mu));  % when mu has Inf, "MU \ Mat" complains about singularity
-EPS = spdiags(eps, 0, length(eps), length(eps));
-
-HfromE = (INV_MU * A2);
-A = PM * A1 * HfromE * PM - omega^2 * EPS;
-HfromE = (1i/omega) * HfromE;
-
-% Reorder the indices of the elements of matrices and vectors to reduce the bandwidth of A.
-N = grid3d.N;
-r = reordering_indices(Axis.count, N);
-
-A = A(r,r);
-b = b(r);
-HfromE = HfromE(r,r);
+[A, b, g_from_f] = create_eq(eqtype, pml, omega, eps_cell, mu_cell, s_factor_cell, J_cell, M_cell, grid3d);
 
 % figure; spy(A); xlabel(''); set(gca, 'xtick', []); set(gca, 'ytick', []);
 % [L1, U1] = lu(A);
@@ -34,36 +10,40 @@ HfromE = HfromE(r,r);
 % [L2, U2, p, q, R] = lu(A, 'vector');
 % figure; spy(U2); xlabel(''); set(gca, 'xtick', []); set(gca, 'ytick', []);
 
-
-if ~nosolve
-	% Below, [L, U, P, Q, R] = lu(A), rather than [L, U] = lu(A), seems to be
-	% similar to this.  The permutation matrices P and Q can be generated as
-	% vectors by [L, U, p, q, R] = lu(A, 'vector').  Then R(:,p)\A(:,q) = L*U.
+% Below, [L, U, P, Q, R] = lu(A), rather than [L, U] = lu(A), seems to be
+% similar to this.  The permutation matrices P and Q can be generated as
+% vectors by [L, U, p, q, R] = lu(A, 'vector').  Then R(:,p)\A(:,q) = L*U.
 	
-%	spparms('spumoni',1);  % make mldivide(A, b) (= A\b) verbose
-	e = A\b;  
-	h = HfromE * e;
+% spparms('spumoni',1);  % make mldivide(A, b) (= A\b) verbose
+f = A\b;
+g = g_from_f(f);
 
-	e = reshape(e, Axis.count, prod(N));
-	Ex = e(int(Axis.x), :); Ex = reshape(Ex, N);
-	Ey = e(int(Axis.y), :); Ey = reshape(Ey, N); 
-	Ez = e(int(Axis.z), :); Ez = reshape(Ez, N);
-	E = {Ex, Ey, Ez};
-
-	% Test symmetry with respect to the plane bisecting the x-axis.
-	if false
-		E = test_sym(Axis.x, A, b, E);
-	end
-
-	h = reshape(h, Axis.count, prod(N));
-	Hx = h(int(Axis.x), :); Hx = reshape(Hx, N);
-	Hy = h(int(Axis.y), :); Hy = reshape(Hy, N); 
-	Hz = h(int(Axis.z), :); Hz = reshape(Hz, N);
-	H = {Hx, Hy, Hz};
-else
-	E = {};
-	H = {};
+if eqtype.f == FT.e
+	e = f;
+	h = g;
+else  % eqtype.f == FT.h
+	e = g;
+	h = f;
 end
+
+N = grid3d.N;
+e = reshape(e, Axis.count, prod(N));
+Ex = e(int(Axis.x), :); Ex = reshape(Ex, N);
+Ey = e(int(Axis.y), :); Ey = reshape(Ey, N); 
+Ez = e(int(Axis.z), :); Ez = reshape(Ez, N);
+E = {Ex, Ey, Ez};
+
+% Test symmetry with respect to the plane bisecting the x-axis.
+if false
+	E = test_sym(Axis.x, A, b, E);
+end
+
+h = reshape(h, Axis.count, prod(N));
+Hx = h(int(Axis.x), :); Hx = reshape(Hx, N);
+Hy = h(int(Axis.y), :); Hy = reshape(Hy, N); 
+Hz = h(int(Axis.z), :); Hz = reshape(Hz, N);
+H = {Hx, Hy, Hz};
+
 
 function E = test_sym(w, A, b, E)
 Nw = size(E{Axis.x}, int(w));

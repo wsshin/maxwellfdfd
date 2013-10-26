@@ -17,7 +17,7 @@ classdef Grid2d < handle
 		lall  % {h_prim with ghost, h_dual with extra vertices; v_prim with ghos, v_dual with extra vertices}
 		bound  % [hall_prim(1), hall_prim(end); vall_prim(1), vall_prim(end)]
         dl  % {diff(h_dual), diff(h_prim); diff(v_dual), diff(v_prim)}
-        bc  % [bc_hn, bc_hp; bc_vn, bc_vp]
+        bc  % [bc_h, bc_v]
         N  % [Nh, Nv]: # of grid cells in the horizontal and vertical directions
 		Ntot  % Nh * Nv
 		L  % [Lh, Lv]; size of the domain
@@ -58,27 +58,27 @@ classdef Grid2d < handle
 		end
 		
 		function l = get.l(this)
-			l = cell(Dir.count, GK.count);
+			l = cell(Dir.count, GT.count);
 			for d = Dir.elems
-				for g = GK.elems
+				for g = GT.elems
 					l{d, g} = this.comp(d).l{g};
 				end
 			end
 		end
 		
 		function lg = get.lg(this)
-			lg = cell(Dir.count, GK.count);
+			lg = cell(Dir.count, GT.count);
 			for d = Dir.elems
-				for g = GK.elems
+				for g = GT.elems
 					lg{d, g} = this.comp(d).lg{g};
 				end
 			end
 		end
 			
 		function lall = get.lall(this)
-			lall = cell(Dir.count, GK.count);
+			lall = cell(Dir.count, GT.count);
 			for d = Dir.elems
-				for g = GK.elems
+				for g = GT.elems
 					lall{d, g} = this.comp(d).lall{g};
 				end
 			end
@@ -92,18 +92,18 @@ classdef Grid2d < handle
 		end
 		
 		function dl = get.dl(this)
-			dl = cell(Dir.count, GK.count);
+			dl = cell(Dir.count, GT.count);
 			for d = Dir.elems
-				for g = GK.elems
+				for g = GT.elems
 					dl{d, g} = this.comp(d).dl{g};
 				end
 			end
 		end
 		
 		function bc = get.bc(this)
-			bc = BC.empty();
+			bc = BC.empty(0, Dir.count);
 			for d = Dir.elems
-				bc(d,:) = this.comp(d).bc;
+				bc(d) = this.comp(d).bc;
 			end
 		end
 		
@@ -177,13 +177,30 @@ classdef Grid2d < handle
 			end
 		end
 		
-		function lplot_cell = lplot(this, gk, withpml)
-			chkarg(istypesizeof(gk, 'GK') , '"gk" should be instance of GK');
+		function lplot_cell = lplot(this, g, withinterp, withpml)
+			chkarg(istypesizeof(g, 'GT') || istypesizeof(g, 'GT', [1 Dir.count]), '"g" should be instance of GT');
+			if length(g) == 1
+				g = g(ones(1, Dir.count));
+			end
+			chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 			
 			lplot_cell = cell(1, Dir.count);
 			for d = Dir.elems
-				lplot_cell{d} = this.comp(d).lplot(gk, withpml);
+				lplot_cell{d} = this.comp(d).lplot(g(d), withinterp, withpml);
+			end
+		end
+		
+		function lpixelbound_cell = lpixelbound(this, g, withpml)
+			chkarg(istypesizeof(g, 'GT') || istypesizeof(g, 'GT', [1 Dir.count]), '"g" should be instance of GT');
+			if length(g) == 1
+				g = g(ones(1, Dir.count));
+			end
+			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
+
+			lpixelbound_cell = cell(1, Dir.count);
+			for d = Dir.elems
+				lpixelbound_cell{d} = this.comp(d).lpixelbound(g(d), withpml);
 			end
 		end
 	end

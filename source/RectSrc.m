@@ -36,7 +36,7 @@
 %   src =  RectSrc(Axis.y, -2000, [0 10; 20 180], Axis.x);  % y = -2000 should not be primary grid point
 %
 %   % Use the constructed src in maxwell_run().
-%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
 
 %%% See Also
 % <PlaneSrc.html |PlaneSrc|>, <maxwell_run.html |maxwell_run|>
@@ -65,11 +65,12 @@ classdef RectSrc < Source
 			end
 			chkarg(istypesizeof(K, 'complex'), '"K" should be complex.');
 
-			l = cell(Axis.count, GK.count);
-			l{normal_axis, GK.dual} = intercept;
+			lgrid = cell(1, Axis.count);
+			laltgrid = cell(1, Axis.count);
+			lgrid{normal_axis} = intercept;
 			
 			rectangle = Rectangle(normal_axis, intercept, rect);
-			this = this@Source(l, rectangle);
+			this = this@Source(lgrid, laltgrid, rectangle);
 			
 			this.normal_axis = normal_axis;
 			this.intercept = intercept;
@@ -78,42 +79,42 @@ classdef RectSrc < Source
 			this.K = K;
 		end
 		
-		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+		function [index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d)
 			index_cell = cell(1, Axis.count);
 			if w_axis ~= this.polarization
-				Jw_patch = [];
+				JMw_patch = [];
 			else  % w_axis == this.polarization
 				n = this.normal_axis;
 				p = w_axis;  % polarization axis
 				q = setdiff(Axis.elems, [n, p]);
 				
-				g = GK.dual;
+				g = this.gt;
 				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				dn = grid3d.dl{n,g}(ind_n);
-				J = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
+				JM = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
 
 				index_cell{n} = ind_n;
-				r_overlap = cell(1, Dir.count);
+				r_overlap = cell(1, Dir.count);  % ratios of intervals overlapping with this rectangle
 				grid2d = Grid2d(grid3d, n);
 				for d = Dir.elems
-					if grid2d.axis(d) == p
-						gk = GK.prim;
-					else
-						gk = GK.dual;
+					if grid2d.axis(d) == p  % overlap in polarization direction
+						g = alter(this.gt);
+					else  % overlap in in-plane direction normal to polarization
+						g = this.gt;
 					end
-					[index_cell{grid2d.axis(d)}, r_overlap{d}] = this.get_ind_r(d, gk, grid2d);
+					[index_cell{grid2d.axis(d)}, r_overlap{d}] = this.get_ind_r(d, g, grid2d);
 				end
 				
-				Jw_patch = J .* (r_overlap{Dir.h}.' * r_overlap{Dir.v});
-				Jw_patch = ipermute(Jw_patch, int([grid2d.axis(Dir.h) grid2d.axis(Dir.v) n]));
+				JMw_patch = JM .* (r_overlap{Dir.h}.' * r_overlap{Dir.v});
+				JMw_patch = ipermute(JMw_patch, int([grid2d.axis(Dir.h) grid2d.axis(Dir.v) n]));
 			end
 		end		
 	end
 	
 	methods (Access = private)
-		function [ind, r_overlap] = get_ind_r(this, dir, gk, grid2d)
+		function [ind, r_overlap] = get_ind_r(this, dir, g, grid2d)
 			chkarg(istypesizeof(dir, 'Dir'), '"dir" should be instance of Dir.');
-			chkarg(istypesizeof(gk, 'GK'), '"gk" should be instance of GK.');  % grid kind on which J will be assigned in dir-direction
+			chkarg(istypesizeof(g, 'GT'), '"g" should be instance of GT.');  % grid kind on which J will be assigned in dir-direction
 			chkarg(istypesizeof(grid2d, 'Grid2d'), '"grid2d" should be instance of Grid2d.');
 			
 			interval = this.rect(dir, :);
@@ -137,29 +138,36 @@ classdef RectSrc < Source
 			% nonperiodic BC will be handled later.
 			if ~grid1d.contains(interval(Sign.n))
 				interval(Sign.n) = interval(Sign.n) + diff(grid1d.bound);
-				drop_n = true;
+				interval_adjusted = true;
+				drop_n = true;  % if BC is nonperiodic, drop negative portion
 			end
 			
-			if ~grid1d.contains(interval(Sign.p)) %|| (interval(Sign.p) == grid1d.bound(Sign.p) && grid1d.bc(Sign.n) == BC.p)
+			if ~grid1d.contains(interval(Sign.p)) % || (interval(Sign.p) == grid1d.bound(Sign.p) && grid1d.bc(Sign.n) == BC.p)
 				interval(Sign.p) = interval(Sign.p) - diff(grid1d.bound);
-				drop_n = false;
+				interval_adjusted = true;
+				drop_n = false;  % if BC is nonperiodic, drop positive portion
 			end
 			
-			% Suppose that gk == GK.prim.  Then, the purpose below is to find
+			% Suppose that g == GT.prim.  Then, the purpose below is to find
 			% the primary grid indices for which J are assigned.  Note that J at
 			% each primary grid extends to the dual grids around it.
-			ind_n = find(grid1d.lg{alter(gk)} <= interval(Sign.n) , 1, 'last');  % grid1d.lg rather than grid1d.l
-			ind_p = find(grid1d.lg{alter(gk)} >= interval(Sign.p) , 1, 'first') - 1;  % grid1d.lg rather than grid1d.l
+			ind_n = find(grid1d.lall{alter(g)} <= interval(Sign.n) , 1, 'last');  % grid1d.lg rather than grid1d.l
+			ind_p = find(grid1d.lall{alter(g)} >= interval(Sign.p) , 1, 'first') - 1;  % grid1d.lg rather than grid1d.l
 			if isempty(ind_p)
-				exception = MException('FDS:srcAssign', 'this %s should extend beyond last %s grid point in %s-axis.', ...
-								class(this), char(alter(gk)), char(grid2d.axis(dir)));
+				exception = MException('FDS:srcAssign', 'this %s extends beyond last %s grid point in %s-axis.', ...
+								class(this), char(alter(g)), char(grid2d.axis(dir)));
 				throw(exception);
+			end
+			
+			if ind_p == grid1d.N+1
+				ind_p = 1;
+				interval_adjusted = true;
 			end
 			
 			if ind_n < ind_p
 				ind = ind_n:ind_p;
-			elseif ind_n == ind_p
-				if grid1d.bc(Sign.n) == BC.p
+			elseif ind_n == ind_p  % can happen by drop_n assignment or mod(ind_p - 1, ...)
+				if interval_adjusted % && grid1d.bc(Sign.n) == BC.p
 					ind = 1:grid1d.N;
 				else
 					ind = ind_n;
@@ -170,21 +178,23 @@ classdef RectSrc < Source
 			
 			r_overlap = ones(1, length(ind));
 			if ind_n < ind_p  % ind = ind_n:ind_p;
-				r_overlap(1) = (grid1d.lg{alter(gk)}(ind_n+1) - interval(Sign.n)) / grid1d.dl{gk}(ind_n);
-				r_overlap(end) = (interval(Sign.p) - grid1d.lg{alter(gk)}(ind_p)) / grid1d.dl{gk}(ind_p);
+				r_overlap(1) = (grid1d.lg{alter(g)}(ind_n+1) - interval(Sign.n)) / grid1d.dl{g}(ind_n);
+				r_overlap(end) = (interval(Sign.p) - grid1d.lg{alter(g)}(ind_p)) / grid1d.dl{g}(ind_p);
 			elseif ind_n == ind_p
-				if grid1d.bc(Sign.n) == BC.p  % ind = 1:grid1d.N;
-					r_overlap(1) = (grid1d.lg{alter(gk)}(ind_n+1) - interval(Sign.n)) / grid1d.dl{gk}(ind_n);
-					r_overlap(end) = (interval(Sign.p) - grid1d.lg{alter(gk)}(ind_p)) / grid1d.dl{gk}(ind_p);
+				if interval_adjusted  % ind = 1:grid1d.N;
+					r_overlap(ind_n) = ...
+						(grid1d.lg{alter(g)}(ind_n+1) - interval(Sign.n) ...
+						+ interval(Sign.p) - grid1d.lg{alter(g)}(ind_p)) ...
+						/ grid1d.dl{g}(ind_n);
 				else  % ind = ind_n;
-					r_overlap(1) = diff(interval) / grid1d.dl{gk}(ind_n);
+					r_overlap(1) = diff(interval) / grid1d.dl{g}(ind_n);
 				end
 			else  % ind_n > ind_p: ind = [1:ind_p, ind_n:grid1d.N];
-				r_overlap(1) = (grid1d.lg{alter(gk)}(ind_n+1) - interval(Sign.n)) / grid1d.dl{gk}(ind_n);
-				r_overlap(end) = (interval(Sign.p) - grid1d.lg{alter(gk)}(ind_p)) / grid1d.dl{gk}(ind_p);
+				r_overlap(ind_p) = (interval(Sign.p) - grid1d.lg{alter(g)}(ind_p)) / grid1d.dl{g}(ind_p);
+				r_overlap(ind_p+1) = (grid1d.lg{alter(g)}(ind_n+1) - interval(Sign.n)) / grid1d.dl{g}(ind_n);
 			end
 			
-			if ind_n > ind_p && grid1d.bc(Sign.n) ~= BC.p
+			if ind_n > ind_p && grid1d.bc(Sign.n) ~= BC.p  % cannot handle case with interval_adjusted == true and ind_n == ind_p
 				if drop_n
 					ind = ind(1:ind_p);
 					r_overlap = r_overlap(1:ind_p);

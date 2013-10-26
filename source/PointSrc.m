@@ -33,7 +33,7 @@
 %   src = PointSrc(Axis.z, [0 0 0]);  % z = 0 should not be dual grid point
 %
 %   % Use the constructed src in maxwell_run().
-%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
 
 %%% See Also
 % <PointSrcM.html |PointSrcM|>, <PlaneSrc.html |PlaneSrc|>, <maxwell_run.html
@@ -58,40 +58,41 @@ classdef PointSrc < Source
 			end
 			chkarg(istypesizeof(I, 'complex'), '"I" should be complex.');
 			
-			l = cell(Axis.count, GK.count);
+			lgrid = cell(1, Axis.count);
+			laltgrid = cell(1, Axis.count);
 			for w = Axis.elems
 				if w == polarization_axis
-					l{w, GK.prim} = location(w);
+					laltgrid{w} = location(w);
 				else
-					l{w, GK.dual} = location(w);
+					lgrid{w} = location(w);
 				end
 			end
 			point = Point(location);
-			this = this@Source(l, point);
+			this = this@Source(lgrid, laltgrid, point);
 			this.polarization = polarization_axis;
 			this.location = location;
 			this.I = I;
 		end
 				
-		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+		function [index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d)
 			index_cell = cell(1, Axis.count);
 			[q, r, p] = cycle(this.polarization);  % q, r: axes normal to polarization axis p
 			if w_axis == p
 				for v = Axis.elems
 					l = this.location(v);
 					if v == p
-						g = GK.prim;
+						g = alter(this.gt);
 					else  % v == q or r
-						g = GK.dual;
+						g = this.gt;
 					end
 					iv = ind_for_loc(l, v, g, grid3d);
 					index_cell{v} = iv;
 				end
-				dq = grid3d.dl{q, GK.dual}(index_cell{q});
-				dr = grid3d.dl{r, GK.dual}(index_cell{r});
-				Jw_patch = this.I / (dq * dr);  % I = J * (area)
+				dq = grid3d.dl{q, this.gt}(index_cell{q});
+				dr = grid3d.dl{r, this.gt}(index_cell{r});
+				JMw_patch = this.I / (dq * dr);  % I = J * (area)
 			else  % w_axis == q or r
-				Jw_patch = [];
+				JMw_patch = [];
 			end
 		end		
 	end

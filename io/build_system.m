@@ -2,55 +2,57 @@
 % Run MaxwellFDS.
 
 %%% Syntax
-%  [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell] = build_system(OSC, DOM, OBJ, SRC, [progmark])
-%  [..., obj_array, src_array] = build_system(OSC, DOM, OBJ, SRC, [pragmark])
-%  [..., eps_node_array, mu_node_array] = build_system(OSC, DOM, OBJ, SRC, [pragmark])
+%  [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell] = build_system(ge, OSC, DOM, OBJ, SRC, [progmark])
+%  [..., obj_array, src_array] = build_system(ge, OSC, DOM, OBJ, SRC, [pragmark])
+%  [..., eps_node_array, mu_node_array] = build_system(ge, OSC, DOM, OBJ, SRC, [pragmark])
 
 
 %%% Description
-% |build_system(OSC, DOM, OBJ, SRC, [progmark])| constructs a system from
+% |build_system(ge, OSC, DOM, OBJ, SRC, [progmark])| constructs a system from
 % given objects and sources.  The constructed system is typically used inside
 % <maxwell_run.html maxwell_run>.
 %
-% Each of |OSC|, |DOM|, |OBJ|, and |SRC| represents a group of parameters.
-% Each group supports several flexible expressions.  For more details, see the
-% relevant sections about the input parameter groups in <maxwell_run.html
-% |maxwell_run|>.
+% |ge| is an instance of |GT| and indicates the grid type of the _E_-field. Each
+% following argument, |OSC|, |DOM|, |OBJ|, and |SRC|, represents a group of
+% parameters. Each group supports several flexible expressions.  For more
+% details, see the relevant sections about the input parameter groups in
+% <maxwell_run.html |maxwell_run|>.
 %
 % An additional input parameter |progmark| is an instance of <ProgMark.html
 % ProgMark>, which outputs the progress of the system build procedure as the
 % standard output.  If it is not given, then it is created internally.
 %
-% |[osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell] =
-% build_system(...)| returns
+% |[osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell] = build_system(...)|
+% returns
 %
 % * |osc|, an instance of <Oscillation.html Oscillation>
 % * |grid3d|, an instance of <Grid3d.html Grid3d>, 
 % * |s_factor_cell|, a cell array of PML s-factors: |{sx_array, sy_array,
 % sz_array}|
-% * |eps_face_cell|, a cell array of electric permittivity evaluated at the
-% centers of the finite-difference grid faces: |{eps_xx_array, eps_yy_array,
-% eps_zz_array}|
-% * |mu_edge_cell|,  a cell array of magnetic permeability evaluated at the
-% centers of the finite-difference grid edges: |{mu_xx_array, mu_yy_array,
-% mu_zz_array}|
+% * |eps_cell|, a cell array of electric permittivity evaluated at the E-field
+% positions: |{eps_xx_array, eps_yy_array, eps_zz_array}|
+% * |mu_cell|,  a cell array of magnetic permeability evaluated at the H-field
+% positions: |{mu_xx_array, mu_yy_array, mu_zz_array}|
 % * |J_cell|, a cell array of electric current sources: |{Jx_array, Jy_array,
 % Jz_array}|
+% * |M_cell|, a cell array of electric current sources: |{Mx_array, My_array,
+% Mz_array}|
 % 
 % |[..., obj_array, src_array] = build_system(...)| returns additionally arrays
 % of instances of <Object.html |Object|> and <Source.html |Source|>.  The
 % |Object| and |Source| elements represent the objects and sources placed in the
 % simulation domain, so they can be used to visualize the simulation domain.
 %
-% |[..., eps_node, mu_node] = build_system(...)| returns additionally arrays of
-% electric permittivity and magnetic permeability evaluated at the nodes of the
-% finite-difference grid.
+% |[..., eps_node_array, mu_node_array] = build_system(...)| returns
+% additionally arrays of electric permittivity and magnetic permeability
+% evaluated at the nodes of the finite-difference grid.
 
 
 %%% Example
 %   gray = [0.5 0.5 0.5];  % [r g b]
 %   inspect_only = true;
-%   [E, H, obj_array, err] = build_system(...
+%   [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell,	...
+%		obj_array, src_array, eps_node_array, mu_node_array] = build_system(...
 %       'OSC', 1e-9, 1550, ...
 %       'DOM', {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...
 %       'OBJ', ...
@@ -59,8 +61,9 @@
 %       'SRC', PointSrc(Axis.x, [0, 0, 200]) ...
 %       );
 
-function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
-	obj_array, src_array, eps_node_array, mu_node_array] = build_system(varargin)
+function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
+	obj_array, src_array, mat_array, eps_node_array, mu_node_array] = build_system(varargin)
+
 	iarg = nargin; arg = varargin{iarg};
 	if istypesizeof(arg, 'ProgMark')
 		pm = arg;
@@ -70,7 +73,15 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 		varargin = [varargin, {pm}];
 		narglim = nargin;
 	end
-		
+	
+	iarg = 1; arg = varargin{iarg};
+	chkarg(istypesizeof(arg, 'GT'), 'argument #%d should be "ge" (GT).', iarg);
+	ge = arg;
+
+	iarg = iarg + 1; arg = varargin{iarg};
+	chkarg(istypesizeof(arg, 'PML'), 'argument #%d should be "pml" (PML).', iarg);
+	pml = arg;
+	
 	function material = create_material(varargin)
 		narg = nargin;
 		if istypesizeof(varargin{end}, 'logical')
@@ -92,10 +103,10 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	mat_array = Material.empty();
 	obj_array = Object.empty();
 	sobj_array = Object.empty();
-	src_array = [];
+	srcj_array = [];
+	srcm_array = [];
 	isepsgiven = false;
 	isTFSF = false;
-	iarg = 0;
 	while iarg < narglim
 		iarg = iarg + 1; arg = varargin{iarg};
 		
@@ -212,7 +223,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 					obj_array = [obj_array(1:end), obj_array_temp];
 				end
 			end
-		elseif ischar(arg) && strcmpi(arg,'SRC')
+		elseif ischar(arg) && strcmpi(arg,'SRCJ')
 			% Set up sources.
 			iarg = iarg + 1; arg = varargin{iarg};
 			if ~istypesizeof(arg, 'Source', [1 0])
@@ -223,7 +234,26 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 				if istypesizeof(arg, 'TFSFPlaneSrc')
 					isTFSF = true;
 				end
-				src_array = [src_array(1:end), arg];
+				src = arg;
+				src.set_gridtype(ge);
+				srcj_array = [srcj_array(1:end), src];
+				iarg = iarg + 1; arg = varargin{iarg};
+			end
+			iarg = iarg - 1;
+		elseif ischar(arg) && strcmpi(arg,'SRCM')
+			% Set up sources.
+			iarg = iarg + 1; arg = varargin{iarg};
+			if ~istypesizeof(arg, 'Source', [1 0])
+				warning('FDS:buildSys', 'no source is given.');
+			end
+
+			while istypesizeof(arg, 'Source', [1 0])
+				if istypesizeof(arg, 'TFSFPlaneSrc')
+					isTFSF = true;
+				end
+				src = arg;
+				src.set_gridtype(alter(ge));
+				srcm_array = [srcm_array(1:end), src];
 				iarg = iarg + 1; arg = varargin{iarg};
 			end
 			iarg = iarg - 1;
@@ -235,6 +265,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 	chkarg(~isempty(osc), 'OSC parameter groups should be set.');
 	chkarg(~isempty(obj_dom), 'DOM parameter groups should be set.');
 	obj_array = [obj_dom, obj_array];
+	src_array = [srcj_array, srcm_array];
 	if isTFSF && isempty(sobj_array)
 		warning('FDS:objAssign', 'TF/SF source is used, but scatteres are not defined in SOBJ group.');
 	end
@@ -260,14 +291,20 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 		pm.mark('dynamic grid generation');
 	end
 	fprintf('\t[Nx Ny Nz] = %s\n', mat2str(grid3d.N));
-
+	
+	% Generate a warning when a seemingly 2D simulation is defined on a 3D grid.
+	[like2d, normal_axis] = is2dlike(grid3d.N);
+	if like2d && grid3d.N(normal_axis) >= 2  % possible user mistake
+		warning(['If this a 2D structure, N%s should be 1; ', ...
+			'check d%s''s of objects and locations of sources'], char(normal_axis), char(normal_axis));
+	end
 
 	% Construct material parameters.
 	if ~isepsgiven
 		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % (Nx+1) x (Ny+1) x (Nz+1)
 	end
-	eps_face_cell = harmonic_mean_eps_node(eps_node_array);
-	mu_edge_cell = arithmetic_mean_mu_node(mu_node_array);
+	eps_cell = mean_material_node(ge, eps_node_array);
+	mu_cell = mean_material_node(alter(ge), mu_node_array);
 
 	% Construct PML s-factors.
 	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d);
@@ -279,7 +316,7 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 			if istypesizeof(src, 'ModalSrc')
 				modalsrc = src;
 				if ~modalsrc.ispreped
-					prep_modalsrc(osc, grid3d, eps_face_cell, mu_edge_cell, s_factor_cell, modalsrc);
+					prep_modalsrc(ge, pml, osc, grid3d, eps_cell, mu_cell, s_factor_cell, modalsrc);
 				end
 
 				neff = modalsrc.neff;
@@ -293,38 +330,81 @@ function [osc, grid3d, s_factor_cell, eps_face_cell, mu_edge_cell, J_cell, ...
 		for src = src_array
 			if istypesizeof(src, 'TFSFPlaneSrc')
 				tfsfsrc = src;
-				tfsfsrc.set_bg_material(obj_dom.material);
-				E0 = tfsfsrc.create_incidentE(osc, grid3d);
-				J = cell(1, Axis.count);
-				for w = Axis.elems
-					J{w} = zeros(grid3d.N);
+				cb_center = tfsfsrc.shape.cb_center;
+				for bgobj = fliplr(obj_array)
+					if bgobj.shape.contains(cb_center)
+						break;
+					end
 				end
-					
-				nosolve = true;
-				[~, ~, A] = solve_eq_direct(osc.in_omega0(), eps_face_cell, mu_edge_cell, s_factor_cell, J, grid3d, nosolve);
+				tfsfsrc.set_bg_material(bgobj.material);
+				F0 = tfsfsrc.create_incidentF(osc, grid3d);
+				JM = cell(1, Axis.count);
+				for w = Axis.elems
+					JM{w} = zeros(grid3d.N);
+				end
+				
+				if tfsfsrc.gt == ge
+					eqtype_tfsf = EquationType(FT.e, ge);  % for SRCJ, create E-field eq
+				else
+					eqtype_tfsf = EquationType(FT.h, ge);  % for SRCM, create H-field eq
+				end
+				A = create_eq(eqtype_tfsf, pml, osc.in_omega0(), eps_cell, mu_cell, s_factor_cell, JM, JM, grid3d);
 							
-				x0 = [E0{Axis.x}(:); E0{Axis.y}(:); E0{Axis.z}(:)];
+				x0 = [F0{Axis.x}(:); F0{Axis.y}(:); F0{Axis.z}(:)];
 				r = reordering_indices(Axis.count, grid3d.N);
 				x0 = x0(r);
 							
-				J = (A*x0) ./ (-1i*osc.in_omega0());
-				J = reshape(J, [Axis.count grid3d.N]);
-				J = permute(J, [int([Axis.x Axis.y Axis.z])+1, 1]);
-				J = {J(:,:,:,Axis.x), J(:,:,:,Axis.y), J(:,:,:,Axis.z)};
+				JM = (A*x0) ./ (-1i*osc.in_omega0());
+				JM = reshape(JM, [Axis.count grid3d.N]);
+				JM = permute(JM, [Axis.elems+1, 1]);
+				JM = {JM(:,:,:,Axis.x), JM(:,:,:,Axis.y), JM(:,:,:,Axis.z)};
 				
-				tfsfsrc.setJ(J, grid3d);
-				pm.mark('TF/SF source assignment');
+				tfsfsrc.setJM(JM, grid3d);
 			end
 		end
 		
+		% Add sobj_array to the already-generated eps and mu.
 		[eps_node_array, mu_node_array] = assign_material_node(grid3d, sobj_array, ...
 			eps_node_array(1:end-1, 1:end-1, 1:end-1), mu_node_array(1:end-1, 1:end-1, 1:end-1));  % (Nx+1) x (Ny+1) x (Nz+1)
-		eps_face_cell = harmonic_mean_eps_node(eps_node_array);
-		mu_edge_cell = arithmetic_mean_mu_node(mu_node_array);
+		eps_cell = mean_material_node(ge, eps_node_array);  % Nx x Ny x Nz
+		mu_cell = mean_material_node(alter(ge), mu_node_array);  % Nx x Ny x Nz
+
+		pm.mark('TF/SF source assignment');
 	end
 	obj_array = [obj_array, sobj_array];
+	
+	if ge == GT.prim
+% 		eps_node_cell = eps_cell;
+% 		for w = Axis.elems
+% 			ind_g = {':',':',':'};
+% 			if grid3d.bc(w) == BC.p
+% 				ind_g{w} = grid3d.N(w);
+% 			else
+% 				ind_g{w} = 1;
+% 			end
+% 			eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
+% 		end
+% 		eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
+% 		eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
+% 		eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
+% 		
+% 		eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
+
+% 		eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
+% 					+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
+% 					+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
+% 					+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
+
+		eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
+					+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
+					+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
+					+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
+	else
+		eps_node_array = eps_node_array(2:end,2:end,2:end);
+	end
 
 	% Construct sources.
-	J_cell = assign_source(grid3d, src_array);
+	J_cell = assign_source(grid3d, srcj_array);
+	M_cell = assign_source(grid3d, srcm_array);
 	pm.mark('J assignment');
 end

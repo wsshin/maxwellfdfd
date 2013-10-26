@@ -39,7 +39,7 @@
 %   src =  ModalSrc(Axis.y, -1000, 1.0);  % y = -1000 should not be primary grid point
 %
 %   % Use the constructed src in maxwell_run().
-%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
 
 %%% See Also
 % <Plane.html |PlaneSrc|>, <TFSFPlaneSrc.html |TFSFPlaneSrc|>, <ModalSrc.html
@@ -51,7 +51,7 @@ classdef ModalSrc < Source
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
 		intercept  % intercept between plane and normal axis
 		KA  % surface integral of surface current density K; for z-normal plane, volume integral of (|Jx|+|Jy|)
-		neff_guess;  % estimated effective refractive index
+		opts  % options to control method to calculate mode
 	end
 	
 	properties (SetAccess = private)
@@ -59,8 +59,8 @@ classdef ModalSrc < Source
 		osc  % instance of Oscillation
 		E2d  % {Ex2d Ey2d Ez2d}: cell array of Scalar2d for E on this plane
 		H2d  % {Hx2d Hy2d Hz2d}: cell array of Scalar2d for H on this plane
-		Jh  % 2D array J in horizontal direction on this plane: Jx for normal == z
-		Jv  % 2D array J in vertical direction on this plane: Jy for normal == z
+		JMh  % 2D array J in horizontal direction on this plane: Jx for normal == z
+		JMv  % 2D array J in vertical direction on this plane: Jy for normal == z
 		neff  % effective n
 	end
 	
@@ -72,28 +72,49 @@ classdef ModalSrc < Source
 	end
 	
 	methods
-		function this = ModalSrc(normal_axis, intercept, neff_guess, KA)
+		function this = ModalSrc(normal_axis, intercept, opts, KA)
 			chkarg(istypesizeof(normal_axis, 'Axis'), ...
 				'"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
-			chkarg(istypesizeof(neff_guess, 'complex'), '"neff" should be complex.');
+			
+			if nargin < 3  % no opts
+				opts.clue = 'order';
+				opts.modeorder = 1;  % fundamental mode
+			end
+			chkarg(istypesizeof(opts, 'struct'), '"opts" should be structure.');
+
+			chkarg(isequal(opts.clue, 'guess') || isequal(opts.clue, 'order'), ...
+				'"opts.clue" should be ''guess'' or ''order'' (string).');
+			if isequal(opts.clue, 'guess')
+				chkarg(isfield(opts, 'neff') && istypesizeof(opts.neff, 'complex'), ...
+					'"opts.neff" should be complex.');
+				% if opts.clue == 'guess', opts can have additional field
+				% opts.H2d.
+			else  % opts.clue == 'order'
+				if ~isfield(opts, 'order')
+					opts.order = 1;  % fundamental mode
+				end
+				chkarg(istypesizeof(opts.order, 'int') && opts.order > 0, ...
+					'"opts.order" should be positive integer.');
+			end
 			
 			if nargin < 4  % no KA
 				KA = 1.0;
 			end
 			chkarg(istypesizeof(KA, 'real'), '"KA" should be real.');
 			
-			l = cell(Axis.count, GK.count);
-			l{normal_axis, GK.dual} = intercept;
+			lgrid = cell(1, Axis.count);
+			laltgrid = cell(1, Axis.count);
+			lgrid{normal_axis} = intercept;
 			plane = Plane(normal_axis, intercept);
-			this = this@Source(l, plane);
+			this = this@Source(lgrid, laltgrid, plane);
 			
 			this.normal_axis = normal_axis;
 			this.intercept = intercept;
-			this.neff_guess = neff_guess;
+			this.opts = opts;
 			this.KA = KA;
-			this.Jh = [];
-			this.Jv = [];
+			this.JMh = [];
+			this.JMv = [];
 		end
 		
 		function beta_r = get.beta_r(this)
@@ -107,10 +128,10 @@ classdef ModalSrc < Source
 		end
 		
 		function ispreped = get.ispreped(this)
-			ispreped = ~isempty(this.Jh) && ~isempty(this.Jh);
+			ispreped = ~isempty(this.JMh) && ~isempty(this.JMh);
 		end
 		
-		function setEH(this, neff, osc, E_cell, H_cell, grid3d)
+		function setEH(this, neff, osc, E_cell, H_cell, ge, grid3d)
 			chkarg(istypesizeof(neff, 'complex'), '"neff" should be complex.');
 			this.neff = neff;
 			
@@ -119,6 +140,8 @@ classdef ModalSrc < Source
 			
 			chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 			this.grid2d = Grid2d(grid3d, this.normal_axis);
+
+			chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');
 
 			Nh = this.grid2d.N(Dir.h);
 			Nv = this.grid2d.N(Dir.v);
@@ -130,32 +153,37 @@ classdef ModalSrc < Source
 			assert(istypesizeof(H_cell, 'complexcell', [1 Axis.count], [Nh Nv]), ...
 				'"H_cell" should be length-%d row cell array whole each element is %d-by-%d array with complex elements.', Axis.count, Nh, Nv);
 			
-			this.Jh = H_cell{v};
-			this.Jv = -H_cell{h};
+			if this.gt == ge  % source is J
+				this.JMh = H_cell{v};
+				this.JMv = -H_cell{h};
+			else  % source is M
+				this.JMh = E_cell{v};
+				this.JMv = -E_cell{h};
+			end
 			
 			this.E2d = cell(1, Axis.count);
 			this.H2d = cell(1, Axis.count);
 			for w = Axis.elems
-				this.E2d{w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, GK.dual, osc, this.intercept);
-				this.H2d{w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, GK.prim, osc, this.intercept);
+				this.E2d{w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, FT.e, ge, osc, this.intercept);
+				this.H2d{w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, FT.h, alter(ge), osc, this.intercept);
 			end
 		end
 		
-		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
-			assert(~isempty(this.Jh) && ~isempty(this.Jv), '"Jh" and "Jv" are not set in this ModalSrc.');
+		function [index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d)
+			assert(~isempty(this.JMh) && ~isempty(this.JMv), '"JMh" and "JMv" are not set in this ModalSrc.');
 			if w_axis == this.normal_axis
-				Jw_patch = [];
+				JMw_patch = [];
 				index_cell = cell(1, Axis.count);
 			else
 				g2d = Grid2d(grid3d, this.normal_axis);
 				assert(isequal(g2d, this.grid2d), ...
-					'%s-normal cross section of "grid3d" is different from the one set with Jh and Jv.', char(this.normal_axis));
+					'%s-normal cross section of "grid3d" is different from the one set with JMh and JMv.', char(this.normal_axis));
 
 				h = this.grid2d.axis(Dir.h);
 				v = this.grid2d.axis(Dir.v);
 				n = this.normal_axis;
 				
-				g = GK.dual;
+				g = this.gt;
 				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				
 				% Set index_cell.
@@ -164,33 +192,33 @@ classdef ModalSrc < Source
 				
 				% Set Jw_patch.
 				dn = grid3d.dl{n,g}(ind_n);
-				dh_prim = grid3d.dl{h, GK.prim};
-				dh_dual = grid3d.dl{h, GK.dual};
-				dv_prim = grid3d.dl{v, GK.prim};
-				dv_dual = grid3d.dl{v, GK.dual};
+				dha = grid3d.dl{h, alter(this.gt)};
+				dhg = grid3d.dl{h, this.gt};
+				dva = grid3d.dl{v, alter(this.gt)};
+				dvg = grid3d.dl{v, this.gt};
 				
-				dVh = dn .* (dh_prim.' * dv_dual);
-				dVv = dn .* (dh_dual.' * dv_prim);
+				dVh = dn .* (dha.' * dvg);
+				dVv = dn .* (dhg.' * dva);
 				
-				KA_curr = abs(this.Jh) .* dVh + abs(this.Jv) .* dVv;
+				KA_curr = abs(this.JMh) .* dVh + abs(this.JMv) .* dVv;
 				KA_curr = sum(KA_curr(:));  % KA_curr is real
-				Jhv = [this.Jh(:); this.Jv(:)];
-				[~, i_pf] = max(abs(Jhv));
-				phasefactor = Jhv(i_pf)/abs(Jhv(i_pf));
+				JMhv = [this.JMh(:); this.JMv(:)];
+				[~, i_pf] = max(abs(JMhv));
+				phasefactor = JMhv(i_pf)/abs(JMhv(i_pf));
 				KA_curr = KA_curr * phasefactor;  % KA_curr is complex
 				norm_factor = this.KA/KA_curr;  % normalization factor
 				
 				if w_axis == h
-					Jw_patch = norm_factor .* this.Jh;
+					JMw_patch = norm_factor .* this.JMh;
 				else
 					assert(w_axis == v);
-					Jw_patch = norm_factor .* this.Jv;
+					JMw_patch = norm_factor .* this.JMv;
 				end
 				
 % 				if h > v  % h == Axis.z and v == Axis.x if this.normal_axis == Axis.y
 % 					Jw_patch = permute(Jw_patch, int([Dir.v, Dir.h]));
 % 				end
-				Jw_patch = ipermute(Jw_patch, int([h v n]));
+				JMw_patch = ipermute(JMw_patch, int([h v n]));
 			end
 		end
 	end

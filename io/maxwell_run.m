@@ -40,7 +40,8 @@
 
 
 %%% Input Parameter Group - OSC
-% OSC group begins with |'OSC'| and ends with one of the followings:
+% OSC group specifies oscillation parameters.  The group begins with |'OSC'| and
+% ends with one of the followings:
 %
 % * |L0, wvlen|  
 % * |osc|
@@ -56,7 +57,8 @@
 
 
 %%% Input Parameter Group - DOM
-% DOM group begins with |'DOM'| and ends with one of the followings:
+% DOM group specifies domain parameters.  The group begins with |'DOM'| and ends
+% with one of the followings:
 %
 % * |material, box, dl, bc, Lpml, [withuniformgrid]|
 % * |domain, dl, bc, Lpml, [withuniformgrid]|
@@ -98,7 +100,8 @@
 
 
 %%% Input Parameter Group - OBJ and SOBJ
-% OBJ group begins with |'OBJ'| and ends with one of the followings:
+% OBJ group specifies obect parameters.  The group begins with |'OBJ'| and ends
+% with one of the followings:
 %
 % * |material_1, shapes_1, ..., material_N, shapes_N|
 % * |obj_1, ..., obj_N|
@@ -130,7 +133,9 @@
 
 
 %%% Input Parameter Group - SRC
-% SRC group begins with |'SRC'| and ends with
+% SRC group specifies current source parameters. Depending on whether the
+% sources are electric or magnetic, the group begins with |'SRCJ'| or |'SRCM'|
+% and ends with
 %
 % * |src_1, ..., src_M|
 %
@@ -175,10 +180,10 @@
 %       'OBJ', ...
 %           {['Palik', filesep, 'SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
 %           {['CRC', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
-%       'SRC', PointSrc(Axis.x, [0, 0, 200]), ...
+%       'SRCJ', PointSrc(Axis.x, [0, 0, 200]), ...
 %       inspect_only);
 
-function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(varargin)
+function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwell_run(varargin)
 	DEFAULT_METHOD = 'direct';  % 'direct', 'gpu', 'aws', 'inputfile'
 		
 	% Set solver options.
@@ -225,7 +230,21 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 		chkarg(istypesizeof(solveropts.withinterp, 'logical'), ...
 			'solveropts.withinterp should be logical.');
 	end
+	
+	if ~is_solveropts || ~isfield(solveropts, 'eqtype')
+		solveropts.eqtype = EquationType(FT.e, GT.prim);
+	else
+		chkarg(istypesizeof(solveropts.eqtype, 'EquationType'), ...
+			'solveropts.eqtype should be instance of EquationType.');
+	end
 
+	if ~is_solveropts || ~isfield(solveropts, 'pml')
+		solveropts.pml = PML.sc;
+	else
+		chkarg(istypesizeof(solveropts.pml, 'PML'), ...
+			'solveropts.pml should be instance of PML.');
+	end
+	
 	chkarg(iarg > 0, 'first argument is not correct.');
 
 	if inspect_only
@@ -233,18 +252,19 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 	else
 		fprintf('%s begins.\n', mfilename);
 	end
+	fprintf('E-field grid type: %s\n', char(solveropts.eqtype.ge));
 	pm = ProgMark();
 	
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
-	[osc, grid3d, s_factor, eps_face, mu_edge, J, obj_array, src_array, eps_node] = ...
-		build_system(varargin{1:iarg}, pm);
+	[osc, grid3d, s_factor, eps, mu, J, M, obj_array, src_array, mat_array, eps_node] = ...
+		build_system(solveropts.eqtype.ge, solveropts.pml, varargin{1:iarg}, pm);
 	
 	if inspect_only  % inspect objects and sources
 		figure;
 		set(gcf, 'units','normalized','position',[0.5 0 0.5 0.5]);			
-		withpml = false;
+		withpml = true;
 		visobjsrc(grid3d, obj_array, src_array, withpml);
 		drawnow
 		pm.mark('domain visualization');
@@ -286,15 +306,17 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 		E = {};
 		H = {};
 	elseif isequal(solveropts.method, 'inputfile')
-		if ~is_solveropts || ~isfield(solveropts, 'E0')
-			solveropts.E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+		if ~is_solveropts || ~isfield(solveropts, 'F0')
+			solveropts.F0 = 'zero';  % 'rand' is the other choice
+% 			solveropts.F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
 		else
-			chkarg(istypesizeof(solveropts.E0, 'complexcell', [1 Axis.count], grid3d.N), ...
-				'solveropts.E0 should be length-%d cell array whose each element is %d-by-%d-by-%d array of complex numbers.', ...
+			chkarg(isequal(solveropts.F0, 'zero') || isequal(solveropts.F0, 'rand') ...
+				|| istypesizeof(solveropts.F0, 'complexcell', [1 Axis.count], grid3d.N), ...
+				'solveropts.F0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
 				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 		end
-		write_input(solveropts.filenamebase, osc, grid3d, s_factor, ...
-			eps_node(2:end,2:end,2:end), eps_face, mu_edge, J, solveropts.E0, solveropts.tol, solveropts.maxit);
+		write_input(solveropts.filenamebase, solveropts.eqtype, osc, grid3d, s_factor, ...
+			eps_node, eps, mu, J, M, solveropts.F0, solveropts.tol, solveropts.maxit);
 
 		pm.mark('input file creation');		
 		fprintf('%s finishes. (input file created)\n\n', mfilename);
@@ -302,42 +324,44 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 		H = {};
 	else	
 		if isequal(solveropts.method, 'direct')
-			[E, H] = solve_eq_direct(osc.in_omega0(), eps_face, mu_edge, s_factor, J, grid3d);
+			[E, H] = solve_eq_direct(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
+		elseif isequal(solveropts.method, 'iterative')
+			[E, H] = solve_eq_iterative(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
 		else  % for solvers using E-field based equation
 			%% Apply spatial inversion.
-% 			d_prim = grid3d.dl(:, GK.prim);
-% 			d_dual = grid3d.dl(:, GK.dual);
-% 			s_prim = s_factor(:, GK.prim);
-% 			s_dual = s_factor(:, GK.dual);
-			d_prim = flip_vec(grid3d.dl(:, GK.dual));  % GK.dual, not GK.prim
-			d_dual = flip_vec(grid3d.dl(:, GK.prim));  % GK.prim, not GK.dual
-			s_prim = flip_vec(s_factor(:, GK.dual));  % GK.dual, not GK.prim
-			s_dual = flip_vec(s_factor(:, GK.prim));  % GK.prim, not GK.dual
-			mu_edge = flip_vec(mu_edge);
-			eps_face = flip_vec(eps_face);
+% 			d_prim = grid3d.dl(:, GT.prim);
+% 			d_dual = grid3d.dl(:, GT.dual);
+% 			s_prim = s_factor(:, GT.prim);
+% 			s_dual = s_factor(:, GT.dual);
+			d_prim = flip_vec(grid3d.dl(:, GT.dual));  % GT.dual, not GT.prim
+			d_dual = flip_vec(grid3d.dl(:, GT.prim));  % GT.prim, not GT.dual
+			s_prim = flip_vec(s_factor(:, GT.dual));  % GT.dual, not GT.prim
+			s_dual = flip_vec(s_factor(:, GT.prim));  % GT.prim, not GT.dual
+			mu = flip_vec(mu);
+			eps = flip_vec(eps);
 			J = neg_vec(flip_vec(J));  % pseudovector
 
 			if isequal(solveropts.method, 'gpu')
 				ds_prim = mult_vec(d_prim, s_prim);
 				ds_dual = mult_vec(d_dual, s_dual);
 				figure;
-				E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+				F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
 				[E, H] = fds(osc.in_omega0(), ...
 								ds_prim, ds_dual, ...
-								mu_edge, eps_face, ...
-								E0, J, ...
+								mu, eps, ...
+								F0, J, ...
 								solveropts.maxit, solveropts.tol, 'plot');
 				%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
 			elseif isequal(solveropts.method, 'aws')
 				ds_prim = mult_vec(d_prim, s_prim);
 				ds_dual = mult_vec(d_dual, s_dual);
-				E0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-% 				E0 = {rand(grid3d.N), rand(grid3d.N), rand(grid3d.N)};
-% 				E0 = {rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N)};
+				F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+% 				F0 = {rand(grid3d.N), rand(grid3d.N), rand(grid3d.N)};
+% 				F0 = {rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N)};
 				callback = maxwell(osc.in_omega0(), ...
 								ds_prim, ds_dual, ...
-								mu_edge, eps_face, ...
-								E0, J, ...
+								mu, eps, ...
+								F0, J, ...
 								solveropts.maxit, solveropts.tol);
 				while ~callback(); end
 				[~, E, H] = callback();
@@ -349,6 +373,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 		end
 
 		pm.mark('solution calculation');
+		fprintf('unknowns: %s-field\n', char(solveropts.eqtype.f));
 		fprintf('%s finishes.\n\n', mfilename);
 	end
 	
@@ -357,18 +382,21 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, grid3d] = maxwell_run(va
 		E_cell = cell(1, Axis.count);
 		H_cell = cell(1, Axis.count);
 		J_cell = cell(1, Axis.count);
+		M_cell = cell(1, Axis.count);
 		for w = Axis.elems
 			if ~isempty(E)
-				E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, GK.dual, osc);
+				E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, FT.e, solveropts.eqtype.ge, osc);
 			end
 			if ~isempty(H)
-				H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, GK.prim, osc);
+				H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, FT.h, alter(solveropts.eqtype.ge), osc);
 			end
-			J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, GK.dual, osc);
+			J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, FT.e, solveropts.eqtype.ge, osc);
+			M_cell{w} = array2scalar(M{w}, PhysQ.M, grid3d, w, FT.h, alter(solveropts.eqtype.ge), osc);
 		end
 	else  % solveropts.withinterp == false
 		E_cell = E;
 		H_cell = H;
 		J_cell = J;
+		M_cell = M;
 	end
 end
