@@ -8,25 +8,29 @@ chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.')
 if nargin < 3  % no m
 	m = 4;
 end
-chkarg(istypesizeof(m, 'real') && m >= 1, '"m" should be real and at least 1.0.');
+chkarg(istypeof(m, 'real') && all(m(:) >= 1), 'element of "m" should be real and at least 1.0.');
+chkarg(isexpandable2mat(m, Axis.count, Sign.count), ...
+	'"m" should be scalar, length-%d vector, or %d-by-%d matrix.', Axis.count, Axis.count, Sign.count);
+m = expand2mat(m, Axis.count, Sign.count);
 
 if nargin < 4  % no R
-	lnR = -16;  % R = 1e-7
-else
-	chkarg(istypesizeof(R, 'real') && R > 0 && R < 1, '"R" should be positive and less than 1.0.');
-	lnR = log(R);  % log() is the natural logarithm
+	R = exp(-16);  % R = exp(-16) ~= 1e-7
 end
-
+chkarg(istypeof(R, 'real') && all(R(:) > 0) && all(R(:) <= 1), ...
+	'element of "R" should be real and between 0.0 and 1.0.');
+chkarg(isexpandable2mat(R, Axis.count, Sign.count), ...
+	'"R" should be scalar, length-%d vector, or %d-by-%d matrix.', Axis.count, Axis.count, Sign.count);
+R = expand2mat(R, Axis.count, Sign.count);
+lnR = log(R);  % log() is the natural logarithm
 
 s_factor_cell = cell(Axis.count, GT.count);
 for w = Axis.elems
 	Nw = grid3d.N(w);
 
-	lpmls = grid3d.lpml(w,:);  % locations of PML interfaces
-	lpml_n = lpmls(Sign.n); lpml_p = lpmls(Sign.p);
-
-	Lpmls = grid3d.Lpml(w,:);  % thicknesses of PML
-	Lpml_n = Lpmls(Sign.n); Lpml_p = Lpmls(Sign.p);
+	lpml_n = grid3d.lpml(w,Sign.n); lpml_p = grid3d.lpml(w,Sign.p);  % locations of PML interfaces
+	Lpml_n = grid3d.Lpml(w,Sign.n); Lpml_p = grid3d.Lpml(w,Sign.p);  % thicknesses of PML
+	m_n = m(w,Sign.n); m_p = m(w,Sign.p);
+	lnR_n = lnR(w,Sign.n); lnR_p = lnR(w,Sign.p);
 
 	for g = GT.elems
 		s_factor = ones(1, Nw);
@@ -34,12 +38,12 @@ for w = Axis.elems
 		for i = 1:Nw
 			li = l(i);
 			if li < lpml_n
-				s_factor(i) = calc_s_factor(lpml_n - li, Lpml_n, omega, m, lnR);
+				s_factor(i) = calc_s_factor(lpml_n - li, Lpml_n, omega, m_n, lnR_n);
 % 				if w == Axis.y
 % 					s_factor(i) = -s_factor(i);
 % 				end
 			elseif li > lpml_p
-				s_factor(i) = calc_s_factor(li - lpml_p, Lpml_p, omega, m, lnR);
+				s_factor(i) = calc_s_factor(li - lpml_p, Lpml_p, omega, m_p, lnR_p);
 % 				if w == Axis.y
 % 					s_factor(i) = -s_factor(i);
 % 				end

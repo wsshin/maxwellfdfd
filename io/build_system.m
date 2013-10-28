@@ -164,7 +164,26 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 			iarg = iarg + 1; Lpml = varargin{iarg};
 			chkarg(istypeof(Lpml, 'real') && isexpandable2mat(Lpml, Axis.count, Sign.count) && all(all(Lpml>=0)), ...
 				'argument #%d should be "Lpml" (scalar, length-%d row vector, or %d-by-%d matrix with nonnegative numbers as elements).', iarg, Axis.count, Axis.count, Sign.count);
+
+			% Set up the degree of the polynomial grading of the PML scale
+			% factors.
+			iarg = iarg + 1; arg = varargin{iarg};
+			deg_pml = 4;  % polynomial degree
+			if istypeof(arg, 'real')
+				deg_pml = arg;
+			else
+				iarg = iarg - 1; % because withuniformgrid is optional argument
+			end
 	
+			% Set up the target reflection coefficient of the PML.
+			iarg = iarg + 1; arg = varargin{iarg};
+			R_pml = exp(-16);  % target reflection coefficient
+			if istypeof(arg, 'real')
+				R_pml = arg;
+			else
+				iarg = iarg - 1; % because withuniformgrid is optional argument
+			end
+			
 			% Set up a flag to generate a grid dynamically.
 			iarg = iarg + 1; arg = varargin{iarg};
 			withuniformgrid = false;  % generate a grid dynamically by default.
@@ -307,7 +326,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	mu_cell = mean_material_node(alter(ge), mu_node_array);
 
 	% Construct PML s-factors.
-	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d);
+	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d, deg_pml, R_pml);
 	pm.mark('eps and mu assignment');
 
 	if ~isTFSF
