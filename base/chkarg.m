@@ -18,6 +18,6 @@ function chkarg(truth, errmsg, varargin)
 errmsg = sprintf(errmsg, varargin{:});
 
 if ~truth
-	exception = MException('FDS:argChk', 'Wrong argument: %s', errmsg);
+	exception = MException('Maxwell:argChk', 'Wrong argument: %s', errmsg);
 	throwAsCaller(exception);
 end

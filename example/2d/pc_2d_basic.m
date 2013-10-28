@@ -6,7 +6,13 @@ inspect_only = false;
 %% Create shapes.
 a = 420;  % lattice constant
 t = 1;  % slab thickness
+
+% permittivity, r/a, and omega*a/(2*pi*c) are taken from p.234 of John D.
+% Joannopoulos? et al., "Photonic Crystals: Molding the Flow of Light," 2nd
+% edition so that the frequency lies in a band gap.
+eps_diel = 11.4;
 r = 0.25*a;  % hole radius
+wvlen = a/0.3;  % omega*a/(2*pi*c) = k*a/(2*pi) = a/lambda = 0.3
 
 ad = 25;  % divider for a
 td = 10;  % divider for t
@@ -22,11 +28,9 @@ rod = CircularCylinder(Axis.z, t, [0 0 t/2], r, [2*r/dd, 2*r/dd, t]);
 %% Solve the system.
 gray = [0.5 0.5 0.5];  % [r g b]
 src_loc = 6*a;
-wvlen = a/0.3;  % omega*a/(2*pi*c) = k*a/(2*pi) = a/lambda = 0.3
-eps_diel = 11.4;
 [E, H, obj_array, src_array, J] = maxwell_run(...
 	'OSC', 1e-9, wvlen, ...
-	'DOM', {'vacuum', 'white', 1.0}, [-mx*a mx*a; -my*a my*a; 0 t], [a/ad a/ad t], BC.p, [15*a 2*a 0], ...
+	'DOM', {'vacuum', 'white', 1.0}, [-mx*a mx*a; -my*a my*a; 0 t], [a/ad a/ad t], BC.p, [7*a 2*a 0], true, ...
 	'OBJ', ...
 		{'dielectric', gray, eps_diel}, periodize_shape(rod, {[a 0 0], [0 a 0], [0 0 t]}, slab_yn), ...
 		{'dielectric', gray, eps_diel}, periodize_shape(rod, {[a 0 0], [0 a 0], [0 0 t]}, slab_yp), ...

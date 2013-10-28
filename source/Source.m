@@ -67,7 +67,7 @@ classdef Source < handle & matlab.mixin.Heterogeneous
 			try
 				[index_cell, JMw_patch] = this.generate_kernel(w_axis, grid3d);  % Cw_patch: current source
 			catch err
-				exception = MException('FDS:srcAssign', 'Source assignment failed.');
+				exception = MException('Maxwell:srcAssign', 'Source assignment failed.');
 				throw(addCause(exception, err));
 			end
 		end

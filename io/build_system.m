@@ -1,5 +1,5 @@
 %% build_system
-% Run MaxwellFDS.
+% Build a system to solve by MaxwellFDFD.
 
 %%% Syntax
 %  [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell] = build_system(ge, OSC, DOM, OBJ, SRC, [progmark])
@@ -246,7 +246,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 			% Set up sources.
 			iarg = iarg + 1; arg = varargin{iarg};
 			if ~istypesizeof(arg, 'Source', [1 0])
-				warning('FDS:buildSys', 'no source is given.');
+				warning('Maxwell:buildSys', 'no source is given.');
 			end
 
 			while istypesizeof(arg, 'Source', [1 0])
@@ -263,7 +263,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 			% Set up sources.
 			iarg = iarg + 1; arg = varargin{iarg};
 			if ~istypesizeof(arg, 'Source', [1 0])
-				warning('FDS:buildSys', 'no source is given.');
+				warning('Maxwell:buildSys', 'no source is given.');
 			end
 
 			while istypesizeof(arg, 'Source', [1 0])
@@ -286,7 +286,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	obj_array = [obj_dom, obj_array];
 	src_array = [srcj_array, srcm_array];
 	if isTFSF && isempty(sobj_array)
-		warning('FDS:objAssign', 'TF/SF source is used, but scatteres are not defined in SOBJ group.');
+		warning('Maxwell:objAssign', 'TF/SF source is used, but scatteres are not defined in SOBJ group.');
 	end
 	
 	chkarg(iarg <= narglim, 'more arguments than expected.');	

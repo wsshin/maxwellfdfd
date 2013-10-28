@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Introduction to MaxwellFDFD</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-10-25"><meta name="DC.source" content="intro.m"><style type="text/css">
+      --><title>Introduction to MaxwellFDFD</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-10-27"><meta name="DC.source" content="intro.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -65,18 +65,51 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Introduction to MaxwellFDFD</h1><!--introduction--><p>Summary of example objective</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Section 1 Title</a></li><li><a href="#2">Section 2 Title</a></li></ul></div><h2>Section 1 Title<a name="1"></a></h2><p>Description of first code block</p><h2>Section 2 Title<a name="2"></a></h2><p>Description of second code block</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+  </style></head><body><div class="content"><h1>Introduction to MaxwellFDFD</h1><p>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+</script>
+</p><p>MaxwellFDFD is a MATLAB-based solver package of the frequency-domain Maxwell's equations.  By solving the equations, we obtain the solution that completely describes the the interaction of electromagnetic (EM) waves with EM objects of interest, such as waveguides, antennas, photonic crystals, and photovoltaic cells.</p><p>The frequency-domain Maxwell's equations are differential equations described as</p><p>\( \nabla \times \mathbf{E}(\mathbf{r}) = -i \, \omega \, \mu(\mathbf{r},\mathbf{\omega}) \, \mathbf{H}(\mathbf{r}) - \mathbf{M}(\mathbf{r}),\\ \nabla \times \mathbf{H}(\mathbf{r}) = i \, \omega \, \varepsilon(\mathbf{r},\mathbf{\omega}) \, \mathbf{E}(\mathbf{r}) + \mathbf{J}(\mathbf{r}), \)</p><p>where</p><div><ul><li>\(\mathbf{E}(\mathbf{r})\) and \(\mathbf{H}(\mathbf{r})\) are the solution electric and magnetic fields of the EM waves that we want to obtain,</li><li>\(\mathbf{J}(\mathbf{r})\) and \(\mathbf{M}(\mathbf{r})\) are the electric and magnetic current source densities at a position \(\mathbf{r}\) that emanate EM waves,</li><li>\(\omega\) is the oscillation frequency of the current sources,</li><li>\(\varepsilon(\mathbf{r},\omega)\) and \(\mu(\mathbf{r},\omega)\) are the electric permittivity and magnetic permeability of the EM object at a position \(\mathbf{r}\).</li></ul></div><p>To construct the frequency-domain Maxwell's equations, you first need to decide the frequency \(\omega\) you are interested in, and then you need to place EM objects, which are described in terms of shapes and material parameters \(\varepsilon(\mathbf{r},\omega)\) and \(\mu(\mathbf{r},\omega)\), in your simulation domain.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Introduction to MaxwellFDFD
-% Summary of example objective
+%
+% <html>
+% <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+% </script>
+% </html>
+%
+% MaxwellFDFD is a MATLAB-based solver package of the frequency-domain Maxwell's
+% equations.  By solving the equations, we obtain the solution that completely
+% describes the the interaction of electromagnetic (EM) waves with EM objects of
+% interest, such as waveguides, antennas, photonic crystals, and photovoltaic
+% cells.
+%
+% The frequency-domain Maxwell's equations are differential equations described
+% as
+%
+% \(
+% \nabla \times \mathbf{E}(\mathbf{r}) = -i \, \omega \, \mu(\mathbf{r},\mathbf{\omega}) \, \mathbf{H}(\mathbf{r}) - \mathbf{M}(\mathbf{r}),\\
+% \nabla \times \mathbf{H}(\mathbf{r}) = i \, \omega \, \varepsilon(\mathbf{r},\mathbf{\omega}) \, \mathbf{E}(\mathbf{r}) + \mathbf{J}(\mathbf{r}),
+% \)
+%
+% where 
+%
+% * \(\mathbf{E}(\mathbf{r})\) and \(\mathbf{H}(\mathbf{r})\) are the solution
+% electric and magnetic fields of the EM waves that we want to obtain,
+% * \(\mathbf{J}(\mathbf{r})\) and \(\mathbf{M}(\mathbf{r})\) are the electric
+% and magnetic current source densities at a position \(\mathbf{r}\) that
+% emanate EM waves,
+% * \(\omega\) is the oscillation frequency of the current sources,
+% * \(\varepsilon(\mathbf{r},\omega)\) and \(\mu(\mathbf{r},\omega)\) are the
+% electric permittivity and magnetic permeability of the EM object at a position
+% \(\mathbf{r}\).
+%
+% To construct the frequency-domain Maxwell's equations, you first need to
+% decide the frequency \(\omega\) you are interested in, and then you need to
+% place EM objects, which are described in terms of shapes and material
+% parameters \(\varepsilon(\mathbf{r},\omega)\) and \(\mu(\mathbf{r},\omega)\),
+% in your simulation domain.
+%
 
-%% Section 1 Title
-% Description of first code block
-a=1;
-
-%% Section 2 Title
-% Description of second code block
-a=2;
 
 ##### SOURCE END #####
 --></body></html>

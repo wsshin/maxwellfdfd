@@ -34,7 +34,7 @@ if withuniform
 		assert(length(lprim) >= 2);
 		dl_generated = lprim(2) - lprim(1);
 		if dl_generated ~= dl_intended
-			warning('FDS:gridGen', 'grid vertex separation %e in generated uniform grid differs from intended separation %e by %e percent.', ...
+			warning('Maxwell:gridGen', 'grid vertex separation %e in generated uniform grid differs from intended separation %e by %e percent.', ...
 				dl_generated, dl_intended, (dl_generated-dl_intended)/dl_intended * 100);
 		end
 		Npml(w,Sign.n) = length(find(lprim < lprim(1) + Lpml(w,Sign.n)));
@@ -88,12 +88,12 @@ else  % withuniform == false: use dynamic grid generation algorithm
 				lprim = complete_lprim1d(lprim_part);
 				ldual = mean([lprim(1:end-1); lprim(2:end)]);  % take average in column
 			catch err2
-				exception = MException('FDS:gridGen', '%s-axis grid generation failed.', char(w));
+				exception = MException('Maxwell:gridGen', '%s-axis grid generation failed.', char(w));
 				throw(addCause(exception, err2));
 			end
 			
 			if ~isempty(setdiff(ldual0{w}, ldual))
-				exception = MException('FDS:gridGen', '%s-axis grid generation failed.', char(w));
+				exception = MException('Maxwell:gridGen', '%s-axis grid generation failed.', char(w));
 				throw(addCause(exception, err1));
 			end
 		end

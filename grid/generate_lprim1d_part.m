@@ -57,7 +57,7 @@ assert(lprim0_array(1) == b_min && lprim0_array(end) == b_max);
 ldual0_array = unique(ldual0_array);  % sorted and duplicate elements are removed
 common = intersect(lprim0_array, ldual0_array);
 if ~isempty(common)
-	exception = MException('FDS:gridGen', 'primary and dual grid share %s.', mat2str(common));
+	exception = MException('Maxwell:gridGen', 'primary and dual grid share %s.', mat2str(common));
 	throw(exception);
 end
 

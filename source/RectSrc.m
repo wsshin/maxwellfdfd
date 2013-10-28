@@ -122,11 +122,11 @@ classdef RectSrc < Source
 			
 			exception = MException.empty(0,1);
 			if diff(interval) > diff(grid1d.bound)
-				exception = MException('FDS:srcAssign', 'this %s should be narrower than grid in %s-axis.', ...
+				exception = MException('Maxwell:srcAssign', 'this %s should be narrower than grid in %s-axis.', ...
 								class(this), char(grid2d.axis(dir)));
 			end
 			if ~any(grid1d.contains(interval.'))
-				exception = MException('FDS:srcAssign', 'this %s should have overlap with grid in %s-axis.', ...
+				exception = MException('Maxwell:srcAssign', 'this %s should have overlap with grid in %s-axis.', ...
 								class(this), char(grid2d.axis(dir)));
 			end
 			
@@ -154,7 +154,7 @@ classdef RectSrc < Source
 			ind_n = find(grid1d.lall{alter(g)} <= interval(Sign.n) , 1, 'last');  % grid1d.lg rather than grid1d.l
 			ind_p = find(grid1d.lall{alter(g)} >= interval(Sign.p) , 1, 'first') - 1;  % grid1d.lg rather than grid1d.l
 			if isempty(ind_p)
-				exception = MException('FDS:srcAssign', 'this %s extends beyond last %s grid point in %s-axis.', ...
+				exception = MException('Maxwell:srcAssign', 'this %s extends beyond last %s grid point in %s-axis.', ...
 								class(this), char(alter(g)), char(grid2d.axis(dir)));
 				throw(exception);
 			end

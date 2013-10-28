@@ -1,5 +1,5 @@
 classdef PhysUnit
-	% PhysUnit defines the units of the physical quantities used in FDS.
+	% PhysUnit defines the units of the physical quantities used in MaxwellFDFD.
 	
 	properties (SetAccess = immutable, GetAccess = private)
 		va = NaN(1,PhysQ.count);  % array of values of units

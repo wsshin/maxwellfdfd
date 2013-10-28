@@ -59,9 +59,9 @@ classdef TotalView3d < handle
 			this.intercept = scalar3d.grid3d.center;
 			
 			for w = Axis.elems
-				warning('off', 'FDS:interp');
+				warning('off', 'Maxwell:interp');
 				this.painter2d(w).scalar2d = slice_scalar3d(scalar3d, w, this.intercept(w));
-				warning('on', 'FDS:interp');
+				warning('on', 'Maxwell:interp');
 			end
 		end
 		
@@ -332,9 +332,9 @@ classdef TotalView3d < handle
 			end
 			set(this.hslider(axis), 'Value', val);
 			this.hs3d(axis) = this.painter3d.draw_slice(this.ha3d, axis, val);
-			warning('off', 'FDS:interp');
+			warning('off', 'Maxwell:interp');
 			this.painter2d(axis).scalar2d = slice_scalar3d(this.scalar3d, axis, val);
-			warning('on', 'FDS:interp');
+			warning('on', 'Maxwell:interp');
 			this.painter2d(axis).draw_slice(this.ha2d(axis));
 			if this.withobjsrc
 				this.painter2d(axis).draw_objsrc(this.ha2d(axis));
@@ -348,9 +348,9 @@ classdef TotalView3d < handle
 			this.intercept(axis) = val;
 			set(this.hedit(axis), 'String', num2str(val));
 			this.hs3d(axis) = this.painter3d.draw_slice(this.ha3d, axis, val);
-			warning('off', 'FDS:interp');
+			warning('off', 'Maxwell:interp');
 			this.painter2d(axis).scalar2d = slice_scalar3d(this.scalar3d, axis, val);
-			warning('on', 'FDS:interp');
+			warning('on', 'Maxwell:interp');
 			this.painter2d(axis).draw_slice(this.ha2d(axis));
 			if this.withobjsrc
 				this.painter2d(axis).draw_objsrc(this.ha2d(axis));

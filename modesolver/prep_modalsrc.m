@@ -14,7 +14,7 @@ chkarg(istypesizeof(s_factor_cell, 'complexcell', [Axis.count GT.count], [1 0]),
 	Axis.count, GT.count);
 chkarg(istypesizeof(modalsrc, 'ModalSrc'), '"modalsrc" should be instance of ModalSrc.');
 if ~isempty(modalsrc.JMh) && ~isempty(modalsrc.JMv)
-	warning('FDS:srcAssign', 'Jh and Jv of "modalsrc" are already assigned; they will be reassigned.');
+	warning('Maxwell:srcAssign', 'Jh and Jv of "modalsrc" are already assigned; they will be reassigned.');
 end
 
 % % Assuming that loss is small, construct the waveguide mode matrix ignoring the
@@ -51,7 +51,7 @@ end
 % end
 % 
 % if abs((lmax - lmax_prev) / lmax) > tol
-% 	warning('FDS:modeSolver', 'power iteration did not converge: abs((lmax - lmax_prev) / lmax) = %s', ...
+% 	warning('Maxwell:modeSolver', 'power iteration did not converge: abs((lmax - lmax_prev) / lmax) = %s', ...
 % 		num2str(abs((lmax - lmax_prev) / lmax)));
 % end
 % 
@@ -89,7 +89,7 @@ end
 % end
 % 
 % if abs((l - l_prev) / l) > tol
-% warning('FDS:modeSolver', 'Rayleigh quotient iteration did not converge: abs((l - l_prev) / l) = %s', ...
+% warning('Maxwell:modeSolver', 'Rayleigh quotient iteration did not converge: abs((l - l_prev) / l) = %s', ...
 % 	num2str(abs((l - l_prev) / l)));
 % end
 % 

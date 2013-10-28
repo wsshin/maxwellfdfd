@@ -3,7 +3,7 @@
 
 %%% Description
 % The only three instances |Axis.x|, |Axis.y|, and |Axis.z| of |Axis| are used
-% extensively in MaxwellFDS to represent and specify the x-, y-, and z-axis of
+% extensively in MaxwellFDFD to represent and specify the x-, y-, and z-axis of
 % the Cartesian coordinate system.
 %
 % |Axis| is a subclass of |Enumerated|, so it inherits all the methods of

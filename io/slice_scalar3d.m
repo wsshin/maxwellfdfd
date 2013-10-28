@@ -18,7 +18,7 @@ if indn ~= 0
 	ind{n} = indn;
 	array = scalar3d.array(ind{:});
 else
-% 	warning('FDS:interp', 'slice at %s = %s is not grid plane where %s is defined; fields are interpolated.', ...
+% 	warning('Maxwell:interp', 'slice at %s = %s is not grid plane where %s is defined; fields are interpolated.', ...
 % 		char(n), num2str(intercept), scalar3d.name);
 
 	indn = find(nall < intercept, 1, 'last');

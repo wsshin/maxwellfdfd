@@ -1,5 +1,5 @@
 %% maxwell_run
-% Run MaxwellFDS.
+% Run MaxwellFDFD.
 
 %%% Syntax
 %  [E_cell, H_cell] = maxwell_run(OSC, DOM, OBJ, SRC, [inspect_only])
@@ -8,19 +8,19 @@
 
 
 %%% Description
-% |maxwell_run(OSC, DOM, OBJ, SRC)| constructs a simulation domain from
-% given objects and sources, and launches the frequency-domain solver (FDS) to
-% solve Maxwell's equations in the simulation domain.
+% |maxwell_run(OSC, DOM, OBJ, SRC)| constructs a simulation domain from given
+% objects and sources, and launches a finite-difference frequency-domain (FDFD)
+% solver to solve Maxwell's equations in the simulation domain.
 %
-% |maxwell_run| can take an optional argument |inspect_only|, which is a logical
-% argument (i.e., |true| or |false|).  If |inspect_only = true|, |maxwell_run|
-% runs without launching FDS.  This is useful to inspect input arguments before
-% starting expensive computation.
-% 
 % Each of |OSC|, |DOM|, |OBJ|, and |SRC| represents a group of parameters.
 % Each group supports several flexible expressions.  See the following sections
 % about the input parameter groups for more details.
 %
+% |maxwell_run| can take an optional argument |inspect_only|, which is a logical
+% argument (i.e., |true| or |false|).  If |inspect_only = true|, |maxwell_run|
+% runs without launching the solver.  This is useful to inspect input arguments
+% before starting expensive computation.
+% 
 % |[E_cell, H_cell] = maxwell_run(...)| returns the E- and H-field solutions of
 % Maxwell's equations.  |E_cell| and |H_cell| are length-3 row cell arrays whose
 % elements are the x-, y-, and z-components of the respective field solutions.
@@ -60,8 +60,8 @@
 % DOM group specifies domain parameters.  The group begins with |'DOM'| and ends
 % with one of the followings:
 %
-% * |material, box, dl, bc, Lpml, [withuniformgrid]|
-% * |domain, dl, bc, Lpml, [withuniformgrid]|
+% * |material, box, dl, bc, Lpml, [deg_pml, [R_pml]], [withuniformgrid]|
+% * |domain, dl, bc, Lpml, [deg_pml, [R_pml]], [withuniformgrid]|
 %
 % |material|: background material filling the simulation domain.  See
 % <maxwell_run.html#7 Material Description> for various ways to describe a
@@ -70,27 +70,42 @@
 % |box|: range of the simulation doamin in the form of |[xmin xmax; ymin ymax;
 % zmin zmax]|.
 %
-% |dl|: default grid cell size in the form of |[dx, dy, dz]|.  Can be
-% abbreviated to a scalar |dl| if |dx == dy == dz|.
+% |dl|: default grid cell size in the form of |[dx dy dz]|.  Can be abbreviated
+% to a scalar |dl| if |dx == dy == dz|.
 %
-% |bc|: boundary conditions in the form of |[bc_xn, bc_yn, bc_zn]|, whose each
+% |bc|: boundary conditions in the form of |[bc_xn bc_yn bc_zn]|, whose each
 % element specifies the boundary condition at the negative end in one of the x-,
 % y-, z-axes (e.g., |bc_xn| for the negative end in the x-axis.).  Each element
 % of |bc| is an instance of <BC.html |BC|>.  The boundary conditions at the
-% positive ends automatically determines by those at the negative ends: |bc_wp
-% == BC.p| for |bc_wn == BC.p| and |bc_wp == BC.m| otherwise.  Can be further
-% abbreviated to a single BC instance if |bc_xn == bc_yn == bc_zn|.
+% positive ends are automatically determined by those at the negative ends:
+% |bc_wp == BC.p| if |bc_wn == BC.p|, and |bc_wp == BC.m| otherwise.  Can be
+% further abbreviated to a single BC instance if |bc_xn == bc_yn == bc_zn|.
 %
-% |Lpml|: thicknesses of PML in the form of |[Lpml_xn, Lpml_xp; Lpml_yn,
-% Lpml_yp; Lpml_zn, Lpml_zp]|, whose each element specifies the thickness at
-% either negative or positive end in one of the x-, y-, z-axes (e.g., |Lpml_xn|
-% for the negative end in the x-axis).  Can be abbreviated to |[Lpml_x, Lpml_y,
-% Lpml_z]| if |Lpml_wn == Lpml_wp| for |w = x, y, z|.  Can be further
-% abbreviated to a single scalar thickness if |Lpml_x == Lpml_y == Lpml_z|.  All
-% thicknesses are in the unit of |L0|.
+% |Lpml|: thicknesses of PML in the form of |[Lpml_xn Lpml_xp; Lpml_yn Lpml_yp;
+% Lpml_zn Lpml_zp]|, whose each element specifies the thickness at either
+% negative or positive end in one of the x-, y-, z-axes (e.g., |Lpml_xn| for the
+% negative end in the x-axis).  Can be abbreviated to |[Lpml_x Lpml_y Lpml_z]|
+% if |Lpml_wn == Lpml_wp| for |w = x, y, z|.  Can be further abbreviated to a
+% single scalar thickness if |Lpml_x == Lpml_y == Lpml_z|.  All thicknesses are
+% in the unit of |L0|.
 %
 % |domain|: instance of <Domain.html |Domain|>, which contains the information
 % about |material| and |box|.
+%
+% |deg_pml|: optional argument to specify the degrees of the polynomial gradings
+% of PML loss parameters in the form of |[deg_xn deg_xp; deg_yn deg_yp; deg_zn
+% deg_zp]|.  Can be abbreviated to |[deg_x deg_y deg_z]| if |deg_wn == deg_wp|
+% for |w = x, y, z|.  Can be further abbreviated to a single scalar if |deg_x ==
+% deg_y == deg_z|.  The default value is |deg_pml = 4|, meaning that the
+% polynomials of degree 4 are used to smoothly increase the PML loss parameters
+% for all boundaries with PML.
+%
+% |R_pml|: optional argument to specify the target reflectances in the form of
+% |[R_xn R_xp; R_yn R_yp; R_zn R_zp]|.  To specify |R_pml|, |deg_pml| should be
+% specified.  Can be abbreviated to |[R_x R_y R_z]| if |R_wn == R_wp| for |w =
+% x, y, z|.  Can be further abbreviated to a single scalar if |R_x == R_y ==
+% R_z|.  The default value is |R_pml = exp(-16)|, meaning that the reflectance
+% from PML is aimed to be as small as |exp(-16) ~= 1e-7|.
 %
 % |withuniformgrid|: optional argument to select a grid generation algorithm.
 % If |withuniformgrid = true|, a grid is generated uniformly; otherwise a grid
