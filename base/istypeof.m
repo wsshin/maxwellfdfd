@@ -77,9 +77,9 @@ elseif iscelltype
 		truth = truth && istypeof(obj{i}, typename);
 	end
 elseif isequal(typename, 'int')
-	truth = isint(obj);
+	truth = isnumeric(obj) && isint(obj);  % note isint('abc') == true
 elseif isequal(typename, 'real')
-	truth = isreal(obj);
+	truth = isnumeric(obj) && isreal(obj);  % note isreal('abc') == true
 elseif isequal(typename, 'complex');
 	truth = isnumeric(obj);
 else
