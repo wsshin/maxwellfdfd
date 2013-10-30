@@ -1,4 +1,4 @@
-function patch_handle_array = draw_objsrc(obj_array, grid3d, withinterp, withpml)
+function patch_handle_array = draw_objsrc(obj_array, src_array, grid3d, withinterp, withpml)
 
 chkarg(istypesizeof(obj_array, 'Object', [1 0]), ...
 	'"object_array" should be row vector with Object as elements.');
@@ -35,9 +35,18 @@ if withpml
 	end
 end
 
+srcobj_array = Object.empty(0, length(src_array));
+i = 0;
+for src = src_array
+	i = i+1;
+	green = 'g';  % green
+	srcmat = Material('Source', green, 1.0);
+	srcobj_array(i) = Object(src.shape, srcmat);
+end
+
 patch_handle_array = [];
 lplotobj = cell(1, Axis.count);  % indices
-for obj = [obj_array, boxes_pml]
+for obj = [obj_array, srcobj_array, boxes_pml]
 	shape = obj.shape;
 	color = obj.material.color;
 	if ~isequal(color, 'none') && ~istypesizeof(shape, 'Domain')
@@ -63,16 +72,24 @@ for obj = [obj_array, boxes_pml]
 		end
 
 		if ~isempty(lplotobj{Axis.x}) && ~isempty(lplotobj{Axis.y}) && ~isempty(lplotobj{Axis.z})  % shape in inside domain
-			lsf = shape.lsf;
+			if ~istypesizeof(shape, 'ZeroVolShape')
+				lsf = shape.lsf;
+			else
+				lsf = @(r) shape.lsf(r, true);
+			end
 			[X, Y, Z] = meshgrid(lplotobj{:});
 			Level = lsf([X(:), Y(:), Z(:)]);
 			Level = reshape(Level, size(X));
-			hp = patch(isosurface(X, Y, Z, Level, 0));
+			hp = patch(isosurface(X, Y, Z, Level, -eps));  % -eps instead of 0 for ZeroVolumeShape
 			isonormals(X, Y, Z, Level, hp)
 
-			set(hp, 'FaceColor', color, 'EdgeColor', 'none');
-			if isequal(obj.material.name, 'PML')
-				alpha(hp, 0.5);
+			if istypesizeof(shape, 'Point')
+				set(hp, 'FaceColor', color, 'EdgeColor', color, 'LineWidth', 3);
+			else
+				set(hp, 'FaceColor', color, 'EdgeColor', 'none');
+			end
+			if isequal(obj.material.name, 'PML') || isequal(obj.material.name, 'Source')
+				alpha(hp, 0.2);
 			end
 
 			patch_handle_array = [patch_handle_array(1:end), hp];

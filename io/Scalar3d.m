@@ -46,6 +46,22 @@ classdef Scalar3d
             this.name = name;
 		end
 		
+		function l_cell = lplot(this, withinterp, withpml)
+			% Return the locations where data are evaluated for plotting.  If
+			% the data do not include the boundaries of the simulation domain (or
+			% the PML interfaces for "withpml == false"), the boundary points
+			% are added.
+			l_cell = this.grid3d.lplot(this.gt_array, withinterp, withpml);
+		end
+		
+		function l_cell = lvoxelbound(this, withpml)
+			% Return the locations of boundaries of voxels drawn.  For data at
+			% primary grid points, the pixel centers are in the simulation
+			% domain including the boundary.  For data at dual grid points, the
+			% pixel centers are in the simulation domain excluding the boundary.
+			l_cell = this.grid3d.lvoxelbound(this.gt_array, withpml);
+		end
+		
 		function [array, l_cell] = data_expanded(this)
 			l_cell = this.grid3d.lall(Axis.elems + Axis.count*subsindex(this.gt_array));
 			array = this.array;
@@ -63,6 +79,36 @@ classdef Scalar3d
 				end
 			end
 			array = this.array(ind{:});
+		end
+		
+		function [V, X, Y, Z] = data_for_slice(this, withinterp, withpml)
+			chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
+			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
+			
+			lall = this.grid3d.lall(Axis.elems + Axis.count*subsindex(this.gt_array));
+			[X, Y, Z] = ndgrid(lall{:});
+
+			lplot = this.lplot(withinterp, withpml);
+			[Xi, Yi, Zi] = ndgrid(lplot{:});
+			V = interpn(X, Y, Z, this.array, Xi, Yi, Zi);
+			V = permute(V, int([Axis.y, Axis.x, Axis.z]));  % to be compatible with slice()
+
+			if ~withinterp
+				% Pad the end boundaries.  The padded values are not drawn, so
+				% they don't have to be accurate.
+				V(end+1, :, :) = V(end, :, :);
+				V(:, end+1, :) = V(:, end, :);
+				V(:, :, end+1) = V(:, :, end);
+			end
+			
+			if nargout >= 2  % X, Y, Z
+				if withinterp
+					l = this.lplot(withinterp, withpml);
+				else
+					l = this.lvoxelbound(withpml);
+				end
+				[X, Y, Z] = meshgrid(l{:});
+			end
 		end
 		
 		function val = value(this, point)

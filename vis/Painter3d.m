@@ -275,7 +275,7 @@ classdef Painter3d < handle
 		end
 		
 		function patch_handle_array = draw_objsrc(this)
-			patch_handle_array = draw_objsrc(this.obj_array, this.scalar3d.grid3d, this.withpml);
+			patch_handle_array = draw_objsrc(this.obj_array, this.src_array, this.scalar3d.grid3d, this.withinterp, this.withpml);
 			
 			if ~this.isopaque
 				alpha(patch_handle_array, this.opacity);

@@ -1,7 +1,7 @@
 classdef PhysUnit
 	% PhysUnit defines the units of the physical quantities used in MaxwellFDFD.
 	
-	properties (SetAccess = immutable, GetAccess = private)
+	properties (SetAccess = immutable, GetAccess = public)
 		va = NaN(1,PhysQ.count);  % array of values of units
 	end
 			
@@ -15,7 +15,9 @@ classdef PhysUnit
 			this.va(PhysQ.E) = 1;  % E-field in V/m
 			this.va(PhysQ.H) = this.va(PhysQ.E) / PhysC.eta0;  % H-field in A/m
 			this.va(PhysQ.J) = this.va(PhysQ.H) / this.va(PhysQ.L);  % electric current density in A/m^2 (L0-dependent)
-			this.va(PhysQ.I) = this.va(PhysQ.J) * this.va(PhysQ.L)^2;  % electric current in Ampere (L0-dependent)
+			this.va(PhysQ.M) = this.va(PhysQ.E) / this.va(PhysQ.L);  % magnetic current density in A/m^2 (L0-dependent)
+			this.va(PhysQ.I) = this.va(PhysQ.J) * this.va(PhysQ.L)^2;  % electric current in Amperes (L0-dependent)
+			this.va(PhysQ.V) = this.va(PhysQ.E) * this.va(PhysQ.L);  % voltage in Volts (L0-dependent)
 			this.va(PhysQ.S) = this.va(PhysQ.E) * this.va(PhysQ.H);  % Poynting vector in Watt/m^2
 			this.va(PhysQ.P) = this.va(PhysQ.S) * this.va(PhysQ.L)^2;  % power in Watt (L0-dependent)
 		end
