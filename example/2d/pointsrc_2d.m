@@ -4,11 +4,10 @@ clear all; close all; clear classes; clc;
 inspect_only = false;
 
 %% Solve the system.
-solveropts.eqtype = EquationType(FT.e, GT.prim);
 wvlen = 20;
 [E, H, obj_array, src_array, J] = maxwell_run(...
 	'OSC', 1e-9, wvlen, ...
-	'DOM', {'vacuum', 'none', 1.0}, [-60, 60; -60, 60; 0, 1], 2, BC.p, [10 10 0], ...
+	'DOM', {'vacuum', 'none', 1.0}, [-60, 60; -60, 60; 0, 1], 1, BC.p, [10 10 0], ...
 	'SRCJ', PointSrc(Axis.z, [0, 0, 0.5]), ...
 	solveropts, inspect_only);
 
@@ -25,7 +24,7 @@ clear opts
 opts.withobjsrc = true;
 % opts.withpml = false;
 % opts.withabs = true;
-% opts.cmax = 1e-2;
+opts.cscale = 2e-1;
 vis2d(E{Axis.z}, Axis.z, 0.5, obj_array, src_array, opts)
 % vis2d(H{Axis.x}, Axis.z, 0.5, obj_array, src_array, opts)
 

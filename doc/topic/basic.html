@@ -1,0 +1,247 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Basic Usage</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-19"><meta name="DC.source" content="basic.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Basic Usage</h1><!--introduction--><p>This document introduces the basic usage of MaxwellFDFD with example codes.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Code</a></li><li><a href="#3">Visualizing the Solution</a></li><li><a href="#5">Visualizing of Objects and Sources</a></li><li><a href="#8">Input Arguments of <tt>maxwell_run</tt></a></li><li><a href="#9">Inspecting the Design before Solution</a></li><li><a href="#11">Complete Code</a></li><li><a href="#12">See Also</a></li></ul></div><h2>Example Code<a name="1"></a></h2><p>We start with a simple example code that solves a 2D problem, which is to examine the transmission of a plane wave through a narrow slit:</p><pre class="codeinput">[E, H] = maxwell_run(<span class="keyword">...</span>
+	<span class="string">'OSC'</span>, 1e-9, 1550, <span class="keyword">...</span>
+	<span class="string">'DOM'</span>, {<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0}, [-1100 1100; -1100 2600; 0 10], 10, BC.p, [100 100 0],<span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, {<span class="string">'CRC/Ag'</span>, <span class="string">'k'</span>}, <span class="keyword">...</span>
+		Box([-1100 -80; 0 1000; 0 10]), <span class="keyword">...</span>
+		Box([80 1100; 0 1000; 0 10]), <span class="keyword">...</span>
+	<span class="string">'SRCJ'</span>, PlaneSrc(Axis.y, -500, Axis.x), true);
+</pre><p>The above is actually one line of code; the ellipsis <tt>...</tt> at the end of each line is MATLAB's way of indicating the continuation of a line.  Upon execution, this code calculates the solution <i>E</i>- and <i>H</i>-fields of the problem.  The solutions are stored in the variables <tt>E</tt> and <tt>H</tt>, which are the outputs of <a href="../comp/maxwell_run.html"><tt>maxwell_run</tt></a>, MaxwellFDFD's core function, that takes a long list of arguments describing the problem.</p><h2>Visualizing the Solution<a name="3"></a></h2><p>Before discussing the details of the arguments of <tt>maxwell_run</tt>, let's first visualize the solution to understand the problem we are solving better. This can be done by another simple line of code:</p><pre class="codeinput">vis2d(E{Axis.x}, Axis.z, 5);
+</pre><p>which produces a figure that looks like:</p><p><img vspace="5" hspace="5" src="../img/basic_01.png" alt=""> </p><p>Note that the PML regions are excluded from the plot by default.</p><h2>Visualizing of Objects and Sources<a name="5"></a></h2><p>The above field plot would have been much more informative if it was overlaid with the objects and source placed in the simulation domain.  The arrays of the objects and sources can be obtained from <tt>maxwell_run</tt> by changing the output arguments as:</p><pre class="codeinput">[E, H, obj_array, src_array] = maxwell_run({ARGUMENTS});
+</pre><p>These objects and sources (actually only one source for the present problem) are drawn on top of the field plot when they are supplied to <tt>vis2d</tt> as extra input arguments as</p><pre class="codeinput">vis2d(E{Axis.x}, Axis.z, 5, obj_array, src_array);
+</pre><p>The modified code will produce an updated figure that looks like:</p><p><img vspace="5" hspace="5" src="../img/basic_02.png" alt=""> </p><p>The black lines indicate the boundaies of the metal pieces, and green line indicates the location of the source plane.</p><h2>Input Arguments of <tt>maxwell_run</tt><a name="8"></a></h2><p><tt>maxwell_run</tt> takes many input arguments that are grouped into several <b>parameter groups</b>.  Each parameter group is specified by <tt>'NAME'</tt> (such as <tt>'OSC'</tt>, <tt>'DOM'</tt>, <tt>'OBJ'</tt>, <tt>'SRCJ'</tt>) that is followed by the arguments in the parameter group.  Below, the meanings of the arguments used in the above example code are explained for each parameter group.</p><p><b>'OSC'</b> specifies the oscillation parameter group, which describes the wavelength of the source.</p><div><ul><li><tt>1e-9</tt>: the unit of wavelength is 1 nm (= 1e-9 m).</li><li><tt>1550</tt>: the wavelength is 1550 nm.</li></ul></div><p>The unit of wavelength specified in this parameter group serves as the unit of all the length arguments of <tt>maxwell_run</tt>.</p><p><b>'DOM'</b> specifies the domain parameter group, which describes the simulation domain of the problem.</p><div><ul><li><tt>{'vacuum', 'none', 1.0}</tt>: the background material that fills the simulation domain is named <tt>'vacuum'</tt> (just a user-defined name), will be visualized with color <tt>'none'</tt> (i.e., the material will not be shown in the figure generated by <tt>vis2d</tt>), and its dielectric constant is 1.0.</li><li><tt>[-1100 1100; -1100 2600; 0 10]</tt>: the simulation domain lies between -1100 and 1100 nm in the <i>x</i>-direction, -1100 and 2600 nm in the <i>y</i>-direction, 0 and 10 nm in the <i>z</i>-direction.</li><li><tt>10</tt>: the coarsest grid size used to descritize the simulation domain is 10 nm.</li><li><tt>BC.p</tt>: periodic boundary conditions are used in all the <i>x</i>-, <i>y</i>-, <i>z</i>-directions.</li><li><tt>[100 100 0]</tt>: the thicknesses of PML are 100 nm at the <i>x</i>- and <i>y</i>-normal boundaries, and no PML is used at the <i>z</i>-normal boundaries.  The simulation domain except PML lies between -1000 and 1000 nm in the <i>x</i>-direction, -1000 and 2500 nm in the <i>y</i>-direction, 0 and 10 nm in the <i>z</i>-direction.</li></ul></div><p><b>'OBJ'</b> specifies the object parameter group, which describes the objects placed in the simulation domain.</p><div><ul><li><tt>{'CRC/Ag', 'k'}</tt>: the material used to create objects has frequency-dependent dielectric constants defined in the file <tt>Ag.mat</tt> under the subdirectory <tt>dielconst/CRC/</tt> under the main MaxwellFDFD directory.  (In fact, the dielectric constants are taken from the silver data in the CRC handbook.)  When the objects made of this material are plotted, they will be colored black (whose MATLAB color code is <tt>'k'</tt>).</li><li><tt>Box([-1100 -80; 0 1000; 0 10])</tt>: place a box made of the material.  The box lies between -1100 and -80 nm in the <i>x</i>-direction, 0 and 1000 nm in the <i>y</i>-direction, 0 and 10 nm in the <i>z</i>-direction.</li><li><tt>Box([80 1100; 0 1000; 0 10])</tt>: place another box made of the material.</li></ul></div><p><b>'SRCJ'</b> specifies the <i>J</i> source parameter group, which describes the electric current sources placed in the simulation domain.</p><div><ul><li><tt>PlaneSrc(Axis.y, -500, Axis.x))</tt>: at <i>y</i> = -500 nm, place a plane of electric dipoles oscillating in the <i>x</i>-direction.</li></ul></div><p>Note that the order of appearance of the parameter groups in <tt>maxwell_run</tt> is interchangeable; for example, you can put the source parameter group before the object parameter group, and vice versa.</p><h2>Inspecting the Design before Solution<a name="9"></a></h2><p>The above example is simple, so it does not hurt to solve the problem without making sure that the system you described with the arguments of <tt>maxwell_run</tt> is indeed what you intended to examine.  However, for larger and more complex problems, the solution process can be time-consuming.  Therefore, in general it is a good practice to inspect the design before solving the problem.</p><p>You can command <tt>maxwell_run</tt> to visualize the simulation domain without solving the problem by appending a logical argument (<tt>true</tt> or <tt>false</tt>) as:</p><pre class="codeinput">[E, H, obj_array, src_array] = maxwell_run({PARAMETER GROUPS}, true);
+</pre><p>The above code does not return solution <i>E</i>- and <i>H</i>-fields in the output arguments <tt>E</tt> and <tt>H</tt>, i.e., <tt>E</tt> and <tt>H</tt> are empty, but it produces the following figure:</p><p><img vspace="5" hspace="5" src="../img/basic_03.png" alt=""> </p><p>The above figure visualizes the objects and source in the simulation domain, including the PML regions.</p><h2>Complete Code<a name="11"></a></h2><p>Below is the complete code that has everything discussed in this document. Note that <tt>vis2d</tt> works only if the last argument of <tt>maxwell_run</tt> is flipped to <tt>false</tt> to calculate the solution.</p><pre class="codeinput">[E, H, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+	<span class="string">'OSC'</span>, 1e-9, 1550, <span class="keyword">...</span>
+	<span class="string">'DOM'</span>, {<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0}, [-1100 1100; -1100 2600; 0 10], 10, BC.p, [100 100 0],<span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, {<span class="string">'CRC/Ag'</span>, <span class="string">'k'</span>}, <span class="keyword">...</span>
+		Box([-1100 -80; 0 1000; 0 10]), <span class="keyword">...</span>
+		Box([80 1100; 0 1000; 0 10]), <span class="keyword">...</span>
+	<span class="string">'SRCJ'</span>, PlaneSrc(Axis.y, -500, Axis.x), <span class="keyword">...</span>
+	true);  <span class="comment">% false to calculate solution</span>
+
+vis2d(E{Axis.x}, Axis.z, 5, obj_array, src_array);
+</pre><h2>See Also<a name="12"></a></h2><p><a href="intermediate.html"><tt>Intermediate Usage</tt></a>, <a href="../comp/maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Basic Usage
+% This document introduces the basic usage of MaxwellFDFD with example codes.
+
+%% Example Code
+% We start with a simple example code that solves a 2D problem, which is to
+% examine the transmission of a plane wave through a narrow slit:
+[E, H] = maxwell_run(...
+	'OSC', 1e-9, 1550, ...
+	'DOM', {'vacuum', 'none', 1.0}, [-1100 1100; -1100 2600; 0 10], 10, BC.p, [100 100 0],...
+	'OBJ', {'CRC/Ag', 'k'}, ...
+		Box([-1100 -80; 0 1000; 0 10]), ...
+		Box([80 1100; 0 1000; 0 10]), ...
+	'SRCJ', PlaneSrc(Axis.y, -500, Axis.x), true);
+
+%%%
+% The above is actually one line of code; the ellipsis |...| at the end of each
+% line is MATLAB's way of indicating the continuation of a line.  Upon
+% execution, this code calculates the solution _E_- and _H_-fields of the
+% problem.  The solutions are stored in the variables |E| and |H|, which are the
+% outputs of <../comp/maxwell_run.html |maxwell_run|>, MaxwellFDFD's core
+% function, that takes a long list of arguments describing the problem.
+
+%% Visualizing the Solution
+% Before discussing the details of the arguments of |maxwell_run|, let's first
+% visualize the solution to understand the problem we are solving better. This
+% can be done by another simple line of code:
+vis2d(E{Axis.x}, Axis.z, 5);
+
+%%%
+% which produces a figure that looks like:
+%
+% <<../img/basic_01.png>>
+%
+% Note that the PML regions are excluded from the plot by default.
+
+%% Visualizing of Objects and Sources
+% The above field plot would have been much more informative if it was overlaid
+% with the objects and source placed in the simulation domain.  The arrays of
+% the objects and sources can be obtained from |maxwell_run| by changing the
+% output arguments as:
+[E, H, obj_array, src_array] = maxwell_run({ARGUMENTS});
+	
+%%%
+% These objects and sources (actually only one source for the present problem)
+% are drawn on top of the field plot when they are supplied to |vis2d| as extra
+% input arguments as
+vis2d(E{Axis.x}, Axis.z, 5, obj_array, src_array);
+
+%%%
+% The modified code will produce an updated figure that looks like:
+%
+% <<../img/basic_02.png>>
+%
+% The black lines indicate the boundaies of the metal pieces, and green line
+% indicates the location of the source plane.
+
+%% Input Arguments of |maxwell_run|
+% |maxwell_run| takes many input arguments that are grouped into several
+% *parameter groups*.  Each parameter group is specified by |'NAME'| (such as
+% |'OSC'|, |'DOM'|, |'OBJ'|, |'SRCJ'|) that is followed by the arguments in the
+% parameter group.  Below, the meanings of the arguments used in the above
+% example code are explained for each parameter group.
+%
+% *'OSC'* specifies the oscillation parameter group, which describes the
+% wavelength of the source.
+%
+% * |1e-9|: the unit of wavelength is 1 nm (= 1e-9 m).
+% * |1550|: the wavelength is 1550 nm.
+%
+% The unit of wavelength specified in this parameter group serves as the unit of
+% all the length arguments of |maxwell_run|.
+%
+% *'DOM'* specifies the domain parameter group, which describes the simulation
+% domain of the problem.
+%
+% * |{'vacuum', 'none', 1.0}|: the background material that fills the simulation
+% domain is named |'vacuum'| (just a user-defined name), will be visualized with
+% color |'none'| (i.e., the material will not be shown in the figure generated
+% by |vis2d|), and its dielectric constant is 1.0.
+% * |[-1100 1100; -1100 2600; 0 10]|: the simulation domain lies between -1100
+% and 1100 nm in the _x_-direction, -1100 and 2600 nm in the _y_-direction, 0
+% and 10 nm in the _z_-direction.
+% * |10|: the coarsest grid size used to descritize the simulation domain is 10
+% nm.
+% * |BC.p|: periodic boundary conditions are used in all the _x_-, _y_-,
+% _z_-directions.
+% * |[100 100 0]|: the thicknesses of PML are 100 nm at the _x_- and _y_-normal
+% boundaries, and no PML is used at the _z_-normal boundaries.  The simulation
+% domain except PML lies between -1000 and 1000 nm in the _x_-direction, -1000
+% and 2500 nm in the _y_-direction, 0 and 10 nm in the _z_-direction.
+%
+% *'OBJ'* specifies the object parameter group, which describes the objects
+% placed in the simulation domain.
+%
+% * |{'CRC/Ag', 'k'}|: the material used to create objects has
+% frequency-dependent dielectric constants defined in the file |Ag.mat| under
+% the subdirectory |dielconst/CRC/| under the main MaxwellFDFD directory.  (In
+% fact, the dielectric constants are taken from the silver data in the CRC
+% handbook.)  When the objects made of this material are plotted, they will be
+% colored black (whose MATLAB color code is |'k'|).
+% * |Box([-1100 -80; 0 1000; 0 10])|: place a box made of the material.  The
+% box lies between -1100 and -80 nm in the _x_-direction, 0 and 1000 nm in
+% the _y_-direction, 0 and 10 nm in the _z_-direction.
+% * |Box([80 1100; 0 1000; 0 10])|: place another box made of the material.
+%
+% *'SRCJ'* specifies the _J_ source parameter group, which describes the
+% electric current sources placed in the simulation domain.
+% 
+% * |PlaneSrc(Axis.y, -500, Axis.x))|: at _y_ = -500 nm, place a plane of
+% electric dipoles oscillating in the _x_-direction.
+%
+% Note that the order of appearance of the parameter groups in |maxwell_run| is
+% interchangeable; for example, you can put the source parameter group before
+% the object parameter group, and vice versa.
+
+%% Inspecting the Design before Solution
+% The above example is simple, so it does not hurt to solve the problem without
+% making sure that the system you described with the arguments of |maxwell_run|
+% is indeed what you intended to examine.  However, for larger and more complex
+% problems, the solution process can be time-consuming.  Therefore, in general
+% it is a good practice to inspect the design before solving the problem.
+%
+% You can command |maxwell_run| to visualize the simulation domain without
+% solving the problem by appending a logical argument (|true| or |false|) as: 
+[E, H, obj_array, src_array] = maxwell_run({PARAMETER GROUPS}, true);
+
+%%%
+% The above code does not return solution _E_- and _H_-fields in the output
+% arguments |E| and |H|, i.e., |E| and |H| are empty, but it produces the
+% following figure:
+% 
+% <<../img/basic_03.png>>
+%
+% The above figure visualizes the objects and source in the simulation domain,
+% including the PML regions.
+
+
+%% Complete Code
+% Below is the complete code that has everything discussed in this document.
+% Note that |vis2d| works only if the last argument of |maxwell_run| is flipped
+% to |false| to calculate the solution.
+[E, H, obj_array, src_array] = maxwell_run(...
+	'OSC', 1e-9, 1550, ...
+	'DOM', {'vacuum', 'none', 1.0}, [-1100 1100; -1100 2600; 0 10], 10, BC.p, [100 100 0],...
+	'OBJ', {'CRC/Ag', 'k'}, ...
+		Box([-1100 -80; 0 1000; 0 10]), ...
+		Box([80 1100; 0 1000; 0 10]), ...
+	'SRCJ', PlaneSrc(Axis.y, -500, Axis.x), ...
+	true);  % false to calculate solution
+
+vis2d(E{Axis.x}, Axis.z, 5, obj_array, src_array);
+
+%%% See Also
+% <intermediate.html |Intermediate Usage|>, <../comp/maxwell_run.html |maxwell_run|>
+
+##### SOURCE END #####
+--></body></html>

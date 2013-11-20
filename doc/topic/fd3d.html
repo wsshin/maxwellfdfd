@@ -1,0 +1,266 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Using FD3D for Large Problems</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-19"><meta name="DC.source" content="fd3d.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Using FD3D for Large Problems</h1><!--introduction--><p>MaxwellFDFD constructs a system of linear equations and solves it by MATLAB's direct solvers.  However, for large (typically 3D) problems, direct solvers use too much memory, and therefore more memory-efficient, iterative solvers are more suitable.</p><p>FD3D is a companion program that runs on a large LINUX cluster to solve 3D problems using iterative solvers. <a href="../comp/maxwell_run.html"><tt>maxwell_run</tt></a> can be configured to generate input files for FD3D.  These input files are uploaded to the LINUX cluster and the solution files are calculated by FD3D. Then, the solution files are downloaded to your local computer and loaded to MaxwellFDFD for further analysis.</p><p>This document briefly explains how to generate the input files and load the solution files in MaxwellFDFD.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Code</a></li><li><a href="#3">Generating Input Files for FD3D</a></li><li><a href="#5">Reading Solution Files in MATLAB</a></li><li><a href="#7">Complete Code</a></li></ul></div><h2>Example Code<a name="1"></a></h2><p>We consider a simple 3D problem that is to simulate wave propagation through a slot waveguide formed in a thin metal film.  The code to solve this problem is:</p><pre class="codeinput">inspect_only = true;
+gray = [0.5 0.5 0.5];  <span class="comment">% [r g b]</span>
+maxwell_run(<span class="keyword">...</span>
+	<span class="string">'OSC'</span>, 1e-9, 1550, <span class="keyword">...</span>
+	<span class="string">'DOM'</span>, {<span class="string">'Palik/SiO2'</span>, <span class="string">'none'</span>}, [-200 1700; -700 700; -600 600], 20, BC.p, 200, <span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, <span class="keyword">...</span>
+		{<span class="string">'Palik/SiO2'</span>, <span class="string">'none'</span>}, Box([-200 1700; -50 50; -50 50], [20 2 2]), <span class="keyword">...</span>
+		{<span class="string">'CRC/Ag'</span>, gray}, <span class="keyword">...</span>
+			Box([-200 1700; -700 -25; -25 25], 20), Box([-200 1700; 25 700; -25 25], 20), <span class="keyword">...</span>
+	<span class="string">'SRCJ'</span>, ModalSrc(Axis.x, 200), <span class="keyword">...</span>
+	inspect_only);
+</pre><p>Upon execution, the above code inspects the simulation domain and produces the figure that looks like:</p><p><img vspace="5" hspace="5" src="../img/fd3d_01.png" alt=""> </p><h2>Generating Input Files for FD3D<a name="3"></a></h2><p><tt>maxwell_run</tt> constructs the simulation domain using the given arguments. Once the simulation domain is constructed, the problem can be solved by different numerical solvers.  <tt>maxwell_run</tt>'s default choice is MATLAB's direct solvers, but it can be also configured to use FD3D, a companion program of MaxwellFDFD that solves Maxwell's equations by iterative solvers.</p><p>To use FD3D, we need to generate input files that can be read by FD3D.  These input files contain the information about the simulation domain.  To generate the input files, we should command <tt>maxwell_run</tt> to do so by setting solver optiotns:</p><pre class="codeinput">inspect_only = false;
+
+<span class="comment">% Solver Options</span>
+solveropts.method = <span class="string">'inputfile'</span>;
+solveropts.filenamebase = <span class="string">'slot_3d'</span>;
+
+<span class="comment">% Input Files</span>
+gray = [0.5 0.5 0.5];  <span class="comment">% [r g b]</span>
+maxwell_run(<span class="keyword">...</span>
+	<span class="string">'OSC'</span>, 1e-9, 1550, <span class="keyword">...</span>
+	<span class="string">'DOM'</span>, {<span class="string">'Palik/SiO2'</span>, <span class="string">'none'</span>}, [-200 1700; -700 700; -600 600], 20, BC.p, 200, <span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, <span class="keyword">...</span>
+		{<span class="string">'Palik/SiO2'</span>, <span class="string">'none'</span>}, Box([-200 1700; -50 50; -50 50], [20 2 2]), <span class="keyword">...</span>
+		{<span class="string">'CRC/Ag'</span>, gray}, <span class="keyword">...</span>
+			Box([-200 1700; -700 -25; -25 25], 20), Box([-200 1700; 25 700; -25 25], 20), <span class="keyword">...</span>
+	<span class="string">'SRCJ'</span>, ModalSrc(Axis.x, 200), <span class="keyword">...</span>
+	solveropts, inspect_only);
+</pre><p>(Note that <tt>inspect_only</tt> is now flipped to <tt>false</tt>.)  Now, upon execution the above code generates four input files:</p><div><ul><li><b><tt>slot_3d.h5</tt></b> for the grid information,</li><li><b><tt>slot_3d.eps.gz</tt></b> for the electric permittivity,</li><li><b><tt>slot_3d.srcJ.gz</tt></b> for the electric current source,</li><li><b><tt>slot_3d.srcM.gz</tt></b> for the magnetic current source.</li></ul></div><p>The base name of the files, |slot_3d|These files can be copied to the machine where FD3D runs. See README file to learn how to use FD3D to solve the problem described in the input files.</p><h2>Reading Solution Files in MATLAB<a name="5"></a></h2><p>A successful run of FD3D generates two solution files:</p><div><ul><li><b><tt>slot_3d.E.h5</tt></b> containing the E-field,</li><li><b><tt>slot_3d.H.h5</tt></b> containing the H-field.</li></ul></div><p>These two files can be read in MATLAB</p><pre class="codeinput">[E, H] = read_output(<span class="string">'slot_3d'</span>);
+</pre><p>Note that the above <tt>read_output</tt> can read the solution file only if the current MATLAB directory (where the script that reads the solution files by <tt>read_output</tt> runs) contains <tt>slot_3d.h5</tt> file as well as the two solution files; the solution files themselves do not have the grid information that <tt>slot_3d.h5</tt> file has.</p><h2>Complete Code<a name="7"></a></h2><p>Below is a typical code to work with FD3D.  You run the code with <tt>has_sol = false</tt> to create input files.  Once you solve the problem using FD3D and download the solution files in the same directory where you created the input files using the code below, you flip <tt>has_sol</tt> to <tt>true</tt> and run the code again to read and visualize the solution.</p><p>If you want to use <tt>obj_array</tt> and <tt>src_array</tt> in visualization, you should save them separately as <tt>.mat</tt> files using <tt>save</tt> function.  The code below does this for you when <tt>inspect_only = false</tt>.</p><pre class="codeinput">inspect_only = false;
+has_sol = false;  <span class="comment">% true if solution files exist</span>
+
+<span class="comment">% Solver Options</span>
+solveropts.method = <span class="string">'inputfile'</span>;
+filenamebase = <span class="string">'slot_3d'</span>;
+solveropts.filenamebase = filenamebase;
+
+<span class="keyword">if</span> ~has_sol  <span class="comment">% solution files do not exist</span>
+	<span class="comment">% Input Files</span>
+	gray = [0.5 0.5 0.5];  <span class="comment">% [r g b]</span>
+	[~, ~, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+		<span class="string">'OSC'</span>, 1e-9, 1550, <span class="keyword">...</span>
+		<span class="string">'DOM'</span>, {<span class="string">'Palik/SiO2'</span>, <span class="string">'none'</span>}, [-200 1700; -700 700; -600 600], 20, BC.p, 200, <span class="keyword">...</span>
+		<span class="string">'OBJ'</span>, <span class="keyword">...</span>
+			{<span class="string">'Palik/SiO2'</span>, <span class="string">'none'</span>}, Box([-200 1700; -50 50; -50 50], [20 2 2]), <span class="keyword">...</span>
+			{<span class="string">'CRC/Ag'</span>, gray}, <span class="keyword">...</span>
+				Box([-200 1700; -700 -25; -25 25], 20), Box([-200 1700; 25 700; -25 25], 20), <span class="keyword">...</span>
+		<span class="string">'SRCJ'</span>, ModalSrc(Axis.x, 200), <span class="keyword">...</span>
+		solveropts, inspect_only);
+
+	<span class="keyword">if</span> ~inspect_only
+		save(filenamebase, <span class="string">'obj_array'</span>, <span class="string">'src_array'</span>);
+	<span class="keyword">end</span>
+<span class="keyword">else</span>  <span class="comment">% solution files exist</span>
+	[E, H] = read_output(filenamebase);
+	load(filenamebase);  <span class="comment">% read obj_array and src_array</span>
+	visall(E{Axis.y}, obj_array, src_array);
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Using FD3D for Large Problems
+% MaxwellFDFD constructs a system of linear equations and solves it by MATLAB's
+% direct solvers.  However, for large (typically 3D) problems, direct solvers
+% use too much memory, and therefore more memory-efficient, iterative solvers
+% are more suitable.
+% 
+% FD3D is a companion program that runs on a large LINUX cluster to solve 3D
+% problems using iterative solvers. <../comp/maxwell_run.html |maxwell_run|> can
+% be configured to generate input files for FD3D.  These input files are
+% uploaded to the LINUX cluster and the solution files are calculated by FD3D.
+% Then, the solution files are downloaded to your local computer and loaded to
+% MaxwellFDFD for further analysis.
+% 
+% This document briefly explains how to generate the input files and load the
+% solution files in MaxwellFDFD.
+
+%% Example Code
+% We consider a simple 3D problem that is to simulate wave propagation through a
+% slot waveguide formed in a thin metal film.  The code to solve this problem
+% is:
+inspect_only = true;
+gray = [0.5 0.5 0.5];  % [r g b]
+maxwell_run(...
+	'OSC', 1e-9, 1550, ...
+	'DOM', {'Palik/SiO2', 'none'}, [-200 1700; -700 700; -600 600], 20, BC.p, 200, ...
+	'OBJ', ...
+		{'Palik/SiO2', 'none'}, Box([-200 1700; -50 50; -50 50], [20 2 2]), ...
+		{'CRC/Ag', gray}, ...
+			Box([-200 1700; -700 -25; -25 25], 20), Box([-200 1700; 25 700; -25 25], 20), ...
+	'SRCJ', ModalSrc(Axis.x, 200), ...
+	inspect_only);
+
+%%%
+% Upon execution, the above code inspects the simulation domain and produces the
+% figure that looks like:
+%
+% <<../img/fd3d_01.png>>
+
+%% Generating Input Files for FD3D
+% |maxwell_run| constructs the simulation domain using the given arguments. Once
+% the simulation domain is constructed, the problem can be solved by different
+% numerical solvers.  |maxwell_run|'s default choice is MATLAB's direct solvers,
+% but it can be also configured to use FD3D, a companion program of MaxwellFDFD
+% that solves Maxwell's equations by iterative solvers.
+%
+% To use FD3D, we need to generate input files that can be read by FD3D.  These
+% input files contain the information about the simulation domain.  To generate
+% the input files, we should command |maxwell_run| to do so by setting solver
+% optiotns:
+inspect_only = false;
+
+% Solver Options
+solveropts.method = 'inputfile';
+solveropts.filenamebase = 'slot_3d';
+
+% Input Files
+gray = [0.5 0.5 0.5];  % [r g b]
+maxwell_run(...
+	'OSC', 1e-9, 1550, ...
+	'DOM', {'Palik/SiO2', 'none'}, [-200 1700; -700 700; -600 600], 20, BC.p, 200, ...
+	'OBJ', ...
+		{'Palik/SiO2', 'none'}, Box([-200 1700; -50 50; -50 50], [20 2 2]), ...
+		{'CRC/Ag', gray}, ...
+			Box([-200 1700; -700 -25; -25 25], 20), Box([-200 1700; 25 700; -25 25], 20), ...
+	'SRCJ', ModalSrc(Axis.x, 200), ...
+	solveropts, inspect_only);
+
+%%%
+% (Note that |inspect_only| is now flipped to |false|.)  Now, upon execution the
+% above code generates four input files: 
+%
+% * *|slot_3d.h5|* for the grid information, 
+% * *|slot_3d.eps.gz|* for the electric permittivity,
+% * *|slot_3d.srcJ.gz|* for the electric current source,
+% * *|slot_3d.srcM.gz|* for the magnetic current source.
+%
+% The base name of the files, |slot_3d|These files can be copied to the machine where FD3D runs. See README file to
+% learn how to use FD3D to solve the problem described in the input files.
+
+%% Reading Solution Files in MATLAB
+% A successful run of FD3D generates two solution files:
+%
+% * *|slot_3d.E.h5|* containing the E-field,
+% * *|slot_3d.H.h5|* containing the H-field.
+%
+% These two files can be read in MATLAB
+[E, H] = read_output('slot_3d');
+
+%%%
+% Note that the above |read_output| can read the solution file only if the
+% current MATLAB directory (where the script that reads the solution files by
+% |read_output| runs) contains |slot_3d.h5| file as well as the two solution
+% files; the solution files themselves do not have the grid information that
+% |slot_3d.h5| file has.
+
+%% Complete Code
+% Below is a typical code to work with FD3D.  You run the code with |has_sol =
+% false| to create input files.  Once you solve the problem using FD3D and
+% download the solution files in the same directory where you created the input
+% files using the code below, you flip |has_sol| to |true| and run the code
+% again to read and visualize the solution.
+%
+% If you want to use |obj_array| and |src_array| in visualization, you should
+% save them separately as |.mat| files using |save| function.  The code below
+% does this for you when |inspect_only = false|.
+inspect_only = false;
+has_sol = false;  % true if solution files exist
+
+% Solver Options
+solveropts.method = 'inputfile';
+filenamebase = 'slot_3d';
+solveropts.filenamebase = filenamebase;
+
+if ~has_sol  % solution files do not exist
+	% Input Files
+	gray = [0.5 0.5 0.5];  % [r g b]
+	[~, ~, obj_array, src_array] = maxwell_run(...
+		'OSC', 1e-9, 1550, ...
+		'DOM', {'Palik/SiO2', 'none'}, [-200 1700; -700 700; -600 600], 20, BC.p, 200, ...
+		'OBJ', ...
+			{'Palik/SiO2', 'none'}, Box([-200 1700; -50 50; -50 50], [20 2 2]), ...
+			{'CRC/Ag', gray}, ...
+				Box([-200 1700; -700 -25; -25 25], 20), Box([-200 1700; 25 700; -25 25], 20), ...
+		'SRCJ', ModalSrc(Axis.x, 200), ...
+		solveropts, inspect_only);
+
+	if ~inspect_only
+		save(filenamebase, 'obj_array', 'src_array');
+	end
+else  % solution files exist
+	[E, H] = read_output(filenamebase);
+	load(filenamebase);  % read obj_array and src_array
+	visall(E{Axis.y}, obj_array, src_array);
+end
+	
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,272 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Intermediate Usage (for building complicated systems)</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-19"><meta name="DC.source" content="intermediate.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Intermediate Usage (for building complicated systems)</h1><!--introduction--><p>This document builds upon <a href="basic.html"><tt>Basic Usage</tt></a> and explains how to describe the problem in a more flexible way.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Code</a></li><li><a href="#2">Passing Variables as Arguments</a></li><li><a href="#5">Building Shapes Beforehand</a></li><li><a href="#8">Complete Code</a></li><li><a href="#9">See Also</a></li></ul></div><h2>Example Code<a name="1"></a></h2><p>We examine a portion of the last code discussed in <a href="basic.html"><tt>Basic Usage</tt></a>:</p><pre class="codeinput">[E, H, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+	<span class="string">'OSC'</span>, 1e-9, 1550, <span class="keyword">...</span>
+	<span class="string">'DOM'</span>, {<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0}, [-1100 1100; -1100 2600; 0 10], 10, BC.p, [100 100 0],<span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, {<span class="string">'CRC/Ag'</span>, <span class="string">'k'</span>}, <span class="keyword">...</span>
+		Box([-1100 -80; 0 1000; 0 10]), <span class="keyword">...</span>
+		Box([80 1100; 0 1000; 0 10]), <span class="keyword">...</span>
+	<span class="string">'SRCJ'</span>, PlaneSrc(Axis.y, -500, Axis.x), <span class="keyword">...</span>
+	true);
+</pre><h2>Passing Variables as Arguments<a name="2"></a></h2><p>You can store any arugments of <a href="../comp/maxwell_run.html"><tt>maxwell_run</tt></a> in variables and pass the variables instead of the arguments to <tt>maxwell_run</tt>. This increases the readability of the code.  For example, the meaning of the last logical argument <tt>true</tt> in the above code is hard to figure out from the code itself.  We can define a variable <tt>inspect_only</tt> and modify the code as:</p><pre class="codeinput">inspect_only = true;
+[E, H, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+	{PARAMETER GROUPS}, <span class="keyword">...</span>
+	inspect_only);
+</pre><p>Now, it is more obvious that <tt>inspect_only = true</tt> makes <tt>maxwell_run</tt> inpect the problem without solving it.</p><p>Similarly, you can define a variable for the color code used for a material. Because the actual color of silver is closer to gray than black, let's define a RGB vector and substitute it for the color code 'k' used for the material <tt>'CRC/Ag'</tt>:</p><pre class="codeinput">inspect_only = true;
+gray = [0.5 0.5 0.5];  <span class="comment">% [r g b]</span>
+[E, H, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+	{OTHER PARAMETER GROUPS}, <span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, {<span class="string">'CRC/Ag'</span>, gray}, <span class="keyword">...</span>
+		Box([-1100 -80; 0 1000; 0 10]), <span class="keyword">...</span>
+		Box([80 1100; 0 1000; 0 10]), <span class="keyword">...</span>
+	inspect_only);
+</pre><p>Upon execution, the above code generates the following figure describing the simulation domain:</p><p><img vspace="5" hspace="5" src="../img/intermediate_01.png" alt=""> </p><p>Compare this with the last figure in <a href="basic.html"><tt>Basic Usage</tt></a> and note that the two silver boxes are now drawn in gray.</p><h2>Building Shapes Beforehand<a name="5"></a></h2><p>You can build the shapes of objects outside <tt>maxwell_run</tt>, store them in variables, and pass the variables to <tt>maxwell_run</tt>:</p><pre class="codeinput">inspect_only = true;
+shape1 = Box([-1100 -80; 0 1000; 0 10]);
+shape2 = Box([80 1100; 0 1000; 0 10]);
+gray = [0.5 0.5 0.5];  <span class="comment">% [r g b]</span>
+[E, H, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+	{OTHER PARAMETER GROUPS}, <span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, {<span class="string">'CRC/Ag'</span>, gray}, shape1, shape2, <span class="keyword">...</span>
+	inspect_only);
+</pre><p>Defining shape variables before <tt>maxwell_run</tt> this way could be useful when, for example, you want to calculate the size of the shapes using complicated equations.</p><p>You can even create an array of shapes and pass it as a single argument:</p><pre class="codeinput">inspect_only = true;
+shape1 = Box([-1100 -80; 0 1000; 0 10]);
+shape2 = Box([80 1100; 0 1000; 0 10]);
+shape_array = [shape1, shape2];
+gray = [0.5 0.5 0.5];  <span class="comment">% [r g b]</span>
+[E, H, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+	{OTHER PARAMETER GROUPS}, <span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, {<span class="string">'CRC/Ag'</span>, gray}, shape_array, <span class="keyword">...</span>
+	inspect_only);
+</pre><p>Passing an array of shapes as an argument can be useful when the number of shapes is not fixed.</p><h2>Complete Code<a name="8"></a></h2><p>As shown above, <tt>maxwell_run</tt> allows flexible ways to construct arguments.  In fact, you can construct most arguments outside <tt>maxwell_run</tt>, store them in variables, and pass the variables to <tt>maxwell_run</tt>.  Below is a complete example that does so.</p><pre class="codeinput">inspect_only = true;
+
+<span class="comment">% Geometric Parameters</span>
+L0 = 1e-9;  <span class="comment">% length unit</span>
+wvlen = 1550;  <span class="comment">% wavelength</span>
+dL = 10;  <span class="comment">% grid size</span>
+Lpml = 10*dL;  <span class="comment">% PML thickness</span>
+xn = -1000-Lpml; xp = 1000+Lpml;  <span class="comment">% x boundaries</span>
+yn = -1000-Lpml; yp = 2500+Lpml;  <span class="comment">% y boundaries</span>
+zn = 0; zp = dL;  <span class="comment">% z boundaries</span>
+w = 160;  <span class="comment">% slit width</span>
+h = 1000;  <span class="comment">% metal thickness</span>
+
+<span class="comment">% Materials and Shapes</span>
+vacuum = Material(<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0);
+shape1 = Box([xn -w/2; 0 h; zn zp]);
+shape2 = Box([w/2 xp; 0 h; zn zp]);
+shape_array = [shape1, shape2];
+gray = [0.5 0.5 0.5];  <span class="comment">% [r g b]</span>
+
+<span class="comment">% Source</span>
+y_src = -500;
+polarization = Axis.x;
+src = PlaneSrc(Axis.y, y_src, polarization);
+
+<span class="comment">% Solution</span>
+[E, H, obj_array, src_array] = maxwell_run(<span class="keyword">...</span>
+	<span class="string">'OSC'</span>, L0, wvlen, <span class="keyword">...</span>
+	<span class="string">'DOM'</span>, vacuum, [xn xp; yn yp; zn zp], dL, BC.p, [Lpml Lpml 0],<span class="keyword">...</span>
+	<span class="string">'OBJ'</span>, {<span class="string">'CRC/Ag'</span>, gray}, shape_array, <span class="keyword">...</span>
+	<span class="string">'SRCJ'</span>, src, <span class="keyword">...</span>
+	inspect_only);
+</pre><h2>See Also<a name="9"></a></h2><p><a href="basic.html"><tt>Basic Usage</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Intermediate Usage (for building complicated systems)
+% This document builds upon <basic.html |Basic Usage|> and explains how to
+% describe the problem in a more flexible way.
+
+%% Example Code
+% We examine a portion of the last code discussed in <basic.html |Basic Usage|>:
+[E, H, obj_array, src_array] = maxwell_run(...
+	'OSC', 1e-9, 1550, ...
+	'DOM', {'vacuum', 'none', 1.0}, [-1100 1100; -1100 2600; 0 10], 10, BC.p, [100 100 0],...
+	'OBJ', {'CRC/Ag', 'k'}, ...
+		Box([-1100 -80; 0 1000; 0 10]), ...
+		Box([80 1100; 0 1000; 0 10]), ...
+	'SRCJ', PlaneSrc(Axis.y, -500, Axis.x), ...
+	true);
+
+%% Passing Variables as Arguments
+% You can store any arugments of <../comp/maxwell_run.html |maxwell_run|> in
+% variables and pass the variables instead of the arguments to |maxwell_run|.
+% This increases the readability of the code.  For example, the meaning of the
+% last logical argument |true| in the above code is hard to figure out from the
+% code itself.  We can define a variable |inspect_only| and modify the code as:
+inspect_only = true;
+[E, H, obj_array, src_array] = maxwell_run(...
+	{PARAMETER GROUPS}, ...
+	inspect_only);
+
+%%%
+% Now, it is more obvious that |inspect_only = true| makes |maxwell_run| inpect
+% the problem without solving it.
+%
+% Similarly, you can define a variable for the color code used for a material.
+% Because the actual color of silver is closer to gray than black, let's define
+% a RGB vector and substitute it for the color code 'k' used for the material
+% |'CRC/Ag'|:
+inspect_only = true;
+gray = [0.5 0.5 0.5];  % [r g b]
+[E, H, obj_array, src_array] = maxwell_run(...
+	{OTHER PARAMETER GROUPS}, ...
+	'OBJ', {'CRC/Ag', gray}, ...
+		Box([-1100 -80; 0 1000; 0 10]), ...
+		Box([80 1100; 0 1000; 0 10]), ...
+	inspect_only);
+
+%%% 
+% Upon execution, the above code generates the following figure describing the
+% simulation domain:
+%
+% <<../img/intermediate_01.png>>
+%
+% Compare this with the last figure in <basic.html |Basic Usage|> and note that
+% the two silver boxes are now drawn in gray.
+
+%% Building Shapes Beforehand
+% You can build the shapes of objects outside |maxwell_run|, store them in
+% variables, and pass the variables to |maxwell_run|:
+inspect_only = true;
+shape1 = Box([-1100 -80; 0 1000; 0 10]);
+shape2 = Box([80 1100; 0 1000; 0 10]);
+gray = [0.5 0.5 0.5];  % [r g b]
+[E, H, obj_array, src_array] = maxwell_run(...
+	{OTHER PARAMETER GROUPS}, ...
+	'OBJ', {'CRC/Ag', gray}, shape1, shape2, ...
+	inspect_only);
+
+%%%
+% Defining shape variables before |maxwell_run| this way could be useful when,
+% for example, you want to calculate the size of the shapes using complicated
+% equations.
+%
+% You can even create an array of shapes and pass it as a single argument:
+inspect_only = true;
+shape1 = Box([-1100 -80; 0 1000; 0 10]);
+shape2 = Box([80 1100; 0 1000; 0 10]);
+shape_array = [shape1, shape2];
+gray = [0.5 0.5 0.5];  % [r g b]
+[E, H, obj_array, src_array] = maxwell_run(...
+	{OTHER PARAMETER GROUPS}, ...
+	'OBJ', {'CRC/Ag', gray}, shape_array, ...
+	inspect_only);
+
+%%%
+% Passing an array of shapes as an argument can be useful when the number of
+% shapes is not fixed.
+
+%% Complete Code
+% As shown above, |maxwell_run| allows flexible ways to construct arguments.  In
+% fact, you can construct most arguments outside |maxwell_run|, store them in
+% variables, and pass the variables to |maxwell_run|.  Below is a complete
+% example that does so.
+inspect_only = true;
+
+% Geometric Parameters
+L0 = 1e-9;  % length unit
+wvlen = 1550;  % wavelength
+dL = 10;  % grid size
+Lpml = 10*dL;  % PML thickness
+xn = -1000-Lpml; xp = 1000+Lpml;  % x boundaries
+yn = -1000-Lpml; yp = 2500+Lpml;  % y boundaries
+zn = 0; zp = dL;  % z boundaries
+w = 160;  % slit width
+h = 1000;  % metal thickness
+
+% Materials and Shapes
+vacuum = Material('vacuum', 'none', 1.0);
+shape1 = Box([xn -w/2; 0 h; zn zp]);
+shape2 = Box([w/2 xp; 0 h; zn zp]);
+shape_array = [shape1, shape2];
+gray = [0.5 0.5 0.5];  % [r g b]
+
+% Source
+y_src = -500;
+polarization = Axis.x;
+src = PlaneSrc(Axis.y, y_src, polarization);
+
+% Solution
+[E, H, obj_array, src_array] = maxwell_run(...
+	'OSC', L0, wvlen, ...
+	'DOM', vacuum, [xn xp; yn yp; zn zp], dL, BC.p, [Lpml Lpml 0],...
+	'OBJ', {'CRC/Ag', gray}, shape_array, ...
+	'SRCJ', src, ...
+	inspect_only);
+
+
+
+%%% See Also
+% <basic.html |Basic Usage|>
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
