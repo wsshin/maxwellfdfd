@@ -132,5 +132,3 @@ else  % solution files exist
 	load(filenamebase);  % read obj_array and src_array
 	visall(E{Axis.y}, obj_array, src_array);
 end
-	
-

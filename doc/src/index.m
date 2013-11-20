@@ -61,18 +61,20 @@
 %% User Guides
 % * <topic/basic.html Basic Usage>
 % * <topic/intermediate.html Intermediate Usage (for building complicated systems)>
-% * <topic/material.html Assigning Material Parameters> (to be written)
-% * <topic/shape.html Placing Objects and Sources> (to be written)
-% * <topic/vis.html Visualizing Solutions> (to be written)
-% * <topic/flux.html Measuring Power Flux> (to be written)
-% * <topic/tfsf.html Total-Field/Scattered-Field Method> (to be written)
-% * <topic/bc.html Using Boundary Conditions as Symmetry Planes> (to be written)
-% * <topic/fd3d.html Using FD3D for Large Problems> (to be written)
+% * <topic/fd3d.html Using FD3D for Large Problems>
 
-%% Advanced Topics
-% * <topic/fcnobj.html Function and Object Manuals> (to be written)
-% * <topic/diel.html Adding Dielectric Constants> (to be written)
-% * <topic/pml.html Changing PML Parameters> (to be written)
-% * <topic/mathematica.html Exporting Solutions for Mathematica> (to be written)
-% * <topic/trouble.html Troubleshooting> (to be written)
+%% User Guides (to be written)
+% * <topic/material.html Assigning Material Parameters>
+% * <topic/shape.html Placing Objects and Sources>
+% * <topic/vis.html Visualizing Solutions>
+% * <topic/flux.html Measuring Power Flux>
+% * <topic/tfsf.html Total-Field/Scattered-Field Method>
+% * <topic/bc.html Using Boundary Conditions as Symmetry Planes>
+
+%% Advanced Topics (to be written)
+% * <topic/fcnobj.html Function and Object Manuals>
+% * <topic/diel.html Adding Dielectric Constants>
+% * <topic/pml.html Changing PML Parameters>
+% * <topic/mathematica.html Exporting Solutions for Mathematica>
+% * <topic/trouble.html Troubleshooting>
 
