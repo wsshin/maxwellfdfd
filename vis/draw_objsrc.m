@@ -85,6 +85,8 @@ for obj = [obj_array, srcobj_array, boxes_pml]
 
 			if istypesizeof(shape, 'Point')
 				set(hp, 'FaceColor', color, 'EdgeColor', color, 'LineWidth', 3);
+			elseif istypesizeof(shape, 'Point') || istypesizeof(shape, 'Plane')
+				set(hp, 'FaceColor', color, 'EdgeColor', color, 'LineWidth', 1);
 			else
 				set(hp, 'FaceColor', color, 'EdgeColor', 'none');
 			end

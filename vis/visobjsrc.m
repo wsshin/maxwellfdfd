@@ -27,3 +27,4 @@ else
 	camlight
 	lighting gouraud
 end
+tightfig;
