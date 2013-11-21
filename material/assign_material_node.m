@@ -1,4 +1,6 @@
 function [eps_node_array, mu_node_array] = assign_material_node(grid3d, object_array, eps_node_array, mu_node_array)
+% It takes an array with Nx x Ny x Nz elements and returns an array with (Nx+2)
+% x (Ny+2) x (Nz+2) elements.
 
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid.');
 chkarg(istypesizeof(object_array, 'Object', [1 0]), ...
@@ -62,12 +64,15 @@ end
 
 % Extend eps and mu to the ghost points considering the boundary conditions.
 for w = Axis.elems
-	ind_g = {':',':',':'};
+	ind_gn = {':',':',':'};
+	ind_gp = {':',':',':'};	
 	if grid3d.bc(w) == BC.p
-		ind_g{w} = grid3d.N(w);
+		ind_gn{w} = grid3d.N(w);
+		ind_gp{w} = 1;
 	else
-		ind_g{w} = 1;
+		ind_gn{w} = 1;
+		ind_gp{w} = grid3d.N(w);
 	end
-	eps_node_array = cat(int(w), eps_node_array(ind_g{:}), eps_node_array);
-	mu_node_array = cat(int(w), mu_node_array(ind_g{:}), mu_node_array);
+	eps_node_array = cat(int(w), eps_node_array(ind_gn{:}), eps_node_array, eps_node_array(ind_gp{:}));
+	mu_node_array = cat(int(w), mu_node_array(ind_gn{:}), mu_node_array, mu_node_array(ind_gp{:}));
 end

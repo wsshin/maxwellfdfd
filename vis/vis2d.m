@@ -136,7 +136,7 @@ if no_opts || ~isfield(opts, 'withobjsrc')
 		opts.withobjsrc = true;
 	else
 		opts.withobjsrc = false;
-		warning('Maxwell:vis', ['for fast plotting, more than 20 objects are not drawn by default.\n', ...
+		warning('Maxwell:vis', ['for fast plotting, object and sources are not drawn by default if they are more than 20.\n', ...
 			'Suggestion: set "opts.withobjsrc = true" to draw objects.']);
 	end
 end

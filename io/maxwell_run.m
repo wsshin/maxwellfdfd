@@ -4,7 +4,7 @@
 %%% Syntax
 %  [E_cell, H_cell] = maxwell_run(OSC, DOM, OBJ, SRC, [inspect_only])
 %  [E_cell, H_cell, obj_array, src_array] = maxwell_run(...)
-%  [E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(...)
+%  [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(...)
 
 
 %%% Description
@@ -26,17 +26,20 @@
 % elements are the x-, y-, and z-components of the respective field solutions.
 % Each x-, y-, z-component of the fields are provided as instances of
 % <Scalar3d.html Scalar3d>.
-
+%
 % |[E_cell, H_cell, obj_array, src_array] = maxwell_run(...)| returns arrays of
 % instances of <Object.html |Object|> and <Source.html |Source|>.  The |Object|
 % and |Source| elements represent the objects and sources placed in the
 % simulation domain, so they can be used to visualize the simulation domain.
-
-% |[E_cell, H_cell, obj_array, src_array, J_cell] = maxwell_run(...)| returns
-% the electric current source distribution |J_cell|.  |J_cell| are length-3 row
-% cell arrays whose elements are the x-, y-, and z-components of the electric
-% current source density. Each x-, y-, z-component of the fields are provided as
-% instances of <Scalar3d.html Scalar3d>.
+%
+% |[E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(...)| returns
+% |extra|, which is a structure containing the fields |grid3d|, |J|, |M|, |eps|,
+% and |mu|: |grid3d| is an instance of <Grid3d.html Grid3d> that contains the
+% grid information; |J| and |M| are the electric and magnetic current source
+% distributions that have the same structure as |E_cell| and |H_cell|; |eps| and
+% |mu| are instances of <Scalar3d.html Scalar3d> that contain the electric
+% permittivity and magnetic permeability defined at the centers of the grid
+% cells.
 
 
 %%% Input Parameter Group - OSC
@@ -198,7 +201,7 @@
 %       'SRCJ', PointSrc(Axis.x, [0, 0, 200]), ...
 %       inspect_only);
 
-function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwell_run(varargin)
+function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	DEFAULT_METHOD = 'direct';  % 'direct', 'gpu', 'aws', 'inputfile'
 		
 	% Set solver options.
@@ -273,7 +276,7 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwel
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
-	[osc, grid3d, s_factor, eps, mu, J, M, obj_array, src_array, mat_array, eps_node] = ...
+	[osc, grid3d, s_factor, eps, mu, J, M, obj_array, src_array, mat_array, eps_node, mu_node] = ...
 		build_system(solveropts.eqtype.ge, solveropts.pml, varargin{1:iarg}, pm);
 	
 	if inspect_only  % inspect objects and sources
@@ -330,8 +333,43 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwel
 				'solveropts.F0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
 				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 		end
+		
+		% Define eps_node_array at vertices of the E-field edges.
+		if solveropts.eqtype.ge == GT.prim
+			eps_node_array = eps_node.data_expanded();  % (Nx+2) x (Ny+2) x (Nz+2)
+			eps_node_array = eps_node_array(1:end-1, 1:end-1, 1:end-1);  % (Nx+1) x (Ny+1) x (Nz+1)
+
+% 			eps_node_cell = eps_cell;
+% 			for w = Axis.elems
+% 				ind_g = {':',':',':'};
+% 				if grid3d.bc(w) == BC.p
+% 					ind_g{w} = grid3d.N(w);
+% 				else
+% 					ind_g{w} = 1;
+% 				end
+% 				eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
+% 			end
+% 			eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
+% 			eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
+% 			eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
+% 			
+% 			eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
+% 
+% 			eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
+% 						+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
+% 						+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
+% 						+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
+
+			eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
+						+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
+						+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
+						+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
+		else
+			eps_node_array = eps_node.data_original();  % Nx x Ny x Nz
+		end
+
 		write_input(solveropts.filenamebase, solveropts.eqtype, osc, grid3d, s_factor, ...
-			eps_node, eps, mu, J, M, solveropts.F0, solveropts.tol, solveropts.maxit);
+			eps_node_array, eps, mu, J, M, solveropts.F0, solveropts.tol, solveropts.maxit);
 
 		pm.mark('input file creation');		
 		fprintf('%s finishes. (input file created)\n\n', mfilename);
@@ -414,4 +452,10 @@ function [E_cell, H_cell, obj_array, src_array, J_cell, M_cell, grid3d] = maxwel
 		J_cell = J;
 		M_cell = M;
 	end
+	
+	extra.grid3d = grid3d;
+	extra.J = J_cell;
+	extra.M = M_cell;
+	extra.eps = eps_node;
+	extra.mu = mu_node;
 end

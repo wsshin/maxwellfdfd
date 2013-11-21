@@ -77,7 +77,7 @@ if ~inspect_only
 	opts.withgrid = false;
 % 	opts.withinterp = false;
 % 	opts.cscale = 1e-1;
-	z_loc = 0;
+	z_loc = 5;
 	vis2d(E{Axis.x}, Axis.z, z_loc, obj_array, src_array, opts)
 
 	%% Calculate the power flux through the slit.

@@ -50,7 +50,6 @@
 
 %%% Example
 %   gray = [0.5 0.5 0.5];  % [r g b]
-%   inspect_only = true;
 %   [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell,	...
 %		obj_array, src_array, eps_node_array, mu_node_array] = build_system(...
 %       'OSC', 1e-9, 1550, ...
@@ -62,7 +61,7 @@
 %       );
 
 function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
-	obj_array, src_array, mat_array, eps_node_array, mu_node_array] = build_system(varargin)
+	obj_array, src_array, mat_array, eps_node, mu_node] = build_system(varargin)
 
 	iarg = nargin; arg = varargin{iarg};
 	if istypesizeof(arg, 'ProgMark')
@@ -320,10 +319,10 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 
 	% Construct material parameters.
 	if ~isepsgiven
-		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % (Nx+1) x (Ny+1) x (Nz+1)
+		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % (Nx+2) x (Ny+2) x (Nz+2)
 	end
-	eps_cell = mean_material_node(ge, eps_node_array);
-	mu_cell = mean_material_node(alter(ge), mu_node_array);
+	eps_cell = mean_material_node(ge, eps_node_array(1:end-1,1:end-1,1:end-1));
+	mu_cell = mean_material_node(alter(ge), mu_node_array(1:end-1,1:end-1,1:end-1));
 
 	% Construct PML s-factors.
 	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d, deg_pml, R_pml);
@@ -384,43 +383,16 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		
 		% Add sobj_array to the already-generated eps and mu.
 		[eps_node_array, mu_node_array] = assign_material_node(grid3d, sobj_array, ...
-			eps_node_array(1:end-1, 1:end-1, 1:end-1), mu_node_array(1:end-1, 1:end-1, 1:end-1));  % (Nx+1) x (Ny+1) x (Nz+1)
-		eps_cell = mean_material_node(ge, eps_node_array);  % Nx x Ny x Nz
-		mu_cell = mean_material_node(alter(ge), mu_node_array);  % Nx x Ny x Nz
+			eps_node_array(2:end-1,2:end-1,2:end-1), mu_node_array(2:end-1,2:end-1,2:end-1));  % (Nx+2) x (Ny+2) x (Nz+2)
+		eps_cell = mean_material_node(ge, eps_node_array(1:end-1,1:end-1,1:end-1));  % Nx x Ny x Nz
+		mu_cell = mean_material_node(alter(ge), mu_node_array(1:end-1,1:end-1,1:end-1));  % Nx x Ny x Nz
 
 		pm.mark('TF/SF source assignment');
 	end
 	obj_array = [obj_array, sobj_array];
 	
-	if ge == GT.prim
-% 		eps_node_cell = eps_cell;
-% 		for w = Axis.elems
-% 			ind_g = {':',':',':'};
-% 			if grid3d.bc(w) == BC.p
-% 				ind_g{w} = grid3d.N(w);
-% 			else
-% 				ind_g{w} = 1;
-% 			end
-% 			eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
-% 		end
-% 		eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
-% 		eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
-% 		eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
-% 		
-% 		eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
-
-% 		eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
-% 					+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
-% 					+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
-% 					+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
-
-		eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
-					+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
-					+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
-					+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
-	else
-		eps_node_array = eps_node_array(2:end,2:end,2:end);
-	end
+	eps_node = Scalar3d(eps_node_array, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.eps, '\epsilon');
+	mu_node = Scalar3d(mu_node_array, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.mu, '\mu');
 
 	% Construct sources.
 	J_cell = assign_source(grid3d, srcj_array);
