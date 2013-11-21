@@ -1,3 +1,11 @@
+## SYSTEM REQUIRMENTS ##
+- Operating System
+Windows, LINUX, OS X, or any operating system where MATLAB can be installed.
+
+- MATLAB
+Version 2010a or later.  (Older versions are not supported due to the lack of some object-oriented programming features that are heavily used in MaxwellFDFD.)  No Toolbox is needed.
+
+
 ## INSTALLATION INSTRUCTION ##
 1. Extract the package tarball (or zip file); it will create a directory "maxwellfdfd".
 
