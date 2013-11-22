@@ -1,7 +1,7 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-inspect_only = false;  % true to inspect structure before any calculation
+inspect_only = true;  % true to inspect structure before any calculation
 
 %% Solve the system.
 L0 = 1e-9;  % unit of length: nm
@@ -13,14 +13,13 @@ b = 300 + 10*dL;  % semiside of simulation domain (10 grid cells inside PML)
 sm = 100;  % semiside of flux measurment box
 
 wvlen = 150;  % wavelength
-inc_ang = 0;  % incidence angle in the yz plane
 [E, H, obj_array, src_array, J] = maxwell_run(...
 	'OSC', L0, wvlen, ...
 	'DOM', {'vacuum', 'none', 1.0}, [-b b; -b b; 0 dL], dL, BC.p, [10*dL 10*dL 0], ...
 	'OBJ', ...
 		{'vacuum', 'none', 1.0}, Box([-sm sm; -sm sm; 0 dL], [dl dl dL]), ...  % flux measurement box
 		{'Palik/GaAs', 'm'}, CircularCylinder(Axis.z, dL, [0 0 dL/2], r, [dl dl dL]), ...  % GaAs cylinder
-	'SRCJ', PlaneSrc(Axis.y, sm+50, Axis.x, 1.0, inc_ang, wvlen), ...
+	'SRCJ', PlaneSrc(Axis.y, sm+50, Axis.x), ...
 	inspect_only);
 
 
