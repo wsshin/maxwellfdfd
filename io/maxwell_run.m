@@ -437,14 +437,21 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 		J_cell = cell(1, Axis.count);
 		M_cell = cell(1, Axis.count);
 		for w = Axis.elems
+			gt = solveropts.eqtype.ge;  % grid type for E-field
+			gt_array = gt(ones(1, Axis.count));
+			gt_array(w) = alter(gt);
 			if ~isempty(E)
-				E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, FT.e, solveropts.eqtype.ge, osc);
+				E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, FT.e, gt_array, osc);
 			end
+			J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, FT.e, gt_array, osc);
+
+			gt = alter(solveropts.eqtype.ge);  % grid type for H-field
+			gt_array = gt(ones(1, Axis.count));
+			gt_array(w) = alter(gt);
 			if ~isempty(H)
-				H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, FT.h, alter(solveropts.eqtype.ge), osc);
+				H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, FT.h, gt_array, osc);
 			end
-			J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, FT.e, solveropts.eqtype.ge, osc);
-			M_cell{w} = array2scalar(M{w}, PhysQ.M, grid3d, w, FT.h, alter(solveropts.eqtype.ge), osc);
+			M_cell{w} = array2scalar(M{w}, PhysQ.M, grid3d, w, FT.h, gt_array, osc);
 		end
 	else  % solveropts.withinterp == false
 		E_cell = E;

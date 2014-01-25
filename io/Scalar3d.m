@@ -35,7 +35,12 @@ classdef Scalar3d
 			this.osc = osc;
 			
 			if nargin < 5  % no physQ
-				this.physQcell = {PhysQ.arbitrary, 1};
+				physQcell = PhysQ.arbitrary;
+			end
+			chkarg(istypesizeof(physQcell, 'PhysQ') || isphysQcell(physQcell), ...
+				'"physQcell" should be instance of PhysQ, or cell array {PhysQ, int; PhysQ, int; ...}.');
+			if istypesizeof(physQcell, 'PhysQ')
+				physQcell = {physQcell, 1};
 			end
 			this.physQcell = physQcell;
 			this.unitvalue = osc.unit.value(this.physQcell);
@@ -43,6 +48,7 @@ classdef Scalar3d
 			if nargin < 6  % no name
 				name = '';
 			end
+			chkarg(ischar(name), '"name" should be string.');
             this.name = name;
 		end
 		

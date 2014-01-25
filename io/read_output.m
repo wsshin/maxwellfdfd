@@ -56,7 +56,15 @@ else
 			ind{n} = ':';
 		end
 		ind{end} = int(w);
-		E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, FT.e, ge, osc);
-		H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, FT.h, alter(ge), osc);
+
+		gt = ge;  % grid type for E-field
+		gt_array = gt(ones(1, Axis.count));
+		gt_array(w) = alter(gt);
+		E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, FT.e, gt_array, osc);
+
+		gt = alter(ge);  % grid type for H-field
+		gt_array = gt(ones(1, Axis.count));
+		gt_array(w) = alter(gt);
+		H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, FT.h, gt_array, osc);
 	end
 end

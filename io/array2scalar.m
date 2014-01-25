@@ -1,10 +1,9 @@
-function scalar = array2scalar(F_array, physQ, grid, axis, ft, gt, osc, intercept)
+function scalar = array2scalar(F_array, physQ, grid, axis, ft, gt_array, osc, intercept)
 chkarg(istypesizeof(physQ, 'PhysQ'), '"physQ" should be instance of PhysQ.');
 chkarg(istypesizeof(grid, 'Grid2d') || istypesizeof(grid, 'Grid3d'), ...
 	'"grid" should be instance of Grid2d or Grid3d.');
 chkarg(istypesizeof(axis, 'Axis'), '"axis" should be instance of Axis.');
 chkarg(istypesizeof(ft, 'FT'), '"ft" should be instance of FT.');
-chkarg(istypesizeof(gt, 'GT'), '"gt" should be instance of GT.');  % type of grid line along which this fields are defined
 chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 
 is3D = true;
@@ -17,14 +16,12 @@ if is3D
 	chkarg(istypesizeof(F_array, 'complex', grid3d.N), ...
 		'"F_array" should be %d-by-%d-by-%d array with complex elements.', ...
 		grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+	chkarg(istypesizeof(gt_array, 'GT', [1, Axis.count]), '"gt_array" should be length-%d row vector with GT as elements.', Axis.count);
 
 	V = F_array;
 	for w = Axis.elems
-		V = attach_extra_F(V, ft, gt, axis, grid3d.bc(w), w, grid3d.kBloch(w)*grid3d.L(w));
+		V = attach_extra_F(V, ft, gt_array(w), axis, grid3d.bc(w), w, grid3d.kBloch(w)*grid3d.L(w));
 	end
-	
-	gt_array = gt(ones(1, Axis.count));
-	gt_array(axis) = alter(gt);
 	
 	scalar = Scalar3d(V, grid3d, gt_array, osc, physQ, [physQ.symbol, '_', char(axis)]);
 else  % grid is Grid2d
@@ -36,6 +33,7 @@ else  % grid is Grid2d
 	grid2d = grid;
 	chkarg(istypesizeof(F_array, 'complex', grid2d.N), ...
 		'"F_array" should be %d-by-%d array with complex elements.', grid2d.N(Dir.h), grid2d.N(Dir.v));
+	chkarg(istypesizeof(gt_array, 'GT', [1, Dir.count]), '"gt_array" should be length-%d row vector with GT as elements.', Dir.count);
 
 	if axis == grid2d.axis(Dir.h)
 		axis_temp = Axis.x;
@@ -46,12 +44,9 @@ else  % grid is Grid2d
 	end
 	
 	C = F_array;
-	C = attach_extra_F(C, ft, gt, axis_temp, grid2d.bc(Dir.h), Axis.x, grid2d.kBloch(Dir.h)*grid2d.L(Dir.h));  % treat C as 3D array with one element in 3rd dimension
-	C = attach_extra_F(C, ft, gt, axis_temp, grid2d.bc(Dir.v), Axis.y, grid2d.kBloch(Dir.v)*grid2d.L(Dir.v));  % treat C as 3D array with one element in 3rd dimension
+	C = attach_extra_F(C, ft, gt_array(Dir.h), axis_temp, grid2d.bc(Dir.h), Axis.x, grid2d.kBloch(Dir.h)*grid2d.L(Dir.h));  % treat C as 3D array with one element in 3rd dimension
+	C = attach_extra_F(C, ft, gt_array(Dir.v), axis_temp, grid2d.bc(Dir.v), Axis.y, grid2d.kBloch(Dir.v)*grid2d.L(Dir.v));  % treat C as 3D array with one element in 3rd dimension
 
-	gt_array = gt(ones(1, Axis.count));
-	gt_array(axis) = alter(gt);
-	gt_array = gt_array(grid2d.axis);
 	scalar = Scalar2d(C, grid2d, gt_array, osc, physQ, [physQ.symbol, '_', char(axis)], intercept);
 end
 
@@ -71,7 +66,7 @@ chkarg(istypesizeof(kvLv, 'real'), '"kvLv" should be real.');
 ind_n = {':',':',':'};
 ind_p = {':',':',':'};
 Nv = size(Fw_array, int(v));
-if (gt == GT.dual && v == w) || (gt == GT.prim && v ~= w)
+if gt == GT.prim
 	if bc_v == BC.p
 		ind_p{v} = 1;
 		Fw_array = cat(int(v), Fw_array, Fw_array(ind_p{:})*exp(-1i*kvLv));
@@ -82,7 +77,7 @@ if (gt == GT.dual && v == w) || (gt == GT.prim && v ~= w)
 		size_extra(v) = 1;
 		Fw_array = cat(int(v), Fw_array, zeros(size_extra));
 	end
-else  % (g == GT.dual && v ~= w) || (g == GT.prim && v == w)
+else  % gt == GT.dual
 	if bc_v == BC.p
 		ind_n{v} = Nv;
 		ind_p{v} = 1;
@@ -91,9 +86,9 @@ else  % (g == GT.dual && v ~= w) || (g == GT.prim && v == w)
 		ind_n{v} = 1;
 		ind_p{v} = Nv;
 		ft_match_bc = (ft == FT.e && bc_v == BC.e) || (ft == FT.h && bc_v == BC.m);
-		if (gt == GT.dual && ft_match_bc) || (gt == GT.prim && ~ft_match_bc)
+		if (v ~= w && ft_match_bc) || (v == w && ~ft_match_bc)
 			Fw_array = cat(int(v), -Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
-		else  % (gt == GT.prim && ft_match_bc) || (gt == GT.dual && ~ft_match_bc)
+		else  % (v == w && ft_match_bc) || (v ~= w && ~ft_match_bc)
 			Fw_array = cat(int(v), Fw_array(ind_n{:}), Fw_array, Fw_array(ind_p{:}));
 		end
 	end
