@@ -110,6 +110,9 @@ end
 chkarg(iarg > nargin, 'Too many arguments.');
 
 
+if no_opts || ~isfield(opts, 'isswapped')
+	opts.isswapped = false;
+end
 if no_opts || ~isfield(opts, 'withgrid')
 	opts.withgrid = false;
 end
@@ -152,6 +155,7 @@ p = Painter2d();
 p.scalar2d = scalar2d;
 p.obj_array = obj_array;	
 p.src_array = src_array;
+p.isswapped = opts.isswapped;
 p.withgrid = opts.withgrid;
 p.withinterp = opts.withinterp;
 p.withpml = opts.withpml;
