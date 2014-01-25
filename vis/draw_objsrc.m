@@ -49,7 +49,8 @@ lplotobj = cell(1, Axis.count);  % indices
 for obj = [obj_array, srcobj_array, boxes_pml]
 	shape = obj.shape;
 	color = obj.material.color;
-	if ~isequal(color, 'none') && ~istypesizeof(shape, 'Domain')
+% 	if ~isequal(color, 'none') && ~istypesizeof(shape, 'Domain')
+	if ~isequal(color, 'none')
 		for w = Axis.elems
 			bn = shape.bound(w, Sign.n);
 			bp = shape.bound(w, Sign.p);

@@ -11,8 +11,8 @@
 % of |ModalSrc|.
 
 %%% Construction
-%  src = ModalSrc(normal_axis, intercept, neff_guess)
-%  src = ModalSrc(normal_axis, intercept, neff_guess, KA)
+%  src = ModalSrc(normal_axis, intercept, opts)
+%  src = ModalSrc(normal_axis, intercept, opts, KA)
 % 
 % *Input Arguments*
 %
@@ -20,11 +20,31 @@
 % distribute.  It is also the axis of the waveguide.  It should be one of
 % |Axis.x|, |Axis.y|, |Axis.z|.
 % * |intercept|: location of the plane in the |normal_axis| direction.
-% * |neff_guess|: estimate of the effective refractive index of the mode to
-% calculate. 
+% * |opts|: options structure that controls the behavior of the mode solver.
+% See below for more details.
 % * |KA|: integral of the norm of the surface current density.  It indicates the
 % strength of the mode amplitude.  If unassigned, the deault value |KA = 1| is
 % used.
+%
+% *Options Structure* 
+%
+% |opts| should have a string property |opts.clue| that indicates the type of
+% the clue that the mode solver utilizes to find an appropriate waveguide mode.
+% The clue can be either the order number of the waveguide mode, or the
+% effective refractive index of the waveguide mode.
+%
+% * |opts.clue = 'order'| commands the mode solver to find the |n|th-order mode,
+% where |n| is the order number you should provide as |opts.order = n|.  For
+% example, |opts| with |opts.clue = 'order'| and |opts.order = 1| commands the
+% mode solver to find the fundamental mode.
+% * |opts.clue = 'guess'| commands the mode solver to find the mode with the
+% effective index close to a "guess".  The guess of the effective index should
+% be provided as |opts.neff = neff_guess|.  For example, |opts| with |opts.clue
+% = 'guess'| and |opts.neff = 2.0 - 0.01i| commands the mode solver to find the
+% mode whose effective index is close to |2.0 - 0.01i|.
+%
+% In general, |opts.clue = 'guess'| finds the mode much faster than |opts.clue =
+% 'order'|.
 
 %%% Note
 % In the finite-difference grid, |ModalSrc| excites dipoles at the _E_-field
@@ -36,7 +56,9 @@
 
 %%% Example
 %   % Create an instance of PointSrc.
-%   src =  ModalSrc(Axis.y, -1000, 1.0);  % y = -1000 should not be primary grid point
+%   modeopts.clue = 'order';
+%   modeopts.order = 1;
+%   src =  ModalSrc(Axis.y, -1000, modeopts);  % y = -1000 should not be primary grid point
 %
 %   % Use the constructed src in maxwell_run().
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
@@ -79,7 +101,7 @@ classdef ModalSrc < Source
 			
 			if nargin < 3  % no opts
 				opts.clue = 'order';
-				opts.modeorder = 1;  % fundamental mode
+				opts.order = 1;  % fundamental mode
 			end
 			chkarg(istypesizeof(opts, 'struct'), '"opts" should be structure.');
 
