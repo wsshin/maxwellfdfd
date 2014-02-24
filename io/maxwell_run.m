@@ -219,6 +219,10 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 		iarg = iarg - 1;  % arg = varargin{iarg};
 	end
 		
+	if ~is_solveropts || ~isfield(solveropts, 'showstruct')
+		solveropts.showstruct = true;
+	end
+	
 	if ~is_solveropts || ~isfield(solveropts, 'method')
 		solveropts.method = DEFAULT_METHOD;
 	end
@@ -280,12 +284,14 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 		build_system(solveropts.eqtype.ge, solveropts.pml, varargin{1:iarg}, pm);
 	
 	if inspect_only  % inspect objects and sources
-		figure;
-		set(gcf, 'units','normalized','position',[0.5 0 0.5 0.5]);			
-		withpml = true;
-		visobjsrc(grid3d, obj_array, src_array, withpml);
-		drawnow
-		pm.mark('domain visualization');
+		if solveropts.showstruct
+			figure;
+			set(gcf, 'units','normalized','position',[0.5 0 0.5 0.5]);			
+			withpml = true;
+			visobjsrc(grid3d, obj_array, src_array, withpml);
+			drawnow
+			pm.mark('domain visualization');
+		end
 		
 		% Visualize modes.
 		is_modalsrc = false;

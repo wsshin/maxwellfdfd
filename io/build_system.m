@@ -171,7 +171,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 			if istypeof(arg, 'real')
 				deg_pml = arg;
 			else
-				iarg = iarg - 1; % because withuniformgrid is optional argument
+				iarg = iarg - 1; % because deg_pml is optional argument
 			end
 	
 			% Set up the target reflection coefficient of the PML.
@@ -180,7 +180,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 			if istypeof(arg, 'real')
 				R_pml = arg;
 			else
-				iarg = iarg - 1; % because withuniformgrid is optional argument
+				iarg = iarg - 1; % because R_pml is optional argument
 			end
 			
 			% Set up a flag to generate a grid dynamically.
