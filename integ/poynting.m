@@ -62,12 +62,23 @@ pi = grid2d.l{Dir.h,GT.dual};
 qi = grid2d.l{Dir.v,GT.dual};
 [PI, QI] = ndgrid(pi, qi);
 
-ep = interp_Scalar2d(Ep2d, grid2d, PI, QI);
-eq = interp_Scalar2d(Eq2d, grid2d, PI, QI);
-hp = interp_Scalar2d(Hp2d, grid2d, PI, QI);
-hq = interp_Scalar2d(Hq2d, grid2d, PI, QI);
+assert(all(Ep2d.gt_array==Hq2d.gt_array) && all(Eq2d.gt_array==Hp2d.gt_array));
 
-array = real(ep .* conj(hq) - eq .* conj(hp)) / 2;
+[ep, l1] = Ep2d.data_expanded();
+hq = Hq2d.data_expanded();  % hq and ep have same location
+[eq, l2] = Eq2d.data_expanded();
+hp = Hp2d.data_expanded();  % hp and eq have same location
+
+sr1 = ep .* conj(hq);
+sr2 = eq .* conj(hp);
+
+[P1, Q1] = ndgrid(l1{:});
+[P2, Q2] = ndgrid(l2{:});
+
+sr1 = interpn(P1, Q1, sr1, PI, QI);
+sr2 = interpn(P2, Q2, sr2, PI, QI);
+
+array = real(sr1 - sr2) / 2;
 
 % Attach extra points.
 for d = Dir.elems
@@ -82,16 +93,6 @@ gt_array = [GT.dual, GT.dual];  % face centers
 % The attached values to array should be the same as the ones inside the array
 % if BC is not periodic.
 S_scalar2d = Scalar2d(array, grid2d, gt_array, osc, physQ, [physQ.symbol, '_', char(polarization)], intercept);
-
-
-function array = interp_Scalar2d(scalar2d, grid2d, PI, QI)
-chkarg(istypesizeof(PI, 'complex', grid2d.N), '"PI" should be %d-by-%d array with complex numbers.');
-chkarg(istypesizeof(QI, 'complex', grid2d.N), '"QI" should be %d-by-%d array with complex numbers.');
-
-l = grid2d.lall(Dir.elems + Dir.count*subsindex(scalar2d.gt_array));
-
-[P, Q] = ndgrid(l{:});
-array = interpn(P, Q, scalar2d.array, PI, QI);
 
 
 function array = attach_extra_S(array, d, grid2d)
