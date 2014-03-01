@@ -246,13 +246,6 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 			'solveropts.tol should be positive.');
 	end
 	
-	if ~is_solveropts || ~isfield(solveropts, 'withinterp')
-		solveropts.withinterp = true;
-	else
-		chkarg(istypesizeof(solveropts.withinterp, 'logical'), ...
-			'solveropts.withinterp should be logical.');
-	end
-	
 	if ~is_solveropts || ~isfield(solveropts, 'eqtype')
 		solveropts.eqtype = EquationType(FT.e, GT.prim);
 	else
@@ -265,6 +258,20 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	else
 		chkarg(istypesizeof(solveropts.pml, 'PML'), ...
 			'solveropts.pml should be instance of PML.');
+	end
+	
+	if ~is_solveropts || ~isfield(solveropts, 'returnAandb')
+		solveropts.returnAandb = false;
+	else
+		chkarg(istypesizeof(solveropts.returnAandb, 'logical'), ...
+			'solveropts.returnAandb should be logical.');
+	end
+	
+	if ~is_solveropts || ~isfield(solveropts, 'returnDiv')
+		solveropts.returnDiv = false;
+	else
+		chkarg(istypesizeof(solveropts.returnDiv, 'logical'), ...
+			'solveropts.returnDiv should be logical.');
 	end
 	
 	chkarg(iarg > 0, 'first argument is not correct.');
@@ -329,141 +336,149 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 		fprintf('%s finishes (inspection only).\n\n', mfilename);
 		E = {};
 		H = {};
-	elseif isequal(solveropts.method, 'inputfile')
-		if ~is_solveropts || ~isfield(solveropts, 'F0')
-			solveropts.F0 = 'zero';  % 'rand' is the other choice
-% 			solveropts.F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-		else
-			chkarg(isequal(solveropts.F0, 'zero') || isequal(solveropts.F0, 'rand') ...
-				|| istypesizeof(solveropts.F0, 'complexcell', [1 Axis.count], grid3d.N), ...
-				'solveropts.F0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
-				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
-		end
-		
-		% Define eps_node_array at vertices of the E-field edges.
-		if solveropts.eqtype.ge == GT.prim
-			eps_node_array = eps_node.data_expanded();  % (Nx+2) x (Ny+2) x (Nz+2)
-			eps_node_array = eps_node_array(1:end-1, 1:end-1, 1:end-1);  % (Nx+1) x (Ny+1) x (Nz+1)
-
-% 			eps_node_cell = eps_cell;
-% 			for w = Axis.elems
-% 				ind_g = {':',':',':'};
-% 				if grid3d.bc(w) == BC.p
-% 					ind_g{w} = grid3d.N(w);
-% 				else
-% 					ind_g{w} = 1;
-% 				end
-% 				eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
-% 			end
-% 			eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
-% 			eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
-% 			eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
-% 			
-% 			eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
-% 
-% 			eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
-% 						+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
-% 						+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
-% 						+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
-
-			eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
-						+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
-						+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
-						+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
-		else
-			eps_node_array = eps_node.data_original();  % Nx x Ny x Nz
-		end
-
-		write_input(solveropts.filenamebase, solveropts.eqtype, osc, grid3d, s_factor, ...
-			eps_node_array, eps, mu, J, M, solveropts.F0, solveropts.tol, solveropts.maxit);
-
-		pm.mark('input file creation');		
-		fprintf('%s finishes. (input file created)\n\n', mfilename);
-		E = {};
-		H = {};
-	else	
-		if isequal(solveropts.method, 'direct')
-			[E, H] = solve_eq_direct(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
-		elseif isequal(solveropts.method, 'iterative')
-			[E, H] = solve_eq_iterative(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
-		else  % for solvers using E-field based equation
-			%% Apply spatial inversion.
-% 			d_prim = grid3d.dl(:, GT.prim);
-% 			d_dual = grid3d.dl(:, GT.dual);
-% 			s_prim = s_factor(:, GT.prim);
-% 			s_dual = s_factor(:, GT.dual);
-			d_prim = flip_vec(grid3d.dl(:, GT.dual));  % GT.dual, not GT.prim
-			d_dual = flip_vec(grid3d.dl(:, GT.prim));  % GT.prim, not GT.dual
-			s_prim = flip_vec(s_factor(:, GT.dual));  % GT.dual, not GT.prim
-			s_dual = flip_vec(s_factor(:, GT.prim));  % GT.prim, not GT.dual
-			mu = flip_vec(mu);
-			eps = flip_vec(eps);
-			J = neg_vec(flip_vec(J));  % pseudovector
-
-			if isequal(solveropts.method, 'gpu')
-				ds_prim = mult_vec(d_prim, s_prim);
-				ds_dual = mult_vec(d_dual, s_dual);
-				figure;
-				F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-				[E, H] = fds(osc.in_omega0(), ...
-								ds_prim, ds_dual, ...
-								mu, eps, ...
-								F0, J, ...
-								solveropts.maxit, solveropts.tol, 'plot');
-				%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
-			elseif isequal(solveropts.method, 'aws')
-				ds_prim = mult_vec(d_prim, s_prim);
-				ds_dual = mult_vec(d_dual, s_dual);
-				F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-% 				F0 = {rand(grid3d.N), rand(grid3d.N), rand(grid3d.N)};
-% 				F0 = {rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N)};
-				callback = maxwell(osc.in_omega0(), ...
-								ds_prim, ds_dual, ...
-								mu, eps, ...
-								F0, J, ...
-								solveropts.maxit, solveropts.tol);
-				while ~callback(); end
-				[~, E, H] = callback();
+	else  % inspect_only == false
+		if isequal(solveropts.method, 'inputfile')
+			if ~is_solveropts || ~isfield(solveropts, 'F0')
+				solveropts.F0 = 'zero';  % 'rand' is the other choice
+% 				solveropts.F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+			else
+				chkarg(isequal(solveropts.F0, 'zero') || isequal(solveropts.F0, 'rand') ...
+					|| istypesizeof(solveropts.F0, 'complexcell', [1 Axis.count], grid3d.N), ...
+					'solveropts.F0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
+					Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 			end
-			
-			E = neg_vec(flip_vec(E));  % pseudovector
-			J = neg_vec(flip_vec(J));  % pseudovector
-			H = flip_vec(H);
-		end
 
-		pm.mark('solution calculation');
-		fprintf('unknowns: %s-field\n', char(solveropts.eqtype.f));
-		fprintf('%s finishes.\n\n', mfilename);
+			% Define eps_node_array at vertices of the E-field edges.
+			if solveropts.eqtype.ge == GT.prim
+				eps_node_array = eps_node.data_expanded();  % (Nx+2) x (Ny+2) x (Nz+2)
+				eps_node_array = eps_node_array(1:end-1, 1:end-1, 1:end-1);  % (Nx+1) x (Ny+1) x (Nz+1)
+
+% 				eps_node_cell = eps_cell;
+% 				for w = Axis.elems
+% 					ind_g = {':',':',':'};
+% 					if grid3d.bc(w) == BC.p
+% 						ind_g{w} = grid3d.N(w);
+% 					else
+% 						ind_g{w} = 1;
+% 					end
+% 					eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
+% 				end
+% 				eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
+% 				eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
+% 				eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
+% 				
+% 				eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
+% 	
+% 				eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
+% 							+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
+% 							+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
+% 							+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
+
+				eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
+							+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
+							+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
+							+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
+			else
+				eps_node_array = eps_node.data_original();  % Nx x Ny x Nz
+			end
+
+			write_input(solveropts.filenamebase, solveropts.eqtype, osc, grid3d, s_factor, ...
+				eps_node_array, eps, mu, J, M, solveropts.F0, solveropts.tol, solveropts.maxit);
+
+			pm.mark('input file creation');		
+			fprintf('%s finishes. (input file created)\n\n', mfilename);
+			E = {};
+			H = {};
+		else  % solveropts.method ~= 'inputfile'
+			if isequal(solveropts.method, 'direct')
+				[E, H] = solve_eq_direct(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
+			elseif isequal(solveropts.method, 'iterative')
+				[E, H] = solve_eq_iterative(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
+			else  % for solvers using E-field based equation
+				%% Apply spatial inversion.
+% 				d_prim = grid3d.dl(:, GT.prim);
+% 				d_dual = grid3d.dl(:, GT.dual);
+% 				s_prim = s_factor(:, GT.prim);
+% 				s_dual = s_factor(:, GT.dual);
+				d_prim = flip_vec(grid3d.dl(:, GT.dual));  % GT.dual, not GT.prim
+				d_dual = flip_vec(grid3d.dl(:, GT.prim));  % GT.prim, not GT.dual
+				s_prim = flip_vec(s_factor(:, GT.dual));  % GT.dual, not GT.prim
+				s_dual = flip_vec(s_factor(:, GT.prim));  % GT.prim, not GT.dual
+				mu = flip_vec(mu);
+				eps = flip_vec(eps);
+				J = neg_vec(flip_vec(J));  % pseudovector
+
+				if isequal(solveropts.method, 'gpu')
+					ds_prim = mult_vec(d_prim, s_prim);
+					ds_dual = mult_vec(d_dual, s_dual);
+					figure;
+					F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+					[E, H] = fds(osc.in_omega0(), ...
+									ds_prim, ds_dual, ...
+									mu, eps, ...
+									F0, J, ...
+									solveropts.maxit, solveropts.tol, 'plot');
+					%   norm(A2 * ((1./e) .* (A1 * y)) - omega^2 * m .* y - A2 * (b ./ (-i*omega*e))) / norm(b) % Error for H-field wave equation.
+				elseif isequal(solveropts.method, 'aws')
+					ds_prim = mult_vec(d_prim, s_prim);
+					ds_dual = mult_vec(d_dual, s_dual);
+					F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
+% 					F0 = {rand(grid3d.N), rand(grid3d.N), rand(grid3d.N)};
+% 					F0 = {rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N), rand(1)*ones(grid3d.N)};
+					callback = maxwell(osc.in_omega0(), ...
+									ds_prim, ds_dual, ...
+									mu, eps, ...
+									F0, J, ...
+									solveropts.maxit, solveropts.tol);
+					while ~callback(); end
+					[~, E, H] = callback();
+				end
+
+				E = neg_vec(flip_vec(E));  % pseudovector
+				J = neg_vec(flip_vec(J));  % pseudovector
+				H = flip_vec(H);
+			end
+
+			pm.mark('solution calculation');
+			fprintf('unknowns: %s-field\n', char(solveropts.eqtype.f));
+			fprintf('%s finishes.\n\n', mfilename);
+		end
 	end
 	
-	% Construct Scalar3d objects.
-	if solveropts.withinterp
-		E_cell = cell(1, Axis.count);
-		H_cell = cell(1, Axis.count);
-		J_cell = cell(1, Axis.count);
-		M_cell = cell(1, Axis.count);
-		for w = Axis.elems
-			gt = solveropts.eqtype.ge;  % grid type for E-field
-			gt_array = gt(ones(1, Axis.count));
-			gt_array(w) = alter(gt);
-			if ~isempty(E)
-				E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, FT.e, gt_array, osc);
-			end
-			J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, FT.e, gt_array, osc);
+	if solveropts.returnAandb
+		[A, b, g_from_f] = create_eq(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
+		extra.A = A;
+		extra.b = b;
+		extra.g_from_f = g_from_f;
+	end
 
-			gt = alter(solveropts.eqtype.ge);  % grid type for H-field
-			gt_array = gt(ones(1, Axis.count));
-			gt_array(w) = alter(gt);
-			if ~isempty(H)
-				H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, FT.h, gt_array, osc);
-			end
-			M_cell{w} = array2scalar(M{w}, PhysQ.M, grid3d, w, FT.h, gt_array, osc);
+	if solveropts.returnDiv
+		[Dive, Divm] = create_divs(solveropts.eqtype.ge, s_factor, grid3d);
+		extra.Dive = Dive;
+		extra.Divm = Divm;
+	end
+
+	% Construct Scalar3d objects.
+	E_cell = cell(1, Axis.count);
+	H_cell = cell(1, Axis.count);
+	J_cell = cell(1, Axis.count);
+	M_cell = cell(1, Axis.count);
+	for w = Axis.elems
+		gt = solveropts.eqtype.ge;  % grid type for E-field
+		gt_array = gt(ones(1, Axis.count));
+		gt_array(w) = alter(gt);
+		if ~isempty(E)
+			E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, FT.e, gt_array, osc);
 		end
-	else  % solveropts.withinterp == false
-		E_cell = E;
-		H_cell = H;
-		J_cell = J;
-		M_cell = M;
+		J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, FT.e, gt_array, osc);
+
+		gt = alter(solveropts.eqtype.ge);  % grid type for H-field
+		gt_array = gt(ones(1, Axis.count));
+		gt_array(w) = alter(gt);
+		if ~isempty(H)
+			H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, FT.h, gt_array, osc);
+		end
+		M_cell{w} = array2scalar(M{w}, PhysQ.M, grid3d, w, FT.h, gt_array, osc);
 	end
 	
 	extra.grid3d = grid3d;
