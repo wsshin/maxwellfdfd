@@ -14,6 +14,8 @@ classdef PhysQ < Enumerated
 		V('electric voltage', 'V', 'V')
 		S('Poynting vector', 'S', 'W/m^2')
 		P('power', 'P', 'W')
+		u('power desnsity', 'u', 'W/m^3')
+		% Whenever new quantity is added, add it to elems below.
 	end
 	
 	properties (SetAccess = immutable)
@@ -33,7 +35,7 @@ classdef PhysQ < Enumerated
 	
 	methods (Static)
 		function elems = elems(ind)
-			elems = [PhysQ.arbitrary, PhysQ.L, PhysQ.omega, PhysQ.eps, PhysQ.mu, PhysQ.E, PhysQ.H, PhysQ.J, PhysQ.M, PhysQ.I, PhysQ.V, PhysQ.S, PhysQ.P];
+			elems = [PhysQ.arbitrary, PhysQ.L, PhysQ.omega, PhysQ.eps, PhysQ.mu, PhysQ.E, PhysQ.H, PhysQ.J, PhysQ.M, PhysQ.I, PhysQ.V, PhysQ.S, PhysQ.P PhysQ.u];
 			if nargin > 0  % ind
 				elems = elems(ind);
 			end

@@ -20,6 +20,7 @@ classdef PhysUnit
 			this.va(PhysQ.V) = this.va(PhysQ.E) * this.va(PhysQ.L);  % voltage in Volts (L0-dependent)
 			this.va(PhysQ.S) = this.va(PhysQ.E) * this.va(PhysQ.H);  % Poynting vector in Watt/m^2
 			this.va(PhysQ.P) = this.va(PhysQ.S) * this.va(PhysQ.L)^2;  % power in Watt (L0-dependent)
+			this.va(PhysQ.u) = this.va(PhysQ.S) / this.va(PhysQ.L);  % power density in Watt/m^3 (L0-dependent)
 		end
 
 		function v0 = value(this, physQcell)
