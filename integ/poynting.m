@@ -29,6 +29,9 @@ if istypesizeof(varargin{iarg+1}, 'Scalar3d')
 	chkarg(isequal(Eq3d.grid3d, grid3d) && isequal(Hp3d.grid3d, grid3d) && isequal(Hq3d.grid3d, grid3d), ... 
 		'instances of Scalar3d do not have same grid3d.');
 	
+	% This makes the Poynting vector calculation independnet of whether the
+	% primary grid is the E-field grid or H-field grid, when normal_axis is
+	% normal to p and q.
 	Ep2d = slice_scalar3d(Ep3d, normal_axis, intercept);
 	Eq2d = slice_scalar3d(Eq3d, normal_axis, intercept);
 	Hp2d = slice_scalar3d(Hp3d, normal_axis, intercept);
@@ -57,7 +60,7 @@ else
 		'instances of Scalar2d do not have same grid2d.');
 end
 
-% Interpolate fields at face centers of unit cells.
+% Interpolate fields at face centers of grid cells.
 pi = grid2d.l{Dir.h,GT.dual};
 qi = grid2d.l{Dir.v,GT.dual};
 [PI, QI] = ndgrid(pi, qi);
@@ -92,7 +95,7 @@ gt_array = [GT.dual, GT.dual];  % face centers
 % Resume here.
 % The attached values to array should be the same as the ones inside the array
 % if BC is not periodic.
-S_scalar2d = Scalar2d(array, grid2d, gt_array, osc, physQ, [physQ.symbol, '_', char(polarization)], intercept);
+S_scalar2d = Scalar2d(array, grid2d, gt_array, osc, physQ, ['<', physQ.symbol, '_', char(polarization), '>'], intercept);
 
 
 function array = attach_extra_S(array, d, grid2d)
