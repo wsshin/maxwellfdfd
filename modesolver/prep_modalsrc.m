@@ -67,7 +67,7 @@ end
 % 
 % 
 % % Construct the waveguide mode matrix including lossy components.
-% [A, En_Ht, gEh_HvEn, gEv_HhEn, Hn_Et] = wgmode_matrix(ge, pml, osc.in_omega0(), ...
+% [A, En_Htr, gEh_HvEn, gEv_HhEn, Hn_Etr] = wgmode_matrix(ge, pml, osc.in_omega0(), ...
 % 	eps_cell, mu_cell, ...
 % 	s_factor_cell, grid3d, ...
 % 	modalsrc.normal_axis, modalsrc.intercept);
@@ -93,11 +93,11 @@ end
 % 	num2str(abs((l - l_prev) / l)));
 % end
 % 
-% Ht = x;
+% Htr = x;
 % beta = sqrt(-l);  % this guarantees real(beta) >= 0; note that l = gamma^2 = -beta^2
 % neff = beta*osc.in_L0()/2/pi;
 
-[A, En_Ht, gEh_HvEn, gEv_HhEn, Hn_Et] = wgmode_matrix(ge, pml, osc.in_omega0(), ...
+[A, En_Htr, gEh_HvEn, gEv_HhEn, Hn_Etr] = wgmode_matrix(ge, pml, osc.in_omega0(), ...
 	eps_cell, mu_cell, ...
 	s_factor_cell, grid3d, ...
 	modalsrc.normal_axis, modalsrc.intercept);
@@ -136,12 +136,12 @@ end
 opts.tol = eps;  % MATLAB default value; just to make sure opts exists
 
 use_eigs = false;
-if ~isfield(modalsrc.opts, 'H2d')  || use_eigs
-	% eigs() generates an error if the shifte matrix is sigular, i.e., if the shift
+if ~isfield(modalsrc.opts, 'H2d')  || use_eigs  % no guess on field distribution
+	% eigs() generates an error if the shift matrix is sigular, i.e., if the shift
 	% value is actually an eigenvalue of A.  To prevent such an error, perturb the
 	% shift value by adding eps.
 	[v, l] = eigs(A, 1, -beta_guess^2 + eps, opts);  % gamma^2 = (i beta)^2
-else
+else  % there is guess on field distribution
 	% Perform the Rayleight quotient iteration on A with x as an initial guess for
 	% the deiserd eigenvector.  (This process can be justified only for sufficiently
 	% small loss.)
@@ -161,18 +161,21 @@ else
 end
 
 beta = sqrt(-l);
-Ht = v;
+Htr = v;
 neff = beta*osc.in_L0()/2/pi;
 
-Ht = reshape(Ht, Dir.count, []).';
+Htr = reshape(Htr, Dir.count, []).';
 [h, v, n] = cycle(modalsrc.normal_axis);
-Hh = Ht(:, Dir.h);
-Hv = Ht(:, Dir.v);
+Hh = Htr(:, Dir.h);
+Hv = Htr(:, Dir.v);
 
-En = En_Ht * [Hh; Hv];
+%% En from Htr
+En = En_Htr * [Hh; Hv];
+
+%% Etr from Htr and En
 Eh = gEh_HvEn * [Hv; En] ./ (1i*beta);  % gamma = 1i * beta
 Ev = gEv_HhEn * [Hh; En] ./ (1i*beta);  % gamma = 1i * beta
-Hn = Hn_Et * [Eh; Ev];
+Hn = Hn_Etr * [Eh; Ev];
 
 Nh = grid3d.N(h);
 Nv = grid3d.N(v);

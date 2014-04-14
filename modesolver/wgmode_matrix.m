@@ -1,4 +1,4 @@
-function [A, En_Ht, gEh_HvEn, gEv_HhEn, Hn_Et] = wgmode_matrix(ge, pml, omega, eps_cell, mu_cell, s_factor_cell, grid3d, normal_axis, intercept)
+function [A, En_Htr, gEh_HvEn, gEv_HhEn, Hn_Etr] = wgmode_matrix(ge, pml, omega, eps_cell, mu_cell, s_factor_cell, grid3d, normal_axis, intercept)
 % The operator A acts on H fields, not E fields.  Therefore, A x = lambda x
 % solves for H fields of an eigenmode of the system. For the eigenvalue
 % equation, see Sec II of G. Veronis and S. Fan, Journal of Lightwave
@@ -170,19 +170,19 @@ A = -omega^2 * EPS_vh * MU_hv ...
 % ex_array = (sqrt(-1)*omega*(mu_yy(:).*hy.array(:)) - DxEz*ez.array(:))./gamma;
 % ey_array = (-sqrt(-1)*omega*(mu_xx(:).*hx.array(:)) - DyEz*ez.array(:))./gamma;
 
-En_Ht = (1/(omega*1i)) * INV_EPS_n * [-DvHh DhHv]; En_Ht(ind_MEn,:) = 0;  % En from Ht
-Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-DvEh DhEv]; Hn_Et(ind_MHn,:) = 0;  % Hn from Et
+En_Htr = (1/(omega*1i)) * INV_EPS_n * [-DvHh DhHv]; En_Htr(ind_MEn,:) = 0;  % En from Htr
+Hn_Etr = (-1/(omega*1i)) * INV_MU_n * [-DvEh DhEv]; Hn_Etr(ind_MHn,:) = 0;  % Hn from Etr
 gEh_HvEn = [1i*omega*MU_v -DhEn]; gEh_HvEn(ind_MEh,:) = 0;  % gamma*Eh from Hv, En
 gEv_HhEn = [-1i*omega*MU_h -DvEn]; gEv_HhEn(ind_MEv,:) = 0;  % gamma*Ev from Hh, En
-% En_Ht = (1/(omega*1i)) * INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}];  % En from Ht
-% Hn_Et = (-1/(omega*1i)) * INV_MU_n * [-Da{Dir.v}, Da{Dir.h}];  % Hn from Et
+% En_Htr = (1/(omega*1i)) * INV_EPS_n * [-Ds{Dir.v}, Ds{Dir.h}];  % En from Htr
+% Hn_Etr = (-1/(omega*1i)) * INV_MU_n * [-Da{Dir.v}, Da{Dir.h}];  % Hn from Etr
 % gEh_HvEn = [1i*omega*MU_v -Da{Dir.h}];  % gamma*Eh from Hv, En
 % gEv_HhEn = [-1i*omega*MU_h -Da{Dir.v}];  % gamma*Ev from Hh, En
 
 
 % Z = sparse(N,N);
 % I = speye(N);
-% gEt_Ht = [gEh_HvEn Z Z; Z Z gEv_HhEn] * [Z I; En_Ht; I Z; En_Ht];
+% gEtr_Htr = [gEh_HvEn Z Z; Z Z gEv_HhEn] * [Z I; En_Htr; I Z; En_Htr];
 
 
 
@@ -205,7 +205,7 @@ A(:,ind_pec) = 0;
 A(ind_pec,:) = 0;
 A = spdiags(diagvec, 0, A);
 
-% % To force the H field components normal to the Et = 0 boundary to be 0, mask
+% % To force the H field components normal to the Etr = 0 boundary to be 0, mask
 % % the matrix appropriately.
 % mask_hx = ones(Nh,Nv);
 % mask_hy = ones(Nh,Nv);
