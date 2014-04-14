@@ -36,6 +36,15 @@
 %
 % <<../img/cylinder2d_field.png>>
 
+%% Plane Wave Incident on a Silver Slab with a Slit
+% * Structure
+%
+% <<../img/slit2d_struct.png>>
+%
+% * Field
+%
+% <<../img/slit2d_field.png>>
+
 %% TF/SF Simulation of a Plane Wave Incident on a Gold Bow-tie Antenna
 % * Structure
 %
@@ -53,3 +62,21 @@
 % * Field
 %
 % <<../img/pc2d_field.png>>
+
+%% 90° Bend in a Photonic Crystal Waveguide
+% * Structure
+%
+% <<../img/pcbend2d_struct.png>>
+%
+% * Field
+%
+% <<../img/pcbend2d_field.png>>
+
+%% Double Bend in a Photonic Crystal Waveguide
+% * Structure
+%
+% <<../img/pcdoublebend2d_struct.png>>
+%
+% * Field
+%
+% <<../img/pcdoublebend2d_field.png>>

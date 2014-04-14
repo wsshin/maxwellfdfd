@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>3D Example Gallery</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-15"><meta name="DC.source" content="gallery3d.m"><style type="text/css">
+      --><title>3D Example Gallery</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-04-13"><meta name="DC.source" content="gallery3d.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -23,7 +23,7 @@ a:visited { color:#004aa0; text-decoration:none; }
 
 p { padding:0px; margin:0px 0px 20px; }
 img { padding:0px; margin:0px 0px 20px; border:none; }
-p img, pre img, tt img, li img { margin-bottom:0px; } 
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
 
 ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
 ul li { padding:0px; margin:0px 0px 7px 0px; }
@@ -38,11 +38,12 @@ ol li ul li { list-style:square; }
 
 .content { font-size:1.2em; line-height:140%; padding: 20px; }
 
-pre, tt, code { font-size:12px; }
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
 pre { margin:0px 0px 20px; }
-pre.error { color:red; }
 pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
 pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
 
 @media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
 
@@ -68,7 +69,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
   </style></head><body><div class="content"><h1>3D Example Gallery</h1><!--introduction--><p>
 <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
 </script>
-</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">90&deg; Bend in a Plasmonic Coaxial Waveguide</a></li></ul></div><h2>90&deg; Bend in a Plasmonic Coaxial Waveguide<a name="1"></a></h2><div><ul><li>Structure</li></ul></div><p><img vspace="5" hspace="5" src="../img/coax_bend_struct.png" alt=""> </p><div><ul><li>Field</li></ul></div><p><img vspace="5" hspace="5" src="../img/coax_bend_field.png" alt=""> </p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Plasmonic Slot Waveguide</a></li><li><a href="#2">90&deg; Bend in a Plasmonic Coaxial Waveguide</a></li></ul></div><h2>Plasmonic Slot Waveguide<a name="1"></a></h2><div><ul><li>Structure</li></ul></div><p><img vspace="5" hspace="5" src="../img/slot3d_struct.png" alt=""> </p><div><ul><li>Field</li></ul></div><p><img vspace="5" hspace="5" src="../img/slot3d_field.png" alt=""> </p><h2>90&deg; Bend in a Plasmonic Coaxial Waveguide<a name="2"></a></h2><div><ul><li>Structure</li></ul></div><p><img vspace="5" hspace="5" src="../img/coax_bend_struct.png" alt=""> </p><div><ul><li>Field</li></ul></div><p><img vspace="5" hspace="5" src="../img/coax_bend_field.png" alt=""> </p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% 3D Example Gallery
 %
@@ -76,6 +77,15 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
 % </script>
 % </html>
+
+%% Plasmonic Slot Waveguide
+% * Structure
+%
+% <<../img/slot3d_struct.png>>
+%
+% * Field
+%
+% <<../img/slot3d_field.png>>
 
 %% 90° Bend in a Plasmonic Coaxial Waveguide
 % * Structure

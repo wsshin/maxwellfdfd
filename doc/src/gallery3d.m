@@ -5,6 +5,15 @@
 % </script>
 % </html>
 
+%% Plasmonic Slot Waveguide
+% * Structure
+%
+% <<../img/slot3d_struct.png>>
+%
+% * Field
+%
+% <<../img/slot3d_field.png>>
+
 %% 90° Bend in a Plasmonic Coaxial Waveguide
 % * Structure
 %
