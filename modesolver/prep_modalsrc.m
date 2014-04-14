@@ -175,6 +175,8 @@ En = En_Htr * [Hh; Hv];
 %% Etr from Htr and En
 Eh = gEh_HvEn * [Hv; En] ./ (1i*beta);  % gamma = 1i * beta
 Ev = gEv_HhEn * [Hh; En] ./ (1i*beta);  % gamma = 1i * beta
+
+%% Hn from Etr
 Hn = Hn_Etr * [Eh; Ev];
 
 Nh = grid3d.N(h);
