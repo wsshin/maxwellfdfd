@@ -1,6 +1,6 @@
 MaxwellFDFD installation instruction
 ====================================
-SYSTEM REQUIRMENTS
+System requirments
 ------------------
 - Operating System
 
