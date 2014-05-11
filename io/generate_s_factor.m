@@ -27,45 +27,34 @@ s_factor_cell = cell(Axis.count, GT.count);
 for w = Axis.elems
 	Nw = grid3d.N(w);
 
-	lpml_n = grid3d.lpml(w,Sign.n); lpml_p = grid3d.lpml(w,Sign.p);  % locations of PML interfaces
-	Lpml_n = grid3d.Lpml(w,Sign.n); Lpml_p = grid3d.Lpml(w,Sign.p);  % thicknesses of PML
-	m_n = m(w,Sign.n); m_p = m(w,Sign.p);
-	lnR_n = lnR(w,Sign.n); lnR_p = lnR(w,Sign.p);
+	lpml = grid3d.lpml(w,:);  % locations of PML interfaces
+	Lpml = grid3d.Lpml(w,:);  % thicknesses of PML
 
 	for g = GT.elems
-		s_factor = ones(1, Nw);
 		l = grid3d.l{w, g};  % length(l) == Nw, rather than Nw+1.
-		for i = 1:Nw
-			li = l(i);
-			if li < lpml_n
-				s_factor(i) = calc_s_factor(lpml_n - li, Lpml_n, omega, m_n, lnR_n);
-% 				if w == Axis.y
-% 					s_factor(i) = -s_factor(i);
-% 				end
-			elseif li > lpml_p
-				s_factor(i) = calc_s_factor(li - lpml_p, Lpml_p, omega, m_p, lnR_p);
-% 				if w == Axis.y
-% 					s_factor(i) = -s_factor(i);
-% 				end
-			end
+		ind_pml = {l < lpml(Sign.n), l > lpml(Sign.p)};  % indices of locatiotns indise PML
+
+		s_factor = ones(1, Nw);
+		for s = Sign.elems
+			s_factor(ind_pml{s}) = calc_s_factor(omega, abs(lpml(s) - l(ind_pml{s})), Lpml(s), m(w,s), lnR(w,s));
 		end
-		
+				
 		s_factor_cell{w,g} = s_factor;
 	end	
 end
 
 
-function s_factor = calc_s_factor(depth, Lpml, omega, m, lnR)
-assert(Lpml > 0);
+function s_factor = calc_s_factor(omega, depth, Lpml, m, lnR)
+% assert(Lpml > 0);
 
 sigma_max = -(m+1) * lnR/(2*Lpml);  % -(m+1) ln(R)/(2 eta Lpml), where eta = 1 in the unit of eta_0
-sigma = sigma_max * (depth/Lpml)^m;
+sigma = sigma_max * (depth/Lpml).^m;
 
 kappa_max = 1;
-kappa = 1 + (kappa_max-1) * (depth/Lpml)^m;
+kappa = 1 + (kappa_max-1) * (depth/Lpml).^m;
 
 ma = m;
 amax = 0;
-a = amax * (1 - depth/Lpml)^ma;
+a = amax * (1 - depth/Lpml).^ma;
 
-s_factor = kappa + sigma/(a + 1i*omega);  % s = kappa + sigma/(a + i omega eps), where eps = 1 in the unit of eps_0
+s_factor = kappa + sigma ./ (a + 1i*omega);  % s = kappa + sigma/(a + i omega eps), where eps = 1 in the unit of eps_0
