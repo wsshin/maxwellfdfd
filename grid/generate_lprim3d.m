@@ -33,9 +33,11 @@ if withuniform
 		lprim = linspace(domain.bound(w,Sign.n), domain.bound(w,Sign.p), Nw+1);
 		assert(length(lprim) >= 2);
 		dl_generated = lprim(2) - lprim(1);
-		if dl_generated ~= dl_intended
-			warning('Maxwell:gridGen', 'grid vertex separation %e in generated uniform grid differs from intended separation %e by %e percent.', ...
-				dl_generated, dl_intended, (dl_generated-dl_intended)/dl_intended * 100);
+		error_dl = (dl_generated - dl_intended) / dl_intended;
+		if abs(error_dl) > 1e-9
+			warning('Maxwell:gridGen', ['grid vertex separation %s in generated uniform grid', ...
+				'significantly differs from intended separation %s: error is %s percent.'], ...
+				num2str(dl_generated), num2str(dl_intended), num2str(error_dl * 100));
 		end
 		Npml(w,Sign.n) = length(find(lprim < lprim(1) + Lpml(w,Sign.n)));
 		Npml(w,Sign.p) = length(find(lprim > lprim(end) - Lpml(w,Sign.p)));
