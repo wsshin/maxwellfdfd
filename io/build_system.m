@@ -321,6 +321,9 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	if ~isepsgiven
 		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % (Nx+2) x (Ny+2) x (Nz+2)
 	end
+	eps_node_array = expand_node_array(eps_node_array, grid3d);
+	mu_node_array = expand_node_array(mu_node_array, grid3d);
+	
 	eps_cell = mean_material_node(ge, eps_node_array(1:end-1,1:end-1,1:end-1));
 	mu_cell = mean_material_node(alter(ge), mu_node_array(1:end-1,1:end-1,1:end-1));
 
