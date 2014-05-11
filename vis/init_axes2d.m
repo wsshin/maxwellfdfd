@@ -10,7 +10,7 @@ hold(axes_handle, 'on');
 if withinterp
 	lplot = grid2d.lplot(GT.prim, withinterp, withpml);
 else
-	lplot = grid2d.lpixelbound(GT.prim, withpml);
+	lplot = grid2d.lvoxelbound(GT.prim, withpml);
 end
 
 if ~isswapped

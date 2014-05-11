@@ -62,9 +62,9 @@ classdef Scalar3d
 		
 		function l_cell = lvoxelbound(this, withpml)
 			% Return the locations of boundaries of voxels drawn.  For data at
-			% primary grid points, the pixel centers are in the simulation
+			% primary grid points, the voxel centers are in the simulation
 			% domain including the boundary.  For data at dual grid points, the
-			% pixel centers are in the simulation domain excluding the boundary.
+			% voxel centers are in the simulation domain excluding the boundary.
 			l_cell = this.grid3d.lvoxelbound(this.gt_array, withpml);
 		end
 		

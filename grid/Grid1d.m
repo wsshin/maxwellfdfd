@@ -139,17 +139,17 @@ classdef Grid1d < handle
 			end
 		end
 		
-		function lpixelbound = lpixelbound(this, g, withpml)
-			% Return the locations of boundaries of pixels drawn.  For data at
-			% primary grid points, the pixel centers are in the simulation
+		function lvoxelbound = lvoxelbound(this, g, withpml)
+			% Return the locations of boundaries of voxels drawn.  For data at
+			% primary grid points, the voxel centers are in the simulation
 			% domain including the boundary.  For data at dual grid points, the
-			% pixel centers are in the simulation domain excluding the boundary.
+			% voxel centers are in the simulation domain excluding the boundary.
 			chkarg(istypesizeof(g, 'GT') , '"g" should be instance of GT');
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 
-			lpixelbound = this.lall{alter(g)};
+			lvoxelbound = this.lall{alter(g)};
 			if ~withpml
-				lpixelbound = lpixelbound(1+this.Npml(Sign.n):end-this.Npml(Sign.p));
+				lvoxelbound = lvoxelbound(1+this.Npml(Sign.n):end-this.Npml(Sign.p));
 			end
 			
 		end

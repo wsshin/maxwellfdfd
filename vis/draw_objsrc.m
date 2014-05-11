@@ -9,7 +9,7 @@ chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 if withinterp
 	lplot = grid3d.lplot(GT.prim, withinterp, withpml);
 else
-	lplot = grid3d.lpixelbound(GT.prim, withpml);
+	lplot = grid3d.lvoxelbound(GT.prim, withpml);
 end
 
 for w = Axis.elems

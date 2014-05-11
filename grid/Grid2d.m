@@ -191,16 +191,16 @@ classdef Grid2d < handle
 			end
 		end
 		
-		function lpixelbound_cell = lpixelbound(this, g, withpml)
+		function lvoxelbound_cell = lvoxelbound(this, g, withpml)
 			chkarg(istypesizeof(g, 'GT') || istypesizeof(g, 'GT', [1 Dir.count]), '"g" should be instance of GT');
 			if length(g) == 1
 				g = g(ones(1, Dir.count));
 			end
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 
-			lpixelbound_cell = cell(1, Dir.count);
+			lvoxelbound_cell = cell(1, Dir.count);
 			for d = Dir.elems
-				lpixelbound_cell{d} = this.comp(d).lpixelbound(g(d), withpml);
+				lvoxelbound_cell{d} = this.comp(d).lvoxelbound(g(d), withpml);
 			end
 		end
 	end

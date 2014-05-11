@@ -215,16 +215,16 @@ classdef Grid3d < handle
 			end
 		end
 		
-		function lpixelbound_cell = lpixelbound(this, g, withpml)
+		function lvoxelbound_cell = lvoxelbound(this, g, withpml)
 			chkarg(istypesizeof(g, 'GT') || istypesizeof(g, 'GT', [1 Axis.count]), '"g" should be instance of GT');
 			if length(g) == 1
 				g = g(ones(1, Axis.count));
 			end
 			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
 
-			lpixelbound_cell = cell(1, Axis.count);
+			lvoxelbound_cell = cell(1, Axis.count);
 			for w = Axis.elems
-				lpixelbound_cell{w} = this.comp(w).lpixelbound(g(w), withpml);
+				lvoxelbound_cell{w} = this.comp(w).lvoxelbound(g(w), withpml);
 			end
 		end
 	end

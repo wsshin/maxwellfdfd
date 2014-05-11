@@ -320,7 +320,7 @@ classdef Painter2d < handle
 			if this.withinterp
 				l_bound = this.scalar2d.lplot(this.withinterp, this.withpml);
 			else
-				l_bound = this.scalar2d.lpixelbound(this.withpml);
+				l_bound = this.scalar2d.lvoxelbound(this.withpml);
 			end
 
 			if this.isswapped

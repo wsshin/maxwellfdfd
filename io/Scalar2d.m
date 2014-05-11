@@ -64,12 +64,12 @@ classdef Scalar2d
 			l_cell = this.grid2d.lplot(this.gt_array, withinterp, withpml);
 		end
 		
-		function l_cell = lpixelbound(this, withpml)
-			% Return the locations of boundaries of pixels drawn.  For data at
-			% primary grid points, the pixel centers are in the simulation
+		function l_cell = lvoxelbound(this, withpml)
+			% Return the locations of boundaries of voxels drawn.  For data at
+			% primary grid points, the voxel centers are in the simulation
 			% domain including the boundary.  For data at dual grid points, the
-			% pixel centers are in the simulation domain excluding the boundary.
-			l_cell = this.grid2d.lpixelbound(this.gt_array, withpml);
+			% voxel centers are in the simulation domain excluding the boundary.
+			l_cell = this.grid2d.lvoxelbound(this.gt_array, withpml);
 		end
 		
 		function [array, l_cell] = data_expanded(this)
@@ -114,7 +114,7 @@ classdef Scalar2d
 				if withinterp
 					l = this.lplot(withinterp, withpml);
 				else
-					l = this.lpixelbound(withpml);
+					l = this.lvoxelbound(withpml);
 				end
 				[X, Y] = meshgrid(l{:});
 			end
