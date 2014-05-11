@@ -159,7 +159,7 @@ classdef TFSFPlaneSrc < Source
 				end
 				
 				[X, Y, Z] = ndgrid(l{Axis.x}(ind{Axis.x}), l{Axis.y}(ind{Axis.y}), l{Axis.z}(ind{Axis.z}));
-				F_cell{w}(ind{:}) = (this.F0 * this.Fhat(w)) * exp(1i * (k(Axis.x)*X + k(Axis.y)*Y + k(Axis.z)*Z));
+				F_cell{w}(ind{:}) = (this.F0 * this.Fhat(w)) * exp(-1i * (k(Axis.x)*X + k(Axis.y)*Y + k(Axis.z)*Z));
 			end
 		end
 		
