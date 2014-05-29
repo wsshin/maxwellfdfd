@@ -319,10 +319,10 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 
 	% Construct material parameters.
 	if ~isepsgiven
-		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % (Nx+2) x (Ny+2) x (Nz+2)
+		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % Nx x Ny x Nz
 	end
-	eps_node_array = expand_node_array(eps_node_array, grid3d);
-	mu_node_array = expand_node_array(mu_node_array, grid3d);
+	eps_node_array = expand_node_array(eps_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+	mu_node_array = expand_node_array(mu_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
 	
 	eps_cell = mean_material_node(ge, eps_node_array(1:end-1,1:end-1,1:end-1));
 	mu_cell = mean_material_node(alter(ge), mu_node_array(1:end-1,1:end-1,1:end-1));
@@ -386,7 +386,11 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		
 		% Add sobj_array to the already-generated eps and mu.
 		[eps_node_array, mu_node_array] = assign_material_node(grid3d, sobj_array, ...
-			eps_node_array(2:end-1,2:end-1,2:end-1), mu_node_array(2:end-1,2:end-1,2:end-1));  % (Nx+2) x (Ny+2) x (Nz+2)
+			eps_node_array(2:end-1,2:end-1,2:end-1), mu_node_array(2:end-1,2:end-1,2:end-1));  % Nx x Ny x Nz
+
+		eps_node_array = expand_node_array(eps_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+		mu_node_array = expand_node_array(mu_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+
 		eps_cell = mean_material_node(ge, eps_node_array(1:end-1,1:end-1,1:end-1));  % Nx x Ny x Nz
 		mu_cell = mean_material_node(alter(ge), mu_node_array(1:end-1,1:end-1,1:end-1));  % Nx x Ny x Nz
 
