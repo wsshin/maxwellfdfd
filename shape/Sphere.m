@@ -5,8 +5,8 @@
 % |Sphere| represents the shape of a sphere.
 
 %%% Construction
-%  shape = Ellipsoid(center, radius)
-%  shape = Ellipsoid(center, radius, dl_max)
+%  shape = Sphere(center, radius)
+%  shape = Sphere(center, radius, dl_max)
 
 % *Input Arguments*
 %
@@ -18,7 +18,7 @@
 
 %%% Example
 %   % Create an instance of Sphere.
-%   shape = Ellipsoid(Axis.z, [0 0 0], 100);
+%   shape = Sphere([0 0 0], 100);
 %
 %   % Use the constructed shape in maxwell_run().
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});

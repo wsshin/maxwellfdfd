@@ -66,7 +66,7 @@ classdef Ellipsoid < Shape
 				super_args = {lprim, @lsf, dl_max};
 			end
 			
-			this = this@Shape(super_args);
+			this = this@Shape(super_args{:});
 		end
 	end	
 end

@@ -143,8 +143,8 @@ if ~isfield(modalsrc.opts, 'H2d')  || use_eigs  % no guess on field distribution
 	[v, l] = eigs(A, 1, -beta_guess^2 + eps, opts);  % gamma^2 = (i beta)^2
 else  % there is guess on field distribution
 	% Perform the Rayleight quotient iteration on A with x as an initial guess for
-	% the deiserd eigenvector.  (This process can be justified only for sufficiently
-	% small loss.)
+	% the desired eigenvector.  (This process can be justified only for sufficiently
+	% small loss, because beta_guess is for the lossless system.)
 	l_prev = -beta_guess^2;
 	l = v' * A * v;
 	i = 0;

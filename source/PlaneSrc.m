@@ -62,7 +62,7 @@ classdef PlaneSrc < Source & WithBloch
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
 		intercept  % intercept between plane and normal axis
 		phi  % angle of polarization with respect to first Cartesian direction in this plane
-		kBloch  % Bloch k-vector [kx, ky, kz]
+		kBloch  % Bloch k-vector [kx, ky, kz]; for PhC mode solver, need to change the code to assign out-of-plane k component (but mode solver does not need source, so should be set directly to Grid)
 		K  % surface current density
 	end
 	
