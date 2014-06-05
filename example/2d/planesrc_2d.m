@@ -20,7 +20,7 @@ wvlen = 20;
 
 % % (incidence in y-direction)
 % polarization = Axis.z;
-% prop = Axis.y
+% prop = Axis.y;
 % angle = 0;
 % [E, H, obj_array, src_array, J] = maxwell_run(...
 % 	'OSC', 1e-9, wvlen, ...
@@ -45,6 +45,7 @@ figure
 clear opts;
 opts.withobjsrc = true;
 opts.withinterp = true;
+opts.withpml = true;
 vis2d(E{polarization}, Axis.z, 0, obj_array, src_array, opts)
 
 %% Calculate the power emanating from the source and test the performance of PML.
