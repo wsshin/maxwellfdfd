@@ -117,32 +117,70 @@ classdef Scalar3d
 			end
 		end
 		
-		function val = value(this, point)
-			chkarg(istypesizeof(point, 'real', [0, Axis.count]), ...
-				'"point" should be 2D array with %d columns.', Axis.count);
-			chkarg(this.grid3d.contains(point), '"point" should be inside grid.');
+		function [val, loc] = value(this, x, y, z)
+			loc = {x, y, z};
+			lavail = this.grid3d.l(Axis.elems + Axis.count*subsindex(this.gt_array));  % available locations
+			num_len1 = 0;
+			for w = Axis.elems
+				coord_w = loc{w};
+				chkarg(isempty(coord_w) || isvector(coord_w) && istypeof(coord_w, 'real'), ...
+				'"%s" should be empty or real vector.', char(w));
+				if isempty(coord_w)
+					coord_w = lavail{w};
+				else
+					chkarg(this.grid3d.comp(w).contains(coord_w), '"%s" should be inside grid.', char(w));
+					coord_w = sort(coord_w);
+				end
+				loc{w} = coord_w;
+				if length(coord_w) == 1
+					num_len1 = num_len1 + 1;
+				end
+			end
+			chkarg(num_len1 >= 2, 'At least two of "x", "y", "z" should be length-1.');  % only points along Cartesian direction are allowed
 			
 			lall = this.grid3d.lall(Axis.elems + Axis.count*subsindex(this.gt_array));
 			ind = cell(1, Axis.count);
+			
 			for w = Axis.elems
-				indw = ismembc2(point(w), lall{w});
-				if indw == 0
-					indw = find(lall{w} < point(w), 1, 'last');
-					ind{w} = [indw, indw+1];
-				elseif indw == 1
-					ind{w} = [indw, indw+1];
-				else  % indw == end
-					ind{w} = [indw-1, indw];
+				loc_min = loc{w}(1);
+				indw_min = ismembc2(loc_min, lall{w});
+				if indw_min == 0
+					indw_min = find(lall{w} < loc_min, 1, 'last');
 				end
+				
+				loc_max = loc{w}(end);
+				indw_max = ismembc2(loc_max, lall{w});
+				if indw_max == 0
+					indw_max = find(lall{w} > loc_max, 1, 'first');
+				end
+				
+				ind{w} = indw_min:indw_max;
 			end
 			
-			l = cell(1, Axis.count);
-			for w = Axis.elems
-				l{w} = lall{w}(ind{w});
+			isindlen1 = [length(ind{Axis.x}), length(ind{Axis.y}), length(ind{Axis.z})] == 1;
+			if all(isindlen1)
+				val = this.array(ind{:});
+			else
+				for w = Axis.elems
+					if isindlen1(w) % ndgrid() needs two data points to interpolate with
+						indw = ind{w};
+						if indw >= 2
+							ind{w} = [indw - 1, indw];
+						else
+							ind{w} = [indw, indw + 1];
+						end
+					end
+				end
+				
+				l = cell(1, Axis.count);
+				for w = Axis.elems
+					l{w} = lall{w}(ind{w}(1):ind{w}(end));
+				end
+				[X, Y, Z] = ndgrid(l{:});
+				V = this.array(ind{:});
+				[Xi, Yi, Zi] = ndgrid(loc{:});
+				val = interpn(X, Y, Z, V, Xi, Yi, Zi);
 			end
-			[X, Y, Z] = ndgrid(l{:});
-			V = this.array(ind{:});
-			val = interpn(X, Y, Z, V, point(Axis.x), point(Axis.y), point(Axis.z));
 		end
 	end		
 end
