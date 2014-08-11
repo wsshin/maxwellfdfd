@@ -154,7 +154,7 @@ switch plotstyle
 		line([30 30], [2e-6 0.5e2], 'color', 'r', 'linestyle', '--');
         xlabel 'Photon Energy (eV)'
 end
-
+title(mfilename)
 
 %% Save data.
 % save(mfilename, 'eV', 'n', 'k');

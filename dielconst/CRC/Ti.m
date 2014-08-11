@@ -315,7 +315,7 @@ switch plotstyle
         xlabel 'wavelength (nm)'
         ylabel 'electric Q';
 end
-
+title(mfilename)
 
 %% Save data.
 save(mfilename, 'eV', 'n', 'k');

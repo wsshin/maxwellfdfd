@@ -230,7 +230,7 @@ switch plotstyle
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel 'Photon Energy (eV)'
 end
-
+title(mfilename)
 
 %% Save data.
 % save(mfilename, 'eV', 'n', 'k');

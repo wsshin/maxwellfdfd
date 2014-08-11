@@ -36,7 +36,7 @@ switch plotstyle
         plot(eV, real(eps), 'o-', eV, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
         xlabel 'Photon Energy (eV)'
-        axis([0.5 6.5 -7 7]);
+%         axis([0.5 6.5 -7 7]);
     case eps_wvlen
         plot(wvlen, real(eps), 'o-', wvlen, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
@@ -58,7 +58,7 @@ switch plotstyle
         xlabel 'wavelength (nm)'
         ylabel 'electric Q';
 end
-
+title(mfilename)
 
 %% Save data.
 save(mfilename, 'eV', 'n', 'k');

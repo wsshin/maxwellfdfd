@@ -141,7 +141,7 @@ switch plotstyle
         xlabel 'wavelength (nm)'
         %axis([0 1e2 -1e1 1e1])
 end
-
+title(mfilename)
 
 %% Save data.
 save(mfilename, 'eV', 'n', 'k');
