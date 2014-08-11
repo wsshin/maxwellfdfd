@@ -30,9 +30,10 @@
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
 
 %%% See Also
-% <EllipticCylinder.html |EllipticCylinder|>, <SectoralCylinder.html
-% |SectoralCylinder|>, <PolyognalCylinder.html |PolygonalCylinder|>, <Shape.html
-% |Shape|>, <maxwell_run.html |maxwell_run|>
+% <CircularShellCylinder.html |CircularShellCylinder|>, <EllipticCylinder.html
+% |EllipticCylinder|>, <SectoralCylinder.html |SectoralCylinder|>,
+% <PolyognalCylinder.html |PolygonalCylinder|>, <Shape.html |Shape|>,
+% <maxwell_run.html |maxwell_run|>
 
 classdef CircularCylinder < EllipticCylinder
 	% CircularCylinder is a Shape for a cylinder whose cross section is a

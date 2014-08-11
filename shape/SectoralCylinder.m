@@ -35,7 +35,8 @@
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
 
 %%% See Also
-% <CircularCylinder.html |CircularCylinder|>, <EllipticCylinder.html
+% <CircularCylinder.html |CircularCylinder|>, <CircularShellCylinder.html
+% |CircularShellCylinder|>, <EllipticCylinder.html
 % |EllipticCylinder|>, <PolyognalCylinder.html |PolygonalCylinder|>, <Shape.html
 % |Shape|>, <maxwell_run.html |maxwell_run|>
 

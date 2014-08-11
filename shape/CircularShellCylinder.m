@@ -1,15 +1,16 @@
-%% EllipticCylinder
+%% CircularShellCylinder
 % Concrete subclass of <GenenicCylinder.html |GenericCylinder|> representing a
-% cylinder with an elliptical cross section.
+% cylinder with a circular shell as the cross section (the cylinder is a hollow
+% pipe).
 
 %%% Description
-% |EllipticCylinder| represents the shape of an ellicptic cylinder.  The major
-% and minor axes of the ellipse as well as the axis of the cylinder should be
-% aligned with the axes of the Cartesian coordinate system.
+% |CircularShellCylinder| represents the shape of a hollow cylindrical pipe with
+% circular cross sections.  The axis of the cylinder should be aligned with an
+% axis of the Cartesian coordinate system.
 
 %%% Construction
-%  shape = EllipticCylinder(normal_axis, height, center, semiaxes)
-%  shape = EllipticCylinder(normal_axis, height, center, semiaxes, dl_max)
+%  shape = CircularShellCylinder(normal_axis, height, center, r1, r2)
+%  shape = CircularShellCylinder(normal_axis, height, center, r1, r2, dl_max)
 % 
 % *Input Arguments*
 %
@@ -17,43 +18,45 @@
 % |Axis.y|, |Axis.z|.
 % * |height|: size of the cylinder along its axis.
 % * |center|: center of the cylinder in the format of |[x y z]|.
-% * |semiaxes|: semiaxes of the ellipse in the format of |[a b]|.  If
-% |normal_axis == Axis.y|, |a| is the semiaxis in the z-axis and |b| is the
-% semiaxis in the x-axis.
+% * |r1|, |r2|: radii of the inner and outer circles (or vice versa).
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
 % dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
 
 %%% Example
-%   % Create an instance of EllipticCylinder.
-%   shape = EllipticCylinder(Axis.z, 100, [0 0 50], [100 50]);
+%   % Create an instance of CircularShellCylinder.
+%   shape = CircularShellCylinder(Axis.z, 100, [0 0 50], [100 50], 25, 50);
 %
 %   % Use the constructed shape in maxwell_run().
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
 
 %%% See Also
-% <CircularCylinder.html |CircularCylinder|>, <CircularShellCylinder.html
-% |CircularShellCylinder|>, <SectoralCylinder.html |SectoralCylinder|>,
+% <CircularCylinder.html |CircularCylinder|>, <EllipticCylinder.html
+% |EllipticCylinder|>, <SectoralCylinder.html |SectoralCylinder|>,
 % <PolyognalCylinder.html |PolygonalCylinder|>, <Shape.html |Shape|>,
 % <maxwell_run.html |maxwell_run|>
 
-classdef EllipticCylinder < GenericCylinder
+classdef CircularShellCylinder < GenericCylinder
 	% EllipticCylinder is a Shape for a cylinder whose cross section is an
 	% ellipse.
 
 	methods
-        function this = EllipticCylinder(normal_axis, height, center, semiaxes, dl_max)
+        function this = CircularShellCylinder(normal_axis, height, center, r1, r2, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(height, 'real') && height > 0, '"height" should be positive.');
 			chkarg(istypesizeof(center, 'real', [1, Axis.count]), ...
 				'"center" should be length-%d row vector with real elements.', Axis.count);
-			chkarg(istypesizeof(semiaxes, 'real', [1, Dir.count]) && all(semiaxes > 0), ...
-				'"semiaxes" should be length-%d row vector with positive elements.', Axis.count);
+			chkarg(istypesizeof(r1, 'real') && r1 > 0, '"r1" should be positive.');
+			chkarg(istypesizeof(r2, 'real') && r2 > 0, '"r2" should be positive.');
 
 			[h, v, n] = cycle(normal_axis);
+			rs = sort([r1 r2]);
+			r = rs(1);
+			R = rs(2);
+			
 			s = NaN(1, Axis.count);  % semisides
-			s(h) = semiaxes(Dir.h);
-			s(v) = semiaxes(Dir.v);
+			s(h) = R;
+			s(v) = R;
 			s(n) = height / 2;
 			bound = [center - s; center + s];
 			bound = bound.';
@@ -67,9 +70,14 @@ classdef EllipticCylinder < GenericCylinder
 				N = size(rho, 1);
 				c = center([h, v]);
 				c_vec = repmat(c, [N 1]);
-				s_vec = repmat(semiaxes, [N 1]);
-				x = (rho - c_vec) ./ s_vec;
-				level = 1 - sqrt(sum(x.*x, 2));
+
+				X = (rho - c_vec) ./ R;
+				level1 = 1 - sqrt(sum(X.*X, 2));  % level set function for inside of R
+
+				x = (rho - c_vec) ./ r;
+				level2 = sqrt(sum(x.*x, 2)) - 1;  % level set function for outside of r
+
+				level = min([level1, level2], [], 2);  % intersection of two areas
 			end
 			
 			lprim = cell(1, Axis.count);
@@ -77,7 +85,7 @@ classdef EllipticCylinder < GenericCylinder
 				lprim{w} = bound(w,:);
 			end
 			
-			if nargin < 5  % no dl_max
+			if nargin < 6  % no dl_max
 				super_args = {normal_axis, @lsf2d, lprim};
 			else
 				super_args = {normal_axis, @lsf2d, lprim, dl_max};
