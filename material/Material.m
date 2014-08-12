@@ -54,7 +54,9 @@ classdef Material
 			chkarg(istypeof(color, 'char') ...
 				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
 				'"color" should be string or [r g b].');
-			chkarg(istypesizeof(eps, 'complex'), '"eps" should be complex.');
+			chkarg(istypeof(eps, 'complex') && isexpandable2row(eps, Axis.count), ...
+				'"eps" should be complex scalar or length-%d row vector.', Axis.count);
+			eps = expand2row(eps, Axis.count);
 			
 			mu_temp = 1.0;
 			islossless = false;
@@ -69,7 +71,10 @@ classdef Material
 				end
 			end
 			
-			chkarg(istypesizeof(mu_temp, 'complex'), '"mu" should be complex.');
+			chkarg(istypeof(mu_temp, 'complex') && isexpandable2row(mu_temp, Axis.count), ...
+				'"mu" should be complex scalar or length-%d row vector.', Axis.count);
+			mu_temp = expand2row(mu_temp, Axis.count);
+			
 			chkarg(istypesizeof(islossless, 'logical'), '"islossless" should be logical.');
 			
 			if islossless
@@ -141,8 +146,8 @@ classdef Material
 			for i = 1:n
 				truth(i)= ~isequal(this(i).name, another(i).name) || ...
 						~isequal(this(i).color, another(i).color) || ...
-						this(i).eps ~= another(i).eps || ...
-						this(i).mu ~= another(i).mu;
+						any(this(i).eps ~= another(i).eps) || ...
+						any(this(i).mu ~= another(i).mu);
 			end
 			truth = reshape(truth, dims);
 		end

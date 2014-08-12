@@ -195,10 +195,11 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 			% Set up OBJ.
 			is_scatterer = strcmpi(arg,'SOBJ');
 			iarg = iarg + 1; arg = varargin{iarg};
-			if istypesizeof(arg, 'complex', [0 0 0])
+			if istypesizeof(arg, 'complex', [0 0 0])  % 3D complex array with arbitrary size
 				isepsgiven = true;
-				eps_node_array = arg;
-				mu_node_array = ones(size(eps_node_array));
+				eps_node_cell = {arg, arg, arg};
+				mu_node_temp = ones(size(arg));
+				mu_node_cell = {mu_node_temp, mu_node_temp, mu_node_temp};
 			else
 				% Set up objects.
 				obj_array_temp = Object.empty();
@@ -319,13 +320,16 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 
 	% Construct material parameters.
 	if ~isepsgiven
-		[eps_node_array, mu_node_array] = assign_material_node(grid3d, obj_array);  % Nx x Ny x Nz
+		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, obj_array);  % Nx x Ny x Nz
 	end
-	eps_node_array = expand_node_array(eps_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
-	mu_node_array = expand_node_array(mu_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
 	
-	eps_cell = mean_material_node(ge, eps_node_array(1:end-1,1:end-1,1:end-1));
-	mu_cell = mean_material_node(alter(ge), mu_node_array(1:end-1,1:end-1,1:end-1));
+	for w = Axis.elems
+		eps_node_cell{w} = expand_node_array(eps_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+		mu_node_cell{w} = expand_node_array(mu_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+	end
+	
+	eps_cell = mean_material_node(ge, eps_node_cell);
+	mu_cell = mean_material_node(alter(ge), mu_node_cell);
 
 	% Construct PML s-factors.
 	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d, deg_pml, R_pml);
@@ -385,22 +389,27 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		end
 		
 		% Add sobj_array to the already-generated eps and mu.
-		[eps_node_array, mu_node_array] = assign_material_node(grid3d, sobj_array, ...
-			eps_node_array(2:end-1,2:end-1,2:end-1), mu_node_array(2:end-1,2:end-1,2:end-1));  % Nx x Ny x Nz
+		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, sobj_array, eps_node_cell, mu_node_cell);  % Nx x Ny x Nz
 
-		eps_node_array = expand_node_array(eps_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
-		mu_node_array = expand_node_array(mu_node_array, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+		for w = Axis.elems
+			eps_node_cell{w} = expand_node_array(eps_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+			mu_node_cell{w} = expand_node_array(mu_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
+		end
 
-		eps_cell = mean_material_node(ge, eps_node_array(1:end-1,1:end-1,1:end-1));  % Nx x Ny x Nz
-		mu_cell = mean_material_node(alter(ge), mu_node_array(1:end-1,1:end-1,1:end-1));  % Nx x Ny x Nz
+		eps_cell = mean_material_node(ge, eps_node_cell);  % Nx x Ny x Nz
+		mu_cell = mean_material_node(alter(ge), mu_node_cell);  % Nx x Ny x Nz
 
 		pm.mark('TF/SF source assignment');
 	end
 	obj_array = [obj_array, sobj_array];
 	
-	eps_node = Scalar3d(eps_node_array, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.eps, '\epsilon');
-	mu_node = Scalar3d(mu_node_array, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.mu, '\mu');
-
+	eps_node = cell(1, Axis.count);
+	mu_node = cell(1, Axis.count);
+	for w = Axis.elems
+		eps_node{w} = Scalar3d(eps_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.eps, '\epsilon');
+		mu_node{w} = Scalar3d(mu_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.mu, '\mu');
+	end
+		
 	% Construct sources.
 	J_cell = assign_source(grid3d, srcj_array);
 	M_cell = assign_source(grid3d, srcm_array);
