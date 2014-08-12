@@ -74,7 +74,7 @@
 %   [m, n] = size(obj);
 %   [me, ne] = size(elem1);
 %   fprintf('Test 4: is the object a cell of size %d-by-%d whose elements are %s arrays of size %d-by-%d?  ', m, n, type, me, ne);
-%   if istypesizeof(obj, type, [m n]);
+%   if istypesizeof(obj, type, [m n], [me ne]);
 %       fprintf('Yes.\n');
 %   else
 %       fprintf('No.\n');
