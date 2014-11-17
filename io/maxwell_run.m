@@ -192,7 +192,7 @@
 %%% Example
 %   gray = [0.5 0.5 0.5];  % [r g b]
 %   inspect_only = true;
-%   [E, H, obj_array, err] = maxwell_run(...
+%   [E, H, obj_array, extra] = maxwell_run(...
 %       'OSC', 1e-9, 1550, ...
 %       'DOM', {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...
 %       'OBJ', ...
@@ -281,14 +281,15 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	else
 		fprintf('%s begins.\n', mfilename);
 	end
-	fprintf('E-field grid type: %s\n', char(solveropts.eqtype.ge));
+	ge = solveropts.eqtype.ge;
+	fprintf('E-field grid type: %s\n', char(ge));
 	pm = ProgMark();
 	
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
 	[osc, grid3d, s_factor, eps, mu, J, M, obj_array, src_array, mat_array, eps_node, mu_node] = ...
-		build_system(solveropts.eqtype.ge, solveropts.pml, varargin{1:iarg}, pm);
+		build_system(ge, solveropts.pml, varargin{1:iarg}, pm);
 	
 	if inspect_only  % inspect objects and sources
 		if solveropts.showstruct
@@ -349,7 +350,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 			end
 
 			% Define eps_node_array at vertices of the E-field edges.
-			if solveropts.eqtype.ge == GT.prim
+			if ge == GT.prim
 				eps_node_array = eps_node.data_expanded();  % (Nx+2) x (Ny+2) x (Nz+2)
 				eps_node_array = eps_node_array(1:end-1, 1:end-1, 1:end-1);  % (Nx+1) x (Ny+1) x (Nz+1)
 
@@ -453,7 +454,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	end
 
 	if solveropts.returnDiv
-		[Dive, Divm] = create_divs(solveropts.eqtype.ge, s_factor, grid3d);
+		[Dive, Divm] = create_divs(ge, s_factor, grid3d);
 		extra.Dive = Dive;
 		extra.Divm = Divm;
 	end
@@ -464,21 +465,16 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	J_cell = cell(1, Axis.count);
 	M_cell = cell(1, Axis.count);
 	for w = Axis.elems
-		gt = solveropts.eqtype.ge;  % grid type for E-field
-		gt_array = gt(ones(1, Axis.count));
-		gt_array(w) = alter(gt);
 		if ~isempty(E)
-			E_cell{w} = array2scalar(E{w}, PhysQ.E, grid3d, w, FT.e, gt_array, osc);
+			E_cell{w} = array2scalar(E{w}, grid3d, ge, FT.e, w, osc, PhysQ.E);
 		end
-		J_cell{w} = array2scalar(J{w}, PhysQ.J, grid3d, w, FT.e, gt_array, osc);
-
-		gt = alter(solveropts.eqtype.ge);  % grid type for H-field
-		gt_array = gt(ones(1, Axis.count));
-		gt_array(w) = alter(gt);
+		
 		if ~isempty(H)
-			H_cell{w} = array2scalar(H{w}, PhysQ.H, grid3d, w, FT.h, gt_array, osc);
+			H_cell{w} = array2scalar(H{w}, grid3d, ge, FT.h, w, osc, PhysQ.H);
 		end
-		M_cell{w} = array2scalar(M{w}, PhysQ.M, grid3d, w, FT.h, gt_array, osc);
+		
+		J_cell{w} = array2scalar(J{w}, grid3d, ge, FT.e, w, osc, PhysQ.J);
+		M_cell{w} = array2scalar(M{w}, grid3d, ge, FT.h, w, osc, PhysQ.M);
 	end
 	
 	extra.grid3d = grid3d;

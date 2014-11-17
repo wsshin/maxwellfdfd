@@ -1,22 +1,32 @@
-function scalar = array2scalar(F_array, physQ, grid, axis, ft, gt_array, osc, intercept)
-chkarg(istypesizeof(physQ, 'PhysQ'), '"physQ" should be instance of PhysQ.');
+function scalar = array2scalar(F_array, grid, ge, ft, axis, osc, physQ, intercept)
+
 chkarg(istypesizeof(grid, 'Grid2d') || istypesizeof(grid, 'Grid3d'), ...
 	'"grid" should be instance of Grid2d or Grid3d.');
-chkarg(istypesizeof(axis, 'Axis'), '"axis" should be instance of Axis.');
+chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');
 chkarg(istypesizeof(ft, 'FT'), '"ft" should be instance of FT.');
+chkarg(istypesizeof(axis, 'Axis'), '"axis" should be instance of Axis.');
 chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
+chkarg(istypesizeof(physQ, 'PhysQ'), '"physQ" should be instance of PhysQ.');
 
 is3D = true;
 if istypesizeof(grid, 'Grid2d')
 	is3D = false;
 end
 
+if ft == FT.e
+    gt = ge;  % grid type for E-field
+else  % ft == FT.h
+    gt = alter(ge);  % grid type for H-field
+end
+
+gt_array = gt(ones(1, Axis.count));
+gt_array(axis) = alter(gt);
+
 if is3D
 	grid3d = grid;
 	chkarg(istypesizeof(F_array, 'complex', grid3d.N), ...
 		'"F_array" should be %d-by-%d-by-%d array with complex elements.', ...
 		grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
-	chkarg(istypesizeof(gt_array, 'GT', [1, Axis.count]), '"gt_array" should be length-%d row vector with GT as elements.', Axis.count);
 
 	V = F_array;
 	for w = Axis.elems
@@ -28,12 +38,13 @@ else  % grid is Grid2d
 	if nargin < 7  % no intercept
 		intercept = NaN;
 	end
-	chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
+	chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');  % NaN is real
 	
 	grid2d = grid;
 	chkarg(istypesizeof(F_array, 'complex', grid2d.N), ...
 		'"F_array" should be %d-by-%d array with complex elements.', grid2d.N(Dir.h), grid2d.N(Dir.v));
-	chkarg(istypesizeof(gt_array, 'GT', [1, Dir.count]), '"gt_array" should be length-%d row vector with GT as elements.', Dir.count);
+
+	gt_array = gt_array(grid2d.axis);
 
 	if axis == grid2d.axis(Dir.h)
 		axis_temp = Axis.x;

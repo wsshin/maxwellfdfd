@@ -43,7 +43,9 @@ osc = scalarNd.osc;
 
 if Ndim == 3
 	scalar = array2scalar(V, physQ, grid, axis, ft, gt_array, osc);
+% 	H_cell{w} = array2scalar(H{w}, grid3d, ge, FT.h, w, osc, PhysQ.H);
 else  % Ndim ==2
 	intercept = scalarNd.intercept;
 	scalar = array2scalar(V, physQ, grid, axis, ft, gt_array, osc, intercept);
+% 	H_cell{w} = array2scalar(H{w}, grid3d, ge, FT.h, w, osc, PhysQ.H);
 end

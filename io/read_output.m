@@ -9,34 +9,20 @@ chkarg(istypesizeof(filenamebase, 'char', [1 0]), '"filenamebase" should be stri
 efile = ['./', filenamebase, '.E.h5'];
 hfile = ['./', filenamebase, '.H.h5'];
 
-E_array = h5read(efile, '/E');
-H_array = h5read(hfile, '/H');
+E_array = h5read(efile, '/E');  % E_array(ri, w, i, j, k)
+H_array = h5read(hfile, '/H');  % H_array(ri, w, i, j, k)
 assert(all(size(E_array) == size(H_array)));
 
-E_array = collapse_complex(E_array);
-H_array = collapse_complex(H_array);
+E_array = collapse_complex(E_array);  % E_array(w, i, j, k) with leading singleton dimension
+H_array = collapse_complex(H_array);  % H_array(w, i, j, k) with leading singleton dimension
 
-%% Permute E_array and H_array's indices to (x, y, z, axis)
-nD = ndims(E_array);
-E_array = permute(E_array, [2:nD, 1]);
-H_array = permute(H_array, [2:nD, 1]);
+% Below, shiftdim() is to remove the leading singleton dimension.
+E = {shiftdim(E_array(Axis.x,:,:,:)), shiftdim(E_array(Axis.y,:,:,:)), shiftdim(E_array(Axis.z,:,:,:))};
+H = {shiftdim(H_array(Axis.x,:,:,:)), shiftdim(H_array(Axis.y,:,:,:)), shiftdim(H_array(Axis.z,:,:,:))};
 
 E_cell = cell(1, Axis.count);
 H_cell = cell(1, Axis.count);
-ind = cell(1, nD);
 for w = Axis.elems
-	for n = 1:nD
-		ind{n} = ':';
-	end
-	ind{end} = int(w);
-
-	gt = ge;  % grid type for E-field
-	gt_array = gt(ones(1, Axis.count));
-	gt_array(w) = alter(gt);
-	E_cell{w} = array2scalar(E_array(ind{:}), PhysQ.E, grid3d, w, FT.e, gt_array, osc);
-
-	gt = alter(ge);  % grid type for H-field
-	gt_array = gt(ones(1, Axis.count));
-	gt_array(w) = alter(gt);
-	H_cell{w} = array2scalar(H_array(ind{:}), PhysQ.H, grid3d, w, FT.h, gt_array, osc);
+	E_cell{w} = array2scalar(E{w}, grid3d, ge, FT.e, w, osc, PhysQ.E);
+	H_cell{w} = array2scalar(H{w}, grid3d, ge, FT.h, w, osc, PhysQ.H);
 end

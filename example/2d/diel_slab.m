@@ -55,7 +55,7 @@ if ~inspect_only
 	fprintf('error = %s%%\n',num2str((power_left-power_right)/power_right*100));
 	
 	%%
-	Sx = poynting(Axis.x, E{Axis.y}, E{Axis.z}, H{Axis.y}, H{Axis.z}, Axis.y, 0);
+	Sx = poynting(Axis.x, E{Axis.y}, E{Axis.z}, H{Axis.y}, H{Axis.z}, Axis.x, 0);
 	[array, l] = Sx.data_original;
 	figure(3);
 	plot(l{2}, abs(array))

@@ -186,15 +186,8 @@ classdef ModalSrc < Source
 			this.E2d = cell(1, Axis.count);
 			this.H2d = cell(1, Axis.count);
 			for w = Axis.elems
-				gt = ge;  % grid type for E-field
-				gt_array = gt(ones(1, Axis.count));
-				gt_array(w) = alter(gt);
-				this.E2d{w} = array2scalar(E_cell{w}, PhysQ.E, this.grid2d, w, FT.e, gt_array(this.grid2d.axis), osc, this.intercept);
-
-				gt = alter(ge);  % grid type for H-field
-				gt_array = gt(ones(1, Axis.count));
-				gt_array(w) = alter(gt);
-				this.H2d{w} = array2scalar(H_cell{w}, PhysQ.H, this.grid2d, w, FT.h, gt_array(this.grid2d.axis), osc, this.intercept);
+				this.E2d{w} = array2scalar(E_cell{w}, this.grid2d, ge, FT.e, w, osc, PhysQ.E, this.intercept);
+				this.H2d{w} = array2scalar(H_cell{w}, this.grid2d, ge, FT.h, w, osc, PhysQ.H, this.intercept);
 			end
 		end
 		
