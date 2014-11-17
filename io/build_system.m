@@ -298,7 +298,17 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	mat_array = unique(mat_array);
 	fprintf('materials used:\n');
 	for mat = mat_array
-		fprintf('\t%s: eps = %s, mu = %s\n', mat.name, num2str(mat.eps), num2str(mat.mu));
+		epstext = mat.eps;
+		if length(unique(epstext)) == 1
+			epstext = epstext(Axis.x);
+		end
+		
+		mutext = mat.mu;
+		if length(unique(mutext)) == 1
+			mutext = mutext(Axis.x);
+		end
+		
+		fprintf('\t%s: eps = %s, mu = %s\n', mat.name, mat2str(epstext), mat2str(mutext));
 	end
 
 	% Generate a grid.
