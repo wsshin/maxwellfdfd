@@ -42,6 +42,12 @@ classdef Material
 		mu
 	end
 
+	properties (Dependent, SetAccess = immutable)
+		hasisoeps
+		hasisomu
+		isiso
+	end
+	
 	properties
 		name
 		color
@@ -87,10 +93,22 @@ classdef Material
 			this.eps = eps;
 			this.mu = mu_temp;
 		end
+		
+		function truth = get.hasisoeps(this)
+			truth = all(this.eps == this.eps(1));
+		end
+		
+		function truth = get.hasisomu(this)
+			truth = all(this.mu == this.mu(1));
+		end
+		
+		function truth = get.isiso(this)
+			truth = this.hasisoeps && this.hasisomu;
+		end
 	end
 	
 	methods (Static)
-		function material = create(osc, name, color, islossless)
+		function material = fromtable(osc, name, color, islossless)
 			chkarg(istypesizeof(osc, 'Oscillation'), '"osc" should be instance of Oscillation.');
 			chkarg(istypesizeof(name, 'char', [1 0]), '"name" should be string.');
 			chkarg(istypesizeof(color, 'char', [1 0]) ...

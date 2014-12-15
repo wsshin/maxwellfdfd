@@ -3,7 +3,7 @@
 
 %%% Syntax
 %  [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell] = build_system(ge, OSC, DOM, OBJ, SRC, [progmark])
-%  [..., obj_array, src_array] = build_system(ge, OSC, DOM, OBJ, SRC, [pragmark])
+%  [..., obj_array, src_array, mat_array] = build_system(ge, OSC, DOM, OBJ, SRC, [pragmark])
 %  [..., eps_node_array, mu_node_array] = build_system(ge, OSC, DOM, OBJ, SRC, [pragmark])
 
 
@@ -38,10 +38,11 @@
 % * |M_cell|, a cell array of electric current sources: |{Mx_array, My_array,
 % Mz_array}|
 % 
-% |[..., obj_array, src_array] = build_system(...)| returns additionally arrays
-% of instances of <Object.html |Object|> and <Source.html |Source|>.  The
-% |Object| and |Source| elements represent the objects and sources placed in the
-% simulation domain, so they can be used to visualize the simulation domain.
+% |[..., obj_array, src_array, mat_array] = build_system(...)| returns
+% additionally arrays of instances of <Object.html |Object|>, <Source.html
+% |Source|>, and <Material.html |Material|>.  The |Object| and |Source|
+% elements represent the objects and sources placed in the simulation
+% domain, so they can be used to visualize the simulation domain.
 %
 % |[..., eps_node_array, mu_node_array] = build_system(...)| returns
 % additionally arrays of electric permittivity and magnetic permeability
@@ -51,7 +52,7 @@
 %%% Example
 %   gray = [0.5 0.5 0.5];  % [r g b]
 %   [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell,	...
-%		obj_array, src_array, eps_node_array, mu_node_array] = build_system(...
+%		obj_array, src_array, mat_array, eps_node_array, mu_node_array] = build_system(...
 %       'OSC', 1e-9, 1550, ...
 %       'DOM', {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...
 %       'OBJ', ...
@@ -89,7 +90,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		
 		chkarg(narg >= 2, '# of arguments should be at least 2.')
 		if narg == 2  % data table is specified
-			material = Material.create(osc, varargin{:});
+			material = Material.fromtable(osc, varargin{:});
 		else
 			material = Material(varargin{:});
 		end
