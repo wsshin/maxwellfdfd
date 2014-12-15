@@ -233,7 +233,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	
 	if ~is_solveropts || ~isfield(solveropts, 'maxit')
 % 		solveropts.maxit = intmax;
-		solveropts.maxit = 1e8;
+		solveropts.maxit = 1e6;
 	else
 		chkarg(istypesizeof(solveropts.maxit, 'real') && solveropts.maxit > 0, ...
 			'solveropts.maxit should be positive.');	
@@ -245,7 +245,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 		chkarg(istypesizeof(solveropts.tol, 'real') && solveropts.tol > 0, ...
 			'solveropts.tol should be positive.');
 	end
-	
+
 	if ~is_solveropts || ~isfield(solveropts, 'eqtype')
 		solveropts.eqtype = EquationType(FT.e, GT.prim);
 	else
@@ -290,6 +290,20 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	% build_system() for correct error reports.
 	[osc, grid3d, s_factor, eps, mu, J, M, obj_array, src_array, mat_array, eps_node, mu_node] = ...
 		build_system(ge, solveropts.pml, varargin{1:iarg}, pm);
+	
+	if ~is_solveropts || ~isfield(solveropts, 'F0')
+		solveropts.F0 = 'zero';  % 'rand' is the other choice
+	else
+		chkarg(isequal(solveropts.F0, 'zero') || isequal(solveropts.F0, 'rand') ...
+			|| istypesizeof(solveropts.F0, 'complexcell', [1 Axis.count], grid3d.N), ...
+			'solveropts.F0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
+			Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+	end
+	
+	isanisotropic = false;
+	for mat = mat_array
+		
+	end
 	
 	if inspect_only  % inspect objects and sources
 		if solveropts.showstruct
@@ -339,17 +353,8 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 		H = {};
 	else  % inspect_only == false
 		if isequal(solveropts.method, 'inputfile')
-			if ~is_solveropts || ~isfield(solveropts, 'F0')
-				solveropts.F0 = 'zero';  % 'rand' is the other choice
-% 				solveropts.F0 = {zeros(grid3d.N), zeros(grid3d.N), zeros(grid3d.N)};
-			else
-				chkarg(isequal(solveropts.F0, 'zero') || isequal(solveropts.F0, 'rand') ...
-					|| istypesizeof(solveropts.F0, 'complexcell', [1 Axis.count], grid3d.N), ...
-					'solveropts.F0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
-					Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
-			end
-
 			% Define eps_node_array at vertices of the E-field edges.
+			
 			if ge == GT.prim
 				eps_node_array = eps_node.data_expanded();  % (Nx+2) x (Ny+2) x (Nz+2)
 				eps_node_array = eps_node_array(1:end-1, 1:end-1, 1:end-1);  % (Nx+1) x (Ny+1) x (Nz+1)
@@ -394,7 +399,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 			if isequal(solveropts.method, 'direct')
 				[E, H] = solve_eq_direct(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
 			elseif isequal(solveropts.method, 'iterative')
-				[E, H] = solve_eq_iterative(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
+				[E, H, relres, iter, resvec] = solve_eq_iterative(solveropts.maxit, solveropts.tol, solveropts.F0, solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
 			else  % for solvers using E-field based equation
 				%% Apply spatial inversion.
 % 				d_prim = grid3d.dl(:, GT.prim);
@@ -441,6 +446,12 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 			end
 
 			pm.mark('solution calculation');
+			if isequal(solveropts.method, 'iterative')
+				%% Report the iterative solution process.
+				semilogy(1:length(resvec), resvec);
+				fprintf('\t# of iteration steps = %d\n', iter);
+				fprintf('\trelative residual error = %e\n', relres);
+			end
 			fprintf('unknowns: %s-field\n', char(solveropts.eqtype.f));
 			fprintf('%s finishes.\n\n', mfilename);
 		end
