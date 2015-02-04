@@ -1,8 +1,10 @@
 function [E, H] = solve_eq_direct(eqtype, pml, omega, eps_cell, mu_cell, s_factor_cell, J_cell, M_cell, grid3d)
 
 % [A1, A2, eps, mu, b] = fds_matrices(omega, eps_cell, mu_cell, s_factor_cell, J_cell, grid3d);
-
-[A, b, g_from_f] = create_eq(eqtype, pml, omega, eps_cell, mu_cell, s_factor_cell, J_cell, M_cell, grid3d);
+% [A, b, g_from_f] = create_eq(eqtype, pml, omega, eps_cell, mu_cell, s_factor_cell, J_cell, M_cell, grid3d);
+eq = MatrixEquation(eqtype, pml, omega, eps_cell, mu_cell, s_factor_cell, J_cell, M_cell, grid3d);
+[A, b] = eq.matrix_op();
+[~, ~, GfromF] = eq.matrixfree_op();
 
 % figure; spy(A); xlabel(''); set(gca, 'xtick', []); set(gca, 'ytick', []);
 % [L1, U1] = lu(A);
@@ -16,7 +18,7 @@ function [E, H] = solve_eq_direct(eqtype, pml, omega, eps_cell, mu_cell, s_facto
 	
 % spparms('spumoni',1);  % make mldivide(A, b) (= A\b) verbose
 f = A\b;
-g = g_from_f(f);
+g = GfromF(f);
 
 if eqtype.f == FT.e
 	e = f;

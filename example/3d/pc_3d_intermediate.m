@@ -11,7 +11,7 @@ osc = Oscillation(wvlen, unit);
 
 %% Create materials.
 vac = Material('vacuum', 'w', 1.0);
-Si = Material.create(osc, 'Palik/Si', [0.5 0.5 0.5]);  % [0.5 0.5 0.5]: gray in RGB
+Si = Material.fromtable(osc, 'Palik/Si', [0.5 0.5 0.5]);  % [0.5 0.5 0.5]: gray in RGB
 
 %% Create objects.
 a = 420;  % lattice constant

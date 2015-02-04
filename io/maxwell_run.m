@@ -288,7 +288,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	% Build the system.
 	% Make sure to pass the first consecutive elements of varargin to
 	% build_system() for correct error reports.
-	[osc, grid3d, s_factor, eps, mu, J, M, obj_array, src_array, mat_array, eps_node, mu_node] = ...
+	[osc, grid3d, s_factor, eps, mu, J, M, obj_array, src_array, mat_array, eps_node, mu_node, isiso] = ...
 		build_system(ge, solveropts.pml, varargin{1:iarg}, pm);
 	
 	if ~is_solveropts || ~isfield(solveropts, 'F0')
@@ -299,12 +299,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 			'solveropts.F0 should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex numbers.', ...
 			Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
 	end
-	
-	isanisotropic = false;
-	for mat = mat_array
 		
-	end
-	
 	if inspect_only  % inspect objects and sources
 		if solveropts.showstruct
 			figure;
@@ -354,36 +349,49 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	else  % inspect_only == false
 		if isequal(solveropts.method, 'inputfile')
 			% Define eps_node_array at vertices of the E-field edges.
+			chkarg(isiso, 'anisotropic materials are not supported for solveropts.method == ''inputfile''.');
 			
 			if ge == GT.prim
+				eps_node = eps_node{Axis.x};  % ad hoc solution
+				
+				% Old implementation (without anisotropy support) starts
+				% here.
 				eps_node_array = eps_node.data_expanded();  % (Nx+2) x (Ny+2) x (Nz+2)
 				eps_node_array = eps_node_array(1:end-1, 1:end-1, 1:end-1);  % (Nx+1) x (Ny+1) x (Nz+1)
-
-% 				eps_node_cell = eps_cell;
-% 				for w = Axis.elems
-% 					ind_g = {':',':',':'};
-% 					if grid3d.bc(w) == BC.p
-% 						ind_g{w} = grid3d.N(w);
-% 					else
-% 						ind_g{w} = 1;
-% 					end
-% 					eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
-% 				end
-% 				eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
-% 				eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
-% 				eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
-% 				
-% 				eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
-% 	
-% 				eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
-% 							+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
-% 							+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
-% 							+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
-
-				eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
-							+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
-							+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
-							+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
+				
+				% The below line is an ad hoc solution for the error.  It
+				% is just to pass an array with correct size to
+				% write_input(), but eps_node_array is not used in
+				% write_input() currently.
+				eps_node_array = eps_node_array(1:end-1, 1:end-1, 1:end-1);  % Nx x Ny x Nz
+% 
+% 				% (Anisotropy support? begins)
+% % 				eps_node_cell = eps_cell;
+% % 				for w = Axis.elems
+% % 					ind_g = {':',':',':'};
+% % 					if grid3d.bc(w) == BC.p
+% % 						ind_g{w} = grid3d.N(w);
+% % 					else
+% % 						ind_g{w} = 1;
+% % 					end
+% % 					eps_node_cell{w} = cat(int(w), eps_node_cell{w}(ind_g{:}), eps_node_cell{w});
+% % 				end
+% % 				eps_node_cell{Axis.x} = 2./(1./eps_node_cell{Axis.x}(1:end-1, :, :) + 1./eps_node_cell{Axis.x}(2:end, :, :));
+% % 				eps_node_cell{Axis.y} = 2./(1./eps_node_cell{Axis.y}(:, 1:end-1, :) + 1./eps_node_cell{Axis.y}(:, 2:end, :));
+% % 				eps_node_cell{Axis.z} = 2./(1./eps_node_cell{Axis.z}(:, :, 1:end-1) + 1./eps_node_cell{Axis.z}(:, :, 2:end));
+% % 				
+% % 				eps_node_array = (eps_node_cell{Axis.x} + eps_node_cell{Axis.y} + eps_node_cell{Axis.z})./3;
+% % 	
+% % 				eps_node_array = (eps_node_array(1:end-1,1:end-1,1:end-1) + eps_node_array(2:end,1:end-1,1:end-1) ...
+% % 							+ eps_node_array(1:end-1,2:end,1:end-1) + eps_node_array(1:end-1,1:end-1,2:end) ...
+% % 							+ eps_node_array(1:end-1,2:end,2:end) + eps_node_array(2:end,1:end-1,2:end) ...
+% % 							+ eps_node_array(2:end,2:end,1:end-1) + eps_node_array(2:end,2:end,2:end))./8;
+% 				% (Anisotropy support? ends)
+% 
+% 				eps_node_array = 8./(1./eps_node_array(1:end-1,1:end-1,1:end-1) + 1./eps_node_array(2:end,1:end-1,1:end-1) ...
+% 							+ 1./eps_node_array(1:end-1,2:end,1:end-1) + 1./eps_node_array(1:end-1,1:end-1,2:end) ...
+% 							+ 1./eps_node_array(1:end-1,2:end,2:end) + 1./eps_node_array(2:end,1:end-1,2:end) ...
+% 							+ 1./eps_node_array(2:end,2:end,1:end-1) + 1./eps_node_array(2:end,2:end,2:end));
 			else
 				eps_node_array = eps_node.data_original();  % Nx x Ny x Nz
 			end
@@ -458,10 +466,11 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 	end
 	
 	if solveropts.returnAandb
-		[A, b, g_from_f] = create_eq(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
-		extra.A = A;
-		extra.b = b;
-		extra.g_from_f = g_from_f;
+%		[A, b, g_from_f] = create_eq(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
+		eq = MatrixEquation(solveropts.eqtype, solveropts.pml, osc.in_omega0(), eps, mu, s_factor, J, M, grid3d);
+		
+		[extra.A, extra.b] = eq.matrix_op();
+		[~, ~, extra.GfromF] = eq.matrixfree_op();
 	end
 
 	if solveropts.returnDiv

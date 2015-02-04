@@ -62,7 +62,7 @@
 %       );
 
 function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
-	obj_array, src_array, mat_array, eps_node, mu_node] = build_system(varargin)
+	obj_array, src_array, mat_array, eps_node, mu_node, isiso] = build_system(varargin)
 
 	iarg = nargin; arg = varargin{iarg};
 	if istypesizeof(arg, 'ProgMark')
@@ -297,6 +297,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	fprintf('\twvlen = %s, freq = %s eV\n', num2str(osc.in_L0()), num2str(osc.in_eV()));
 	
 	mat_array = unique(mat_array);
+	isiso = true;
 	fprintf('materials used:\n');
 	for mat = mat_array
 		epstext = mat.eps;
@@ -310,6 +311,8 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		end
 		
 		fprintf('\t%s: eps = %s, mu = %s\n', mat.name, mat2str(epstext), mat2str(mutext));
+		
+		isiso = isiso && mat.isiso;
 	end
 
 	% Generate a grid.
@@ -384,13 +387,16 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 				else
 					eqtype_tfsf = EquationType(FT.h, ge);  % for SRCM, create H-field eq
 				end
-				A = create_eq(eqtype_tfsf, pml, osc.in_omega0(), eps_cell, mu_cell, s_factor_cell, JM, JM, grid3d);
+% 				A = create_eq(eqtype_tfsf, pml, osc.in_omega0(), eps_cell, mu_cell, s_factor_cell, JM, JM, grid3d);
+				eq = MatrixEquation(eqtype_tfsf, pml, osc.in_omega0(), eps_cell, mu_cell, s_factor_cell, JM, JM, grid3d);
+				Op = eq.matrixfree_op();
 							
 				x0 = [F0{Axis.x}(:); F0{Axis.y}(:); F0{Axis.z}(:)];
 				r = reordering_indices(Axis.count, grid3d.N);
 				x0 = x0(r);
 							
-				JM = (A*x0) ./ (-1i*osc.in_omega0());
+% 				JM = (A*x0) ./ (-1i*osc.in_omega0());
+				JM = Op(x0, 'notransp') ./ (-1i*osc.in_omega0());
 				JM = reshape(JM, [Axis.count grid3d.N]);
 				JM = permute(JM, [Axis.elems+1, 1]);
 				JM = {JM(:,:,:,Axis.x), JM(:,:,:,Axis.y), JM(:,:,:,Axis.z)};

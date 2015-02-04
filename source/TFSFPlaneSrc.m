@@ -131,7 +131,8 @@ classdef TFSFPlaneSrc < Source
 		
 		function set_bg_material(this, material)
 			chkarg(istypesizeof(material, 'Material'), '"mat_bg" should be instance of Material.');
-			this.N_bg = sqrt(material.eps * material.mu);
+			chkarg(material.isiso, 'anisotropic "mat_bg" is currently not supported.');
+			this.N_bg = sqrt(material.eps(Axis.x) * material.mu(Axis.x));
 		end
 		
 		function F_cell = create_incidentF(this, osc, grid3d)
