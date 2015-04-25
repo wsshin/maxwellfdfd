@@ -42,5 +42,5 @@ if ~inspect_only
 
 	%% Calculate the scatterd power
 	s_power = powerflux_box(E,H, [-sm sm; -sm sm; 0 dL]);
-	fprintf('scattering cross section = %e\n', s_power/dL);  % intensity of incident wave = 1
+	fprintf('scattering cross section = %e\n', s_power/dL);  % intensity of incident wave = 0.5
 end
