@@ -118,6 +118,7 @@ classdef Material
 			if nargin < 4
 				islossless = false;
 			end
+			chkarg(istypesizeof(islossless, 'logical'), '"islossless" should be logical.');
 			
 			eV = osc.in_eV();
 			

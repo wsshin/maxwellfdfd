@@ -89,10 +89,11 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		end
 		
 		chkarg(narg >= 2, '# of arguments should be at least 2.')
-		if narg == 2  % data table is specified
-			material = Material.fromtable(osc, varargin{:});
-		else
+		matname = varargin{1};
+		if isempty(strfind(matname, '/'))  % data table is not specified
 			material = Material(varargin{:});
+		else  % data table is specified
+			material = Material.fromtable(osc, varargin{:});
 		end
 	end
 
