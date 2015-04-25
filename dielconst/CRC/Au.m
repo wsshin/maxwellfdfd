@@ -286,7 +286,11 @@ switch plotstyle
 %         plot(wvlen, n, wvlen, k)
         legend('n', 'k', 'Location', 'SouthEast');
         xlabel 'wavelength (nm)'
-%         axis([1e2 1e4 1e-2 1e2])
+% 		axis([1e2 1e4 1e-2 1e2])
+%         loglog(wvlen/1000, n, 'o-', wvlen/1000, k, 'o-')
+%         legend('n', 'k', 'Location', 'SouthEast');
+%         xlabel 'wavelength (\mum)'
+% 		axis([1e0 2e0 1e-2 1e2])
     case eps_eV  % plot real(eps) and -imag(eps)
         loglog(eV, abs(real(eps)), 'o-', eV, -imag(eps), 'o-')
         legend('\epsilon_1', '\epsilon_2', 'Location', 'SouthEast');
@@ -316,4 +320,4 @@ end
 title(mfilename)
 
 %% Save data.
-save(mfilename, 'eV', 'n', 'k');
+% save(mfilename, 'eV', 'n', 'k');
