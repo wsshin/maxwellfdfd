@@ -1,16 +1,16 @@
-%% SectoralCylinder
-% Concrete subclass of <GenericCylinder.html |GenericCylinder|> representing a
-% cylinder with a sectoral cross section.
+%% SegmentalCylinder
+% Concrete subclass of <GenericCylinder.html |GenericCylinder|>
+% representing a cylinder with a cross section of a circular segment.
 
 %%% Description
-% |SectoralCylinder| represents the shape of a sectoral cylinder.  Its cross
-% section is a circular sector (angular portion of a disk).  The axis of the
-% cylinder should be aligned with one of the axes of the Cartesian coordinate
-% system.
+% |SegmentalCylinder| represents the shape of a segmental cylinder.  Its
+% cross section is a circular segment (region surrounded by an arc and the
+% chord connecting its end points).  The axis of the cylinder should be
+% aligned with one of the axes of the Cartesian coordinate system.
 
 %%% Construction
-%  shape = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta)
-%  shape = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)
+%  shape = SegmentalCylinder(normal_axis, height, center, radius, theta, d_theta)
+%  shape = SegmentalCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)
 % 
 % *Input Arguments*
 %
@@ -21,15 +21,15 @@
 % |normal_axis = Axis.z|, |(x, y)| is the coordinate of the center of the
 % circle.
 % * |radius|: radius of the circle
-% * |theta|: beginning angle of the sector in radian
-% * |d_theta|: angular width of the sector in radian between -2*pi and 2*pi.
+% * |theta|: beginning angle of the segment in radian
+% * |d_theta|: angular width of the segment in radian between -2*pi and 2*pi.
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
 % dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
 
 %%% Example
-%   % Create an instance of SectoralCylinder.
-%   shape = SectoralCylinder(Axis.z, 100, [0 0 50], 50, pi/6, pi/3);
+%   % Create an instance of SegmentalCylinder.
+%   shape = SegmentalCylinder(Axis.z, 100, [0 0 50], 50, pi/6, pi/3);
 %
 %   % Use the constructed shape in maxwell_run().
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
@@ -41,10 +41,10 @@
 % <PolyognalCylinder.html |PolygonalCylinder|>, <Shape.html |Shape|>,
 % <maxwell_run.html |maxwell_run|>
 
-classdef SectoralCylinder < GenericCylinder
+classdef SegmentalCylinder < GenericCylinder
 
 	methods
-        function this = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)
+        function this = SegmentalCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(height, 'real') && height > 0, '"height" should be positive.');
 			chkarg(istypesizeof(center, 'real', [1, Axis.count]), ...
@@ -76,22 +76,30 @@ classdef SectoralCylinder < GenericCylinder
 				chkarg(istypesizeof(rho, 'real', [0, Dir.count]), ...
 					'"rho" should be matrix with %d columns with real elements.', Dir.count);
 				N = size(rho, 1);
+				
 				c = center([h, v]);
 				c_vec = repmat(c, [N 1]);
+				
+				m = c + mean(radius * [cos(thetas.') sin(thetas.')]);
+				m_vec = repmat(m, [N 1]);
+				
+				n_cth = [cos(cth) sin(cth)];  % normal vector in centeral angle direction
 				
 				rc = rho - c_vec;
 				theta_pt = atan2(rc(:,Dir.v), rc(:,Dir.h));  % -pi <= theta_rho < pi
 				r_pt = sqrt(sum(rc.^2, 2));
 				zero_r_pt = (r_pt==0);  % atan2(0,0) is not well-defined
 				
+				rm = rho - m_vec;
+				
 				dr = r_pt - cr;
-				level = min([lsf_th(theta_pt), 1 - abs(dr/sr)], [], 2);
+				level = min([lsf_th(theta_pt), 1 - abs(dr/sr), rm * n_cth.'], [], 2);
 				level(zero_r_pt) = 0;
 			end
 			
 			lprim = cell(1, Axis.count);
-			lprim{h} = [radius * cos(thetas) + center(h), center(h)];
-			lprim{v} = [radius * sin(thetas) + center(v), center(v)];
+			lprim{h} = radius * cos(thetas) + center(h);
+			lprim{v} = radius * sin(thetas) + center(v);
 			lprim{n} = [-height height]/2 + center(n);
 			
 			if lsf_th(0) > 0
