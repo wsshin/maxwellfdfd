@@ -62,6 +62,7 @@
 % * <topic/basic.html Basic Usage>
 % * <topic/intermediate.html Intermediate Usage (for building complicated systems)>
 % * <topic/fd3d.html Using FD3D for Large Problems>
+% * <comp/components.html List of Functions and Classes>
 
 %% User Guides (to be written)
 % * <topic/material.html Assigning Material Parameters>
