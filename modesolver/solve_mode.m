@@ -1,3 +1,4 @@
+% This function is no longer used; see prep_modalsrc(). 
 function [v, beta] = solve_mode(A, strategy, sval, v_guess)
 
 chkarg(isequal(strategy, 'beta') || isequal(strategy, 'modeorder'), '"strategy" should be ''beta'' or ''modeorder''.');

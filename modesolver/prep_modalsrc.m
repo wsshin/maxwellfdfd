@@ -102,13 +102,14 @@ end
 	s_factor_cell, grid3d, ...
 	modalsrc.normal_axis, modalsrc.intercept);
 
+%% Construct a guess eigenvalue and eigenvector.
 if isequal(modalsrc.opts.clue, 'order')
 	Ar = wgmode_matrix(ge, pml, real(osc.in_omega0()), ...
 		real_cell(eps_cell), real_cell(mu_cell), ...
 		real_cell(s_factor_cell), grid3d, ...
 		modalsrc.normal_axis, modalsrc.intercept);
 
-	[v, beta_guess] = solve_mode_real(Ar, modalsrc.opts.order, 1e-6);
+	[v, beta_guess] = solve_mode_real(Ar, modalsrc.opts.order, 1e-10);
 	opts.v0 = v;
 else
 	assert(isequal(modalsrc.opts.clue, 'guess'))
