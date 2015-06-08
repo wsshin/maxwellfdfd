@@ -14,6 +14,7 @@ classdef Painter2d < handle
 	% Properties that affect C, Xh, Yv, and hence require draw2d()
 	properties (Dependent)
 		scalar2d
+		grid2d
 		withinterp
 		withpml
 		phase_angle
@@ -42,6 +43,24 @@ classdef Painter2d < handle
         withgrid
 		withcolorbar
 		linewidth
+	end
+	
+	methods (Access = private)
+		function l_cell = lplot(this)
+			% Return the locations where data are evaluated for plotting.  If
+			% the data do not include the boundaries of the simulation domain (or
+			% the PML interfaces for "withpml == false"), the boundary points
+			% are added.
+			l_cell = this.grid2d.lplot(this.scalar2d.gt_array, this.withinterp, this.withpml);
+		end
+		
+		function l_cell = lvoxelbound(this)
+			% Return the locations of boundaries of voxels drawn.  For data at
+			% primary grid points, the voxel centers are in the simulation
+			% domain including the boundary.  For data at dual grid points, the
+			% voxel centers are in the simulation domain excluding the boundary.
+			l_cell = this.grid2d.lvoxelbound(this.scalar2d.gt_array, this.withpml);
+		end
 	end
 	
 	methods
@@ -79,6 +98,10 @@ classdef Painter2d < handle
 				this.isLpreped = false;
 				this.scalar2d_ = scalar2d;
 			end
+		end
+		
+		function grid2d = get.grid2d(this)
+			grid2d = this.scalar2d.grid2d;
 		end
 		
 		function truth = get.withinterp(this)
@@ -185,34 +208,58 @@ classdef Painter2d < handle
 			chkarg(istypesizeof(linewidth, 'real') && linewidth > 0, '"cscale" should be positive.');
 			this.linewidth = linewidth;
 		end
-		
+				
 		function prep_data(this)
-			if this.isLpreped
-				this.C = this.scalar2d.data_for_pcolor(this.withinterp, this.withpml);
-			else
-				[this.C, this.Xh, this.Yv] = this.scalar2d.data_for_pcolor(this.withinterp, this.withpml);
-			end
+			if ~this.isCpreped
+				[array, lall] = this.scalar2d.data_expanded();
+				[Xh0, Yv0] = ndgrid(lall{:});
+
+				lplot = this.lplot();
+				[Xhi, Yvi] = ndgrid(lplot{:});
+				this.C = interpn(Xh0, Yv0, array, Xhi, Yvi);
+				this.C = permute(this.C, int([Dir.v, Dir.h]));  % to be compatible with pcolor()
+
+				if this.isswapped
+					this.C = this.C.';
+				end
+
+				this.maxamp = max(abs(this.C(:)));
+				if isnan(this.cmax)
+					this.cmax = this.maxamp;
+				end
+
+				if this.withabs
+					this.C = abs(this.C);
+				else
+					this.C = real(exp(1i * this.phase_angle) .* this.C);
+				end
+				
+				if ~this.withinterp
+					% Pad the end boundaries.  The padded values are not drawn, so
+					% they don't have to be accurate.
+					this.C(end+1, :) = this.C(end, :);
+					this.C(:, end+1) = this.C(:, end);
+				end
 			
-			if this.isswapped
-				this.C = this.C.';
-				temp = this.Xh;
-				this.Xh = this.Yv.';
-				this.Yv = temp.';
+				this.isCpreped = true;
 			end
-			
-			this.maxamp = max(abs(this.C(:)));
-			if isnan(this.cmax)
-				this.cmax = this.maxamp;
+
+			if ~this.isLpreped
+				if this.withinterp
+					l = this.lplot();
+				else
+					l = this.lvoxelbound();
+				end
+				[this.Xh, this.Yv] = meshgrid(l{:});
+
+				if this.isswapped
+					temp = this.Xh;
+					this.Xh = this.Yv.';
+					this.Yv = temp.';
+				end
+
+				this.isLpreped = true;
 			end
-			
-			if this.withabs
-				this.C = abs(this.C);
-			else
-				this.C = real(exp(1i * this.phase_angle) .* this.C);
-			end
-						
-			this.isLpreped = true;
-			this.isCpreped = true;
 		end
 		
 		function set_caxis(this, axes_handle)
@@ -232,9 +279,7 @@ classdef Painter2d < handle
 				axes_handle = gca;
 			end
 
-			if ~this.isCpreped
-				this.prep_data();
-			end
+			this.prep_data();
 
 			init_axes2d(axes_handle, this.scalar2d.grid2d, this.withinterp, this.withpml, this.isswapped);
 			this.set_caxis(axes_handle);
@@ -253,9 +298,7 @@ classdef Painter2d < handle
 			end
 			chkarg(ishandle(axes_handle), '"axes_handle" should be handle.');
 			
-			if ~this.isCpreped
-				this.prep_data();
-			end
+			this.prep_data();
 			
 			% Update the title.
 			str = this.scalar2d.name;
@@ -298,9 +341,7 @@ classdef Painter2d < handle
 			end
 			chkarg(ishandle(axes_handle), '"axes_handle" should be handle.');
 			
-			if ~this.isCpreped
-				this.prep_data();
-			end
+			this.prep_data();
 			
 			title_curr = get(get(axes_handle, 'Title'), 'String');
 			xlabel_curr = get(get(axes_handle, 'Xlabel'), 'String');
@@ -318,9 +359,9 @@ classdef Painter2d < handle
 			end
 			intercept = this.scalar2d.intercept;
 			if this.withinterp
-				l_bound = this.scalar2d.lplot(this.withinterp, this.withpml);
+				l_bound = this.lplot();
 			else
-				l_bound = this.scalar2d.lvoxelbound(this.withpml);
+				l_bound = this.lvoxelbound();
 			end
 
 			if this.isswapped

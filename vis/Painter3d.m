@@ -15,6 +15,7 @@ classdef Painter3d < handle
 	% Properties that affect V, X, Y, Z, and hence require draw2d() or draw3d()
 	properties (Dependent)
 		scalar3d
+		grid3d
 		withinterp
 		withpml
 		phase_angle
@@ -41,6 +42,41 @@ classdef Painter3d < handle
         isopaque
         opacity
         withgrid
+		withcolorbar
+	end
+	
+	properties (SetAccess = private)
+		intercept0  % default slice position
+	end		
+	
+	methods (Access = private)
+		function l_cell = lplot(this)
+			% Return the locations where data are evaluated for plotting.  If
+			% the data do not include the boundaries of the simulation domain (or
+			% the PML interfaces for "withpml == false"), the boundary points
+			% are added.
+			l_cell = this.grid3d.lplot(this.scalar3d.gt_array, this.withinterp, this.withpml);
+		end
+		
+		function l_cell = lvoxelbound(this)
+			% Return the locations of boundaries of voxels drawn.  For data at
+			% primary grid points, the voxel centers are in the simulation
+			% domain including the boundary.  For data at dual grid points, the
+			% voxel centers are in the simulation domain excluding the boundary.
+			l_cell = this.grid3d.lvoxelbound(this.scalar3d.gt_array, this.withpml);
+		end
+
+		function calc_intercept0(this, V, lplot)
+			absV = abs(V);
+			this.intercept0 = NaN(1, Axis.count);
+			for w = Axis.elems
+				[u, v] = cycle(w);
+				Vproj = sum(sum(absV, int(u)), int(v));
+				Vproj = Vproj(:);
+				[~, ind] = max(Vproj);
+				this.intercept0(w) = lplot{w}(ind);
+			end
+		end
 	end
 	
 	methods
@@ -57,13 +93,14 @@ classdef Painter3d < handle
 			this.isopaque = false;
 			this.opacity = 0.7;
 			this.withgrid = false;
-						
+			this.withcolorbar = false;
+
 			this.isVpreped = false;
 			this.isLpreped = false;
 		end
 		
 		function databound = get.databound(this)
-			databound = this.scalar3d.grid3d.bound_plot(this.withpml);
+			databound = this.grid3d.bound_plot(this.withpml);
 		end
 				
 		function scalar3d = get.scalar3d(this)
@@ -77,6 +114,10 @@ classdef Painter3d < handle
 				this.isLpreped = false;
 				this.scalar3d_ = scalar3d;
 			end
+		end
+		
+		function grid3d = get.grid3d(this)
+			grid3d = this.scalar3d.grid3d;
 		end
 		
 		function truth = get.withinterp(this)
@@ -171,26 +212,56 @@ classdef Painter3d < handle
 			this.withgrid = truth;
 		end
 		
+		function set.withcolorbar(this, truth)
+			chkarg(istypesizeof(truth, 'logical'), '"truth" should be logical.');
+			this.withcolorbar = truth;
+		end
+		
 		function prep_data(this)
-			if this.isLpreped
-				this.V = this.scalar3d.data_for_slice(this.withinterp, this.withpml);
-			else
-				[this.V, this.X, this.Y, this.Z] = this.scalar3d.data_for_slice(this.withinterp, this.withpml);
+			if ~this.isVpreped
+				[array, lall] = this.scalar3d.data_expanded();
+				[X0, Y0, Z0] = ndgrid(lall{:});
+
+				lplot = this.lplot();
+				[Xi, Yi, Zi] = ndgrid(lplot{:});
+				this.V = interpn(X0, Y0, Z0, array, Xi, Yi, Zi);
+
+				this.calc_intercept0(this.V, lplot);  % calculate before permuting V
+
+				this.V = permute(this.V, int([Axis.y, Axis.x, Axis.z]));  % to be compatible with slice()
+
+				this.maxamp = max(abs(this.V(:)));
+				if isnan(this.cmax)
+					this.cmax = this.maxamp;
+				end
+
+				if this.withabs
+					this.V = abs(this.V);
+				else
+					this.V = real(exp(1i * this.phase_angle) .* this.V);
+				end
+
+				if ~this.withinterp
+					% Pad the end boundaries.  The padded values are not drawn, so
+					% they don't have to be accurate.
+					this.V(end+1, :, :) = this.V(end, :, :);
+					this.V(:, end+1, :) = this.V(:, end, :);
+					this.V(:, :, end+1) = this.V(:, :, end);
+				end
+				
+				this.isVpreped = true;
 			end
 			
-			this.maxamp = max(abs(this.V(:)));
-			if isnan(this.cmax)
-				this.cmax = this.maxamp;
+			if ~this.isLpreped
+				if this.withinterp
+					l = this.lplot();
+				else
+					l = this.lvoxelbound();
+				end
+				[this.X, this.Y, this.Z] = meshgrid(l{:});
+
+				this.isLpreped = true;
 			end
-			
-			if this.withabs
-				this.V = abs(this.V);
-			else
-				this.V = real(exp(1i * this.phase_angle) .* this.V);
-			end
-						
-			this.isLpreped = true;
-			this.isVpreped = true;
 		end
 		
 		function set_caxis(this, axes_handle)
@@ -210,14 +281,20 @@ classdef Painter3d < handle
 				axes_handle = gca;
 			end
 
-			if ~this.isVpreped
-				this.prep_data();
-			end
+			this.prep_data();
 			
-			init_axes3d(axes_handle, this.scalar3d.grid3d, this.withinterp, this.withpml);
+			init_axes3d(axes_handle, this.grid3d, this.withinterp, this.withpml);
 			this.set_caxis(axes_handle);
 			
-			% Execute "this.set_caxis(axes_handle)" again in draw_slice().
+			% Should execute "this.set_caxis(axes_handle)" again in
+			% draw_slice().
+
+			if this.withcolorbar
+				hc = colorbar;
+				format_colorbar(hc, this.scalar3d);
+			else
+				colorbar off
+			end
 		end
 				
 		function surface_handle = draw_slice(this, axes_handle, normal_axis, intercept)
@@ -228,11 +305,11 @@ classdef Painter3d < handle
 
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			
-			if ~this.isVpreped
-				this.prep_data();
-			end
-			if nargin < 4  % no intercept
-				intercept = this.scalar3d.grid3d.center(normal_axis);
+			this.prep_data();
+
+			if nargin < 4  || isempty(intercept)  % no intercept
+% 				intercept = this.grid3d.center(normal_axis);
+				intercept = this.intercept0(normal_axis);
 			end
 			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');			
 			chkarg(intercept >= this.databound(normal_axis, Sign.n) && intercept <= this.databound(normal_axis, Sign.p), ...
@@ -275,7 +352,7 @@ classdef Painter3d < handle
 		end
 		
 		function patch_handle_array = draw_objsrc(this)
-			patch_handle_array = draw_objsrc(this.obj_array, this.src_array, this.scalar3d.grid3d, this.withinterp, this.withpml);
+			patch_handle_array = draw_objsrc(this.obj_array, this.src_array, this.grid3d, this.withinterp, this.withpml);
 			
 			if ~this.isopaque
 				alpha(patch_handle_array, this.opacity);

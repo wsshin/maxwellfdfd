@@ -1,8 +1,8 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-isnew = true;
-inspect_only = true;
+isnew = false;
+inspect_only = false;
 srcfilenamebase = 'coax';
 
 %% Solve the system.
@@ -65,8 +65,9 @@ end
 if ~inspect_only
 	figure;
 	clear opts;
-	opts.withabs = true;
+	opts.withabs = false;
 	opts.isopaque = false;
-% 	opts.withgrid = true;
 	visall(H{Axis.z}, obj_array, src_array, opts);
+% 	vis3d(H{Axis.z}, [], 0, 0, opts);
+% 	colormap(gca, 'jet');
 end

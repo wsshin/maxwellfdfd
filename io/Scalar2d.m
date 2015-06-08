@@ -56,29 +56,21 @@ classdef Scalar2d
 			this.intercept = intercept;
 		end
 		
-		function l_cell = lplot(this, withinterp, withpml)
-			% Return the locations where data are evaluated for plotting.  If
-			% the data do not include the boundaries of the simulation domain (or
-			% the PML interfaces for "withpml == false"), the boundary points
-			% are added.
-			l_cell = this.grid2d.lplot(this.gt_array, withinterp, withpml);
-		end
-		
-		function l_cell = lvoxelbound(this, withpml)
-			% Return the locations of boundaries of voxels drawn.  For data at
-			% primary grid points, the voxel centers are in the simulation
-			% domain including the boundary.  For data at dual grid points, the
-			% voxel centers are in the simulation domain excluding the boundary.
-			l_cell = this.grid2d.lvoxelbound(this.gt_array, withpml);
-		end
-		
-		function [array, l_cell] = data_expanded(this)
+		function l_cell = lall(this)
 			l_cell = this.grid2d.lall(Dir.elems + Dir.count*subsindex(this.gt_array));
+		end
+		
+		function l_cell = l(this)
+			l_cell = this.grid2d.l(Dir.elems + Dir.count*subsindex(this.gt_array));
+		end
+
+		function [array, l_cell] = data_expanded(this)
+			l_cell = this.lall;
 			array = this.array;
 		end
 		
 		function [array, l_cell] = data_original(this)
-			l_cell = this.grid2d.l(Dir.elems + Dir.count*subsindex(this.gt_array));
+			l_cell = this.l;
 			ind = cell(1, Dir.count);
 			
 			for d = Dir.elems
@@ -91,61 +83,70 @@ classdef Scalar2d
 			array = this.array(ind{:});
 		end
 		
-		function [C, X, Y] = data_for_pcolor(this, withinterp, withpml)
-			chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
-			chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
-			
-			lall = this.grid2d.lall(Dir.elems + Dir.count*subsindex(this.gt_array));
-			[Xh, Yv] = ndgrid(lall{:});
-
-			lplot = this.lplot(withinterp, withpml);
-			[XIh, YIv] = ndgrid(lplot{:});
-			C = interpn(Xh, Yv, this.array, XIh, YIv);
-			C = permute(C, int([Dir.v, Dir.h]));  % to be compatible with pcolor()
-
-			if ~withinterp
-				% Pad the end boundaries.  The padded values are not drawn, so
-				% they don't have to be accurate.
-				C(end+1, :) = C(end, :);
-				C(:, end+1) = C(:, end);
-			end
-			
-			if nargout >= 2  % X, Y
-				if withinterp
-					l = this.lplot(withinterp, withpml);
+		function val = value(this, h, v)
+			loc = {h, v};
+			lavail = this.l;  % available locations
+			num_len1 = 0;
+			for d = Dir.elems
+				coord_d = loc{d};
+				chkarg(isempty(coord_d) || isvector(coord_d) && istypeof(coord_d, 'real'), ...
+				'"%s" should be empty or real vector.', char(d));
+				if isempty(coord_d)
+					coord_d = lavail{d};
 				else
-					l = this.lvoxelbound(withpml);
+					chkarg(this.grid2d.comp(d).contains(coord_d), '"%s" should be inside grid.', char(d));
+					coord_d = sort(coord_d);
 				end
-				[X, Y] = meshgrid(l{:});
+				loc{d} = coord_d;
+				if length(coord_d) == 1
+					num_len1 = num_len1 + 1;
+				end
 			end
-		end
+			chkarg(num_len1 >= 1, 'Points should be along Cartesian direction.');
 			
-		function val = value(this, point)
-			chkarg(istypesizeof(point, 'real', [0, Dir.count]), ...
-				'"point" should be 2D array with %d columns.', Dir.count);
-			chkarg(this.grid2d.contains(point), '"point" should be inside grid.');
-			
-			lall = this.grid2d.lall(Dir.elems + Dir.count*subsindex(this.gt_array));
+			lall = this.lall;
 			ind = cell(1, Dir.count);
+			
 			for d = Dir.elems
-				indd = ismembc2(point(d), lall{d});
-				if indd == 0
-					indd = find(lall{d} < point(d), 1, 'last');
-					ind{d} = [indd, indd+1];
-				elseif indd == 1
-					ind{d} = [indd, indd+1];
-				else  % indd == end
-					ind{d} = [indd-1, indd];
+				loc_min = loc{d}(1);
+				indw_min = ismembc2(loc_min, lall{d});
+				if indw_min == 0
+					indw_min = find(lall{d} < loc_min, 1, 'last');
 				end
+				
+				loc_max = loc{d}(end);
+				indw_max = ismembc2(loc_max, lall{d});
+				if indw_max == 0
+					indw_max = find(lall{d} > loc_max, 1, 'first');
+				end
+				
+				ind{d} = indw_min:indw_max;
 			end
 			
-			l = cell(1, Dir.count);
-			for d = Dir.elems
-				l{d} = lall{d}(ind{d});
-			end
-			[X, Y] = ndgrid(l{:});
-			C = this.array(ind{:});
-			val = interpn(X, Y, C, point(Dir.h), point(Dir.v));
-		end		
+			isindlen1 = [length(ind{Dir.h}), length(ind{Dir.v})] == 1;
+			if all(isindlen1)
+				val = this.array(ind{:});
+			else
+				for d = Dir.elems
+					if isindlen1(d) % ndgrid() needs two data points to interpolate with
+						indw = ind{d};
+						if indw >= 2
+							ind{d} = [indw - 1, indw];
+						else
+							ind{d} = [indw, indw + 1];
+						end
+					end
+				end
+				
+				l = cell(1, Dir.count);
+				for d = Dir.elems
+					l{d} = lall{d}(ind{d}(1):ind{d}(end));
+				end
+				[H, V] = ndgrid(l{:});
+				C = this.array(ind{:});
+				[Hi, Vi] = ndgrid(loc{:});
+				val = interpn(H, V, C, Hi, Vi);
+			end			
+		end
 	end		
 end

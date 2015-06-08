@@ -56,13 +56,6 @@ classdef TotalView3d < handle
 		
 		function set.scalar3d(this, scalar3d)
 			this.painter3d.scalar3d = scalar3d;
-			this.intercept = scalar3d.grid3d.center;
-			
-			for w = Axis.elems
-				warning('off', 'Maxwell:interp');
-				this.painter2d(w).scalar2d = slice_scalar3d(scalar3d, w, this.intercept(w));
-				warning('on', 'Maxwell:interp');
-			end
 		end
 		
 		function obj_array = get.obj_array(this)
@@ -250,10 +243,16 @@ classdef TotalView3d < handle
 
 			% Prepare data to show.
 			p3d.prep_data();
+			this.intercept = p3d.intercept0;  % after p3d.prep_data()
+
 			this.cmax = p3d.cmax;
-			
+
 			% Draw slices in 2D.
 			for w = Axis.elems
+				warning('off', 'Maxwell:interp');
+				p2d(w).scalar2d = slice_scalar3d(this.scalar3d, w, this.intercept(w));
+				warning('on', 'Maxwell:interp');
+
 				p2d(w).init_display(this.ha2d(w));
 				p2d(w).draw_slice(this.ha2d(w));
 				if this.withobjsrc
