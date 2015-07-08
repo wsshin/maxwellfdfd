@@ -183,21 +183,17 @@
 % material.  It is a path relative to |material| directory.  For example,
 % |'Palik/Si'| refers to silicon's permittivity data stored in |Si.m| file in
 % |material/Palik| directory.  The permittivity for the frequency of interest is
-% automatically retrieved from the data file.  Note that |"/"| here is the file
-% separator used in UNIX-like systems; In MS Windows, |"\"| should be used.  To
-% be platform-independent, |filesep| can be used in place of |"/"| or |"\"|
-% (e.g., |strcat('Palik', filesep, 'Si')| or |['Palik', filesep, 'Si']|).
-
+% automatically retrieved from the data file.
 
 %%% Example
 %   gray = [0.5 0.5 0.5];  % [r g b]
 %   inspect_only = true;
 %   [E, H, obj_array, extra] = maxwell_run(...
 %       'OSC', 1e-9, 1550, ...
-%       'DOM', {['Palik', filesep, 'SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...
+%       'DOM', {['Palik/SiO2'], 'none'}, [-700, 700; -600, 600; -200, 1700], 20, BC.p, 200, ...
 %       'OBJ', ...
-%           {['Palik', filesep, 'SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
-%           {['CRC', filesep, 'Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
+%           {['Palik/SiO2'], 'none'}, Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]), ...  % OBJ1
+%           {['CRC/Ag'], gray}, [Box([-700, -25; -25, 25; -200, 1700], 20), Box([25, 700; -25, 25; -200, 1700], 20)], ...  % OBJ2
 %       'SRCJ', PointSrc(Axis.x, [0, 0, 200]), ...
 %       inspect_only);
 
