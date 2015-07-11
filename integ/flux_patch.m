@@ -15,7 +15,7 @@ gt = scalar2d.gt_array;
 % l = grid2d.lall(Dir.elems + Dir.count*subsindex(gt));
 % la = grid2d.lall(Dir.elems + Dir.count*subsindex(alter(gt)));
 
-la = scalar2d.lvoxelbound(true);  % true: include PML
+la = grid2d.lvoxelbound(gt, true);  % true: include PML
 array = scalar2d.data_original();
 
 ind_array = NaN(Dir.count, Sign.count);
