@@ -67,7 +67,8 @@ if ~inspect_only
 	clear opts;
 	opts.withabs = false;
 	opts.isopaque = false;
-	visall(H{Axis.z}, obj_array, src_array, opts);
-% 	vis3d(H{Axis.z}, [], 0, 0, opts);
-% 	colormap(gca, 'jet');
+% 	visall(H{Axis.z}, obj_array, src_array, opts);
+	vis3d(H{Axis.z}, [], 0, 0, opts);
+	axis(gca, [-200 200 -200 200 -200 200]);
+	colormap(gca, 'jet');
 end
