@@ -26,7 +26,7 @@ How to install MaxwellFDFD
 		maxwellfdfd_root = 'INSTALLATION DIRECTORY'
 		addpath(maxwellfdfd_root);
 		addpath([maxwellfdfd_root, filesep, 'base']);
-		addpath([maxwellfdfd_root, filesep, 'deriv']);
+		addpath([maxwellfdfd_root, filesep, 'diff']);
 		addpath([maxwellfdfd_root, filesep, 'dielconst']);
 		addpath([maxwellfdfd_root, filesep, 'grid']);
 		addpath([maxwellfdfd_root, filesep, 'integ']);
