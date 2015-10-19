@@ -117,7 +117,7 @@ h5create(filename, '/e_ikL', [2 Axis.count]);
 h5write(filename, '/e_ikL', expand_complex(e_ikL.'));
 
 for w = Axis.elems
-	datasetname = ['/', char(w), '_prim'];
+	datasetname = ['/', char(w), '_prim'];  % needed not for solver, but for visualization in MaxwellFDFD
 	real_array = grid3d.lall{w,GT.prim}.';
 	h5create(filename, datasetname, length(real_array));
 	h5write(filename, datasetname, real_array);
@@ -147,7 +147,7 @@ if use_petsc
 			eps_node_array = complex(eps_node_array);
 		end
 	% 	PetscBinaryWrite(petscfilename, eps_node_array(:), 'indices', 'int64');
-		PetscBinaryWrite(petscfilename, eps_node_array(:));
+		PetscBinaryWrite(petscfilename, eps_node_array(:), 'complex', true);
 		gzip(petscfilename);
 		delete(petscfilename);
 	end
@@ -158,7 +158,7 @@ if use_petsc
 		eps_array = complex(eps_array);
 	end
 % 	PetscBinaryWrite(petscfilename, eps_array(:), 'indices', 'int64');
-	PetscBinaryWrite(petscfilename, eps_array(:));
+	PetscBinaryWrite(petscfilename, eps_array(:), 'complex', true);
 	gzip(petscfilename);
 	delete(petscfilename);
 
@@ -168,7 +168,7 @@ if use_petsc
 		J_array = complex(J_array);
 	end
 % 	PetscBinaryWrite(petscfilename, J_array(:), 'indices', 'int64');
-	PetscBinaryWrite(petscfilename, J_array(:));
+	PetscBinaryWrite(petscfilename, J_array(:), 'complex', true);
 	gzip(petscfilename);
 	delete(petscfilename);
 
@@ -178,7 +178,7 @@ if use_petsc
 		M_array = complex(M_array);
 	end
 % 	PetscBinaryWrite(petscfilename, M_array(:), 'indices', 'int64');
-	PetscBinaryWrite(petscfilename, M_array(:));
+	PetscBinaryWrite(petscfilename, M_array(:), 'complex', true);
 	gzip(petscfilename);
 	delete(petscfilename);
 
@@ -189,7 +189,7 @@ if use_petsc
 			F0_array = complex(F0_array);
 		end
 	% 	PetscBinaryWrite(petscfilename, F0_array(:), 'indices', 'int64');
-		PetscBinaryWrite(petscfilename, F0_array(:));
+		PetscBinaryWrite(petscfilename, F0_array(:), 'complex', true);
 		gzip(petscfilename);
 		delete(petscfilename);
 	end
