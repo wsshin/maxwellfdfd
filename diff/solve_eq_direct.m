@@ -19,32 +19,20 @@ eq = MatrixEquation(eqtype, pml, omega, eps_cell, mu_cell, s_factor_cell, J_cell
 % spparms('spumoni',1);  % make mldivide(A, b) (= A\b) verbose
 f = A\b;
 g = GfromF(f);
-
 if eqtype.f == FT.e
 	e = f;
 	h = g;
 else  % eqtype.f == FT.h
 	e = g;
 	h = f;
-end
+end	
 
-N = grid3d.N;
-e = reshape(e, Axis.count, prod(N));
-Ex = e(int(Axis.x), :); Ex = reshape(Ex, N);
-Ey = e(int(Axis.y), :); Ey = reshape(Ey, N); 
-Ez = e(int(Axis.z), :); Ez = reshape(Ez, N);
-E = {Ex, Ey, Ez};
+[E, H] = EH_from_eh(e, h, eqtype, grid3d);
 
 % Test symmetry with respect to the plane bisecting the x-axis.
 if false
 	E = test_sym(Axis.x, A, b, E);
 end
-
-h = reshape(h, Axis.count, prod(N));
-Hx = h(int(Axis.x), :); Hx = reshape(Hx, N);
-Hy = h(int(Axis.y), :); Hy = reshape(Hy, N); 
-Hz = h(int(Axis.z), :); Hz = reshape(Hz, N);
-H = {Hx, Hy, Hz};
 
 
 function E = test_sym(w, A, b, E)

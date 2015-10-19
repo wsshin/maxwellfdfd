@@ -101,16 +101,30 @@ classdef MatrixEquation
 
 				A = PM * (this.Cm * INV_MU * this.Ce) * PM - this.omega^2 * EPS;
 				b = -1i*this.omega*this.j - this.Cm*(this.m./this.mu);
-			else  % this.ft == FT.h
+            
+				A = A(this.r, this.r);
+				b = b(this.r);
+			elseif this.ft == FT.h
 				INV_EPS = create_spdiag(1./this.eps);  % when mu has Inf, "MU \ Mat" complains about singularity
 				MU = create_spdiag(this.mu);
 
 				A = (this.Ce * INV_EPS * this.Cm) - this.omega^2 * MU;
 				b = -1i*this.omega*this.m + this.Ce*(this.j./this.eps);
-			end
             
-			A = A(this.r, this.r);
-			b = b(this.r);
+				A = A(this.r, this.r);
+				b = b(this.r);
+			else  % this.ft == FT.eh
+				EPS = create_spdiag(this.eps);
+				MU = create_spdiag(this.mu);
+				
+				A = [-1i * this.omega * EPS, this.Cm; this.Ce, 1i * this.omega * MU];
+				b = [this.j; -this.m];
+            
+				N = length(this.r);
+				rr = [this.r; (this.r + N)];
+				A = A(rr, rr);
+				b = b(rr);
+			end
 		end
 		
 		function [h_Op, b, h_GfromF] = matrixfree_op(this)

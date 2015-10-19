@@ -3,11 +3,12 @@ classdef FT < Enumerated
 	enumeration
 		e('E')
 		h('H')
+		eh('EH')
 	end
 	
 	methods (Static)
 		function elems = elems(ind)
-			elems = [FT.e, FT.h];
+			elems = [FT.e, FT.h, FT.eh];
 			if nargin > 0  % ind
 				elems = elems(ind);
 			end
@@ -18,18 +19,18 @@ classdef FT < Enumerated
 		end
 	end
 
-	methods
-		function f = alter(this)
-			% This function simply returned FT.h if this == FT.e and FT.e if
-			% this == FT.h originally, but it is modified to handle arguments
-			% given as arrays.
-			chkarg(istypeof(this, 'FT'), '"this" should have FT as elements.');
-			if isempty(this)  % alter([]) makes no sense, but alter(FT.empty()) does
-				f = [];
-			else
-				f = this.elems(FT.count + 1 - int(this));
-			end
-		end
-	end
+% 	methods
+% 		function f = alter(this)
+% 			% This function simply returned FT.h if this == FT.e and FT.e if
+% 			% this == FT.h originally, but it is modified to handle arguments
+% 			% given as arrays.
+% 			chkarg(istypeof(this, 'FT'), '"this" should have FT as elements.');
+% 			if isempty(this)  % alter([]) makes no sense, but alter(FT.empty()) does
+% 				f = [];
+% 			else
+% 				f = this.elems(FT.count + 1 - int(this));
+% 			end
+% 		end
+% 	end
 end
 
