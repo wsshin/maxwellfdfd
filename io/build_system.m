@@ -12,11 +12,11 @@
 % given objects and sources.  The constructed system is typically used inside
 % <maxwell_run.html maxwell_run>.
 %
-% |ge| is an instance of |GT| and indicates the grid type of the _E_-field. Each
-% following argument, |OSC|, |DOM|, |OBJ|, and |SRC|, represents a group of
-% parameters. Each group supports several flexible expressions.  For more
-% details, see the relevant sections about the input parameter groups in
-% <maxwell_run.html |maxwell_run|>.
+% |ge| is an instance of |GT| and indicates the grid type of the _E_-field.
+% Each following argument, |OSC|, |DOM|, |OBJ|, and |SRC|, represents a
+% group of parameters. Each group supports several flexible expressions.
+% For more details, see the relevant sections about the input parameter
+% groups in <maxwell_run.html |maxwell_run|>.
 %
 % An additional input parameter |progmark| is an instance of <ProgMark.html
 % ProgMark>, which outputs the progress of the system build procedure as the
