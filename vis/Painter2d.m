@@ -347,15 +347,15 @@ classdef Painter2d < handle
 			xlabel_curr = get(get(axes_handle, 'Xlabel'), 'String');
 			ylabel_curr = get(get(axes_handle, 'Ylabel'), 'String');
 			
-			grid2d = this.scalar2d.grid2d;
-			n_axis = grid2d.normal_axis;
-			h_axis = grid2d.axis(Dir.h);
-			v_axis = grid2d.axis(Dir.v);
+			g2d = this.scalar2d.grid2d;
+			n_axis = g2d.normal_axis;
+			h_axis = g2d.axis(Dir.h);
+			v_axis = g2d.axis(Dir.v);
 % 			dh = min(grid2d.dl{Dir.h, GT.prim});
 % 			dv = min(grid2d.dl{Dir.v, GT.prim});
 			dlmin = NaN(Dir.count, 1);
 			for d = Dir.elems
-				dlmin(d) = min(grid2d.dl{d, GT.dual}, [], 2);
+				dlmin(d) = min(g2d.dl{d, GT.dual}, [], 2);
 			end
 			intercept = this.scalar2d.intercept;
 			if this.withinterp
@@ -394,8 +394,12 @@ classdef Painter2d < handle
 				end
 				
 				if ~isequal(color, 'none')  && shape.interval(n_axis).contains(intercept);
+					w_line = this.linewidth;
 					if ~istypesizeof(shape, 'ZeroVolShape')
 						lsf = shape.lsf;
+						if w_line < 3;
+							w_line = 3;
+						end
 					else
 						lsf = @(r) shape.lsf(r, true);
 					end
@@ -429,20 +433,20 @@ classdef Painter2d < handle
 					h = ezplot(axes_handle, lsf2d, [bound(Dir.h,:), bound(Dir.v,:)]);
 					warning('on', 'MATLAB:contour:ConstantData');
 					set(h, 'Color', color);
-					set(h, 'LineWidth', this.linewidth);
-					if i > nobj  % source
-						if istypesizeof(shape, 'Point')
-							set(h, 'LineWidth', 3);
-						elseif istypesizeof(shape, 'Line')
-% 							if n_axis == shape.axis
-% 								set(h, 'LineWidth', 3);
-% 							else
-% 								set(h, 'LineStyle', ':');
-% 							end
-% 						elseif istypesizeof(shape, 'Plane')
-% 							set(h, 'LineStyle', ':');
-						end
-					end
+					set(h, 'LineWidth', w_line);
+% 					if i > nobj  % source
+% 						if istypesizeof(shape, 'Point')
+% 							set(h, 'LineWidth', 3);
+% 						elseif istypesizeof(shape, 'Line')
+% % 							if n_axis == shape.axis
+% % 								set(h, 'LineWidth', 3);
+% % 							else
+% % 								set(h, 'LineStyle', ':');
+% % 							end
+% % 						elseif istypesizeof(shape, 'Plane')
+% % 							set(h, 'LineStyle', ':');
+% 						end
+% 					end
 					plot_handle_array = [plot_handle_array(1:end), h];
 				end
 			end

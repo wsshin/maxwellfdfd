@@ -103,7 +103,7 @@ classdef PlaneSrc < Source & WithBloch
 					'"theta" should be polar angle in radian between -pi/2 and pi/2.');
 				chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
 				kt_Bloch = NaN(1, Dir.count);
-				kt = (2*pi/wvlen) * sin(theta);  % k tangential to plane
+				kt = (2*pi/wvlen) * sin(theta);  % tangential component of k to plane
 				kp = kt * cos(phi_ + pi/2);
 				kq = kt * sin(phi_ + pi/2);
 				kt_Bloch(Dir.h) = kp;

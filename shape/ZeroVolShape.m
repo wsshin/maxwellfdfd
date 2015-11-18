@@ -26,9 +26,11 @@ classdef ZeroVolShape < Shape
 				
 				level = lsf(r);
 				if force_draw && all(level <= 0)
-					% Make sure to "level" reaches zero; otherwise the plane is not
-					% drawn.
+					% If the level set function is negative, nothing is drawn,
+					% so shift the function upward.
 					max_level = max(level);
+					max_level = max(level(level<max_level));  % second largest
+% 					max_level = max(level(level<max_level));  % third largest
 					level = level - max_level;
 				end
 			end
