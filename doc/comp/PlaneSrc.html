@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>PlaneSrc</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-07-02"><meta name="DC.source" content="PlaneSrc.m"><style type="text/css">
+      --><title>PlaneSrc</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-11-18"><meta name="DC.source" content="PlaneSrc.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -23,7 +23,7 @@ a:visited { color:#004aa0; text-decoration:none; }
 
 p { padding:0px; margin:0px 0px 20px; }
 img { padding:0px; margin:0px 0px 20px; border:none; }
-p img, pre img, tt img, li img { margin-bottom:0px; } 
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
 
 ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
 ul li { padding:0px; margin:0px 0px 7px 0px; }
@@ -38,11 +38,12 @@ ol li ul li { list-style:square; }
 
 .content { font-size:1.2em; line-height:140%; padding: 20px; }
 
-pre, tt, code { font-size:12px; }
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
 pre { margin:0px 0px 20px; }
-pre.error { color:red; }
 pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
 pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
 
 @media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
 
@@ -67,11 +68,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
   </style></head><body><div class="content"><h1>PlaneSrc</h1><!--introduction--><p>Concrete subclass of <a href="Source.html"><tt>Source</tt></a> representing a constant electric dipole distribution over an entire plane.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Note</a></li><li><a href="#4">Example</a></li><li><a href="#5">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>PlaneSrc</tt> is to generate a plane wave in a homogeneous medium.  It supports oblique incidence, i.e., emission in the direction different from the normal direction of the plane.</p><h2>Construction<a name="2"></a></h2><pre>src = PlaneSrc(normal_axis, intercept, polarization)
 src = PlaneSrc(normal_axis, intercept, polarization, K)
-src = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: direction normal to the plane.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>intercept</tt>: location of the plane in the <tt>normal_axis</tt> direction.</li><li><tt>polarization</tt>: direction of the dipoles distributed on the plane.  It should be either one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>, or an angle in radian. When it is an instance of <a href="Axis.html"><tt>Axis</tt></a>, it should be orthogonal to <tt>normal_axis</tt>.  When it is an angle in radian, it is measured in the 2D Cartesian coordinate system normal to <tt>normal_axis</tt>.  For example, if <tt>normal_axis == Axis.y</tt>, then the angle is measured in the zx plane, and therefore it is measured in the counterclockwise direction from the z-axis in the zx plane.</li><li><tt>K</tt>: amplitude of the surface current density that the dipoles drive.</li><li><tt>theta</tt>: oblique incidence angle measured from <tt>normal_axis</tt>.  <tt>abs(theta)</tt> should not exceed <tt>pi/2</tt> because the waves are emitted from the both sides of the plane.</li><li><tt>wvlen</tt>: wavelength of the plane wave in the background medium.  It is required to set up the Bloch boundary condition for oblique incidence. <tt>wvlen</tt> is not the vacuum wavelength used in the frequency-domain Maxwell's equations, but the wavelength in the medium where this <tt>PlaneSrc</tt> is located.</li></ul></div><h2>Note<a name="3"></a></h2><p>In the finite-difference grid, <tt>PlaneSrc</tt> excites dipoles at the <i>E</i>-field points.  This poses a condition on <tt>intercept</tt> argument in the constructor: <tt>intercept</tt> should be at a dual grid point in the <tt>normal_axis</tt> direction. Therefore, make sure that <tt>intercept</tt> does not overlap with the locations of the vertices of <a href="Shape.html"><tt>Shape</tt></a> in the <tt>normal_axis</tt> direction; otherwise dynamic grid generation in <a href="moxwell_run.html"><tt>maxwell_run</tt></a> will fail.</p><h2>Example<a name="4"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of PointSrc.</span>
+src = PlaneSrc(normal_axis, intercept, polarization, K, k_Bloch)
+src = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: direction normal to the plane.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>intercept</tt>: location of the plane in the <tt>normal_axis</tt> direction.</li><li><tt>polarization</tt>: direction of the dipoles distributed on the plane.  It should be either one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>, or an angle in radian. When it is an instance of <a href="Axis.html"><tt>Axis</tt></a>, it should be orthogonal to <tt>normal_axis</tt>.  When it is an angle in radian, it is measured in the 2D Cartesian coordinate system normal to <tt>normal_axis</tt>.  For example, if <tt>normal_axis == Axis.y</tt>, then the angle is measured in the zx plane, and therefore it is measured in the counterclockwise direction from the z-axis in the zx plane.</li><li><tt>K</tt>: amplitude of the surface current density that the dipoles drive.</li><li><tt>kt_Bloch</tt>: in-plane Bloch wavevector.  If unassigned, <tt>kt_Bloch = [0 0]</tt> is used.</li><li><tt>theta</tt>: oblique incidence angle measured from <tt>normal_axis</tt>.  It is positive toward <tt>normal_axis x polarization</tt> direction, and negative toward <tt>-normal_axis x polarization</tt> direction. For example, if <tt>normal_axis == Axis.y</tt> and <tt>polarization == Axis.z</tt>, <tt>theta</tt> measured toward the +x-direction is positive, and <tt>theta</tt> measured toward the -x-direction is negative. <tt>abs(theta)</tt> should not exceed <tt>pi/2</tt>, because the waves are emitted from the both sides of the plane anyway.</li><li><tt>wvlen</tt>: wavelength of the plane wave in the background medium.  It is required to set up the Bloch boundary condition for oblique incidence. <tt>wvlen</tt> is not the vacuum wavelength used in the frequency-domain Maxwell's equations, but the wavelength in the medium where this <tt>PlaneSrc</tt> is located.</li></ul></div><h2>Note<a name="3"></a></h2><p>In the finite-difference grid, <tt>PlaneSrc</tt> excites dipoles at the <i>E</i>-field points.  This poses a condition on <tt>intercept</tt> argument in the constructor: <tt>intercept</tt> should be at a dual grid point in the <tt>normal_axis</tt> direction. Therefore, make sure that <tt>intercept</tt> does not overlap with the locations of the vertices of <a href="Shape.html"><tt>Shape</tt></a> in the <tt>normal_axis</tt> direction; otherwise dynamic grid generation in <a href="moxwell_run.html"><tt>maxwell_run</tt></a> will fail.</p><h2>Example<a name="4"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of PointSrc.</span>
 src =  PlaneSrc(Axis.y, 0, Axis.z);  <span class="comment">% y = 0 should not be primary grid point</span>
 </pre><pre class="language-matlab"><span class="comment">% Use the constructed src in maxwell_run().</span>
-[E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'SRC'</span>, src);
-</pre><h2>See Also<a name="5"></a></h2><p><a href="PointSrc.html"><tt>PointSrc</tt></a>, <a href="PointSrcM.html"><tt>PointSrcM</tt></a>, <a href="TFSFPlaneSrc.html"><tt>TFSFPlaneSrc</tt></a>, <a href="ModalSrc.html"><tt>ModalSrc</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+[E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'SRCJ'</span>, src);
+</pre><h2>See Also<a name="5"></a></h2><p><a href="PointSrc.html"><tt>PointSrc</tt></a>, <a href="PointSrcM.html"><tt>PointSrcM</tt></a>, <a href="TFSFPlaneSrc.html"><tt>TFSFPlaneSrc</tt></a>, <a href="ModalSrc.html"><tt>ModalSrc</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% PlaneSrc
 % Concrete subclass of <Source.html |Source|> representing a constant electric
@@ -85,6 +87,7 @@ src =  PlaneSrc(Axis.y, 0, Axis.z);  <span class="comment">% y = 0 should not be
 %%% Construction
 %  src = PlaneSrc(normal_axis, intercept, polarization)
 %  src = PlaneSrc(normal_axis, intercept, polarization, K)
+%  src = PlaneSrc(normal_axis, intercept, polarization, K, k_Bloch)
 %  src = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)
 % 
 % *Input Arguments*
@@ -101,9 +104,15 @@ src =  PlaneSrc(Axis.y, 0, Axis.z);  <span class="comment">% y = 0 should not be
 % therefore it is measured in the counterclockwise direction from the z-axis in
 % the zx plane.
 % * |K|: amplitude of the surface current density that the dipoles drive.
-% * |theta|: oblique incidence angle measured from |normal_axis|.  |abs(theta)|
-% should not exceed |pi/2| because the waves are emitted from the both sides of
-% the plane.
+% * |kt_Bloch|: in-plane Bloch wavevector.  If unassigned, |kt_Bloch = [0 0]| is
+% used.
+% * |theta|: oblique incidence angle measured from |normal_axis|.  It is
+% positive toward |normal_axis x polarization| direction, and negative toward
+% |-normal_axis x polarization| direction. For example, if |normal_axis ==
+% Axis.y| and |polarization == Axis.z|, |theta| measured toward the +x-direction
+% is positive, and |theta| measured toward the -x-direction is negative.
+% |abs(theta)| should not exceed |pi/2|, because the waves are emitted from the
+% both sides of the plane anyway.
 % * |wvlen|: wavelength of the plane wave in the background medium.  It is
 % required to set up the Bloch boundary condition for oblique incidence.
 % |wvlen| is not the vacuum wavelength used in the frequency-domain Maxwell's
@@ -122,7 +131,7 @@ src =  PlaneSrc(Axis.y, 0, Axis.z);  <span class="comment">% y = 0 should not be
 %   src =  PlaneSrc(Axis.y, 0, Axis.z);  % y = 0 should not be primary grid point
 %
 %   % Use the constructed src in maxwell_run().
-%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRC', src);
+%   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'SRCJ', src);
 
 %%% See Also
 % <PointSrc.html |PointSrc|>, <PointSrcM.html |PointSrcM|>, <TFSFPlaneSrc.html
@@ -134,27 +143,27 @@ classdef PlaneSrc < Source & WithBloch
 		normal_axis  % plane normal axis: one of Axis.x, Axis.y, Axis.z
 		intercept  % intercept between plane and normal axis
 		phi  % angle of polarization with respect to first Cartesian direction in this plane
-		theta  % emission angle in the plane normal to polarization: (+) toward normal x polarization, (-) toward -normal x polarization
-		kBloch  % Bloch k-vector [kx, ky, kz]
+		kBloch  % Bloch k-vector [kx, ky, kz]; for PhC mode solver, need to change the code to assign out-of-plane k component (but mode solver does not need source, so should be set directly to Grid)
 		K  % surface current density
 	end
 	
 	methods
-		function this = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)
+		function this = PlaneSrc(normal_axis, intercept, polarization, K, theta, wvlen)  % refractive index would be better rather than wvlen
 			chkarg(istypesizeof(normal_axis, 'Axis'), ...
 				'"normal_axis" should be instance of Axis.');
-			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
-			
+			[p, q] = cycle(normal_axis);
+
+			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');			
 			chkarg(istypesizeof(polarization, 'Axis') || istypesizeof(polarization, 'real'), ...
 				'"polarization" should be instance of Axis or angle in radian.');
+			phi_ = polarization;
 			if istypesizeof(polarization, 'Axis')
 				chkarg(polarization ~= normal_axis, '"polarization" should be orthogonal to "normal_axis".');
-				[p, q] = cycle(normal_axis);
 				if polarization == p
-					polarization = 0;
+					phi_ = 0;
 				else
 					assert(polarization == q);
-					polarization = pi/2;
+					phi_ = pi/2;
 				end
 			end
 			
@@ -163,48 +172,50 @@ classdef PlaneSrc < Source & WithBloch
 			end
 			chkarg(istypesizeof(K, 'complex'), '"K" should be complex.');
 
-			if nargin < 6  % no wvlen
-				assert(nargin < 5);  % no theta
-				theta = 0;
-				wvlen = Inf;
+			if nargin < 5  % no theta (or k_Bloch)
+				kt_Bloch = [0 0];
+			elseif nargin < 6  % no wvlen
+				kt_Bloch = theta;  % theta is in fact kt_Bloch
+				chkarg(istypesizeof(kt_Bloch, 'real', [1 Dir.count]), ...
+					'"kt_Bloch" should be length-%d row vector with real elements.', Dir.count);
+			else  % with wvlen
+				assert(nargin == 6);
+				chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
+					'"theta" should be polar angle in radian between -pi/2 and pi/2.');
+				chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
+				kt_Bloch = NaN(1, Dir.count);
+				kt = (2*pi/wvlen) * sin(theta);  % tangential component of k to plane
+				kp = kt * cos(phi_ + pi/2);
+				kq = kt * sin(phi_ + pi/2);
+				kt_Bloch(Dir.h) = kp;
+				kt_Bloch(Dir.v) = kq;
 			end
-			chkarg(istypesizeof(theta, 'real') && theta >= -pi/2 && theta <= pi/2, ...
-				'"theta" should be polar angle in radian between -pi/2 and pi/2.');
-			chkarg(istypesizeof(wvlen, 'real') && wvlen > 0, '"wvlen" should be positive.');
-						
-			l = cell(Axis.count, GT.count);
-			l{normal_axis, GT.dual} = intercept;
+			
+			lgrid = cell(1, Axis.count);
+			laltgrid = cell(1, Axis.count);
+			lgrid{normal_axis} = intercept;
 			plane = Plane(normal_axis, intercept);
-			this = this@Source(l, plane);
+			this = this@Source(lgrid, laltgrid, plane);
 			
 			this.normal_axis = normal_axis;
 			this.intercept = intercept;
-			this.phi = polarization;
-			this.theta = theta;
+			this.phi = phi_;
 			this.K = K;
-
 			this.kBloch = [0 0 0];
-			if this.theta ~= 0
-				[p, q] = cycle(this.normal_axis);
-				kt = (2*pi/wvlen) * sin(this.theta);  % k tangential to plane
-				kp = kt * cos(this.phi + pi/2);
-				kq = kt * sin(this.phi + pi/2);
-				this.kBloch(p) = kp;
-				this.kBloch(q) = kq;
-			end
+			this.kBloch([p q]) = kt_Bloch;
 		end
 		
-		function [index_cell, Jw_patch] = generate_kernel(this, w_axis, grid3d)
+		function [index_cell, JMw_patch] = generate_kernel(this, w_axis, grid3d)
 			grid3d.set_kBloch(this);
 			if w_axis == this.normal_axis
-				Jw_patch = [];
+				JMw_patch = [];
 				index_cell = cell(1, Axis.count);
 			else
 				n = this.normal_axis;
 				w = w_axis;
 				v = setdiff(Axis.elems, [n, w]);
 				
-				g = GT.dual;
+				g = this.gt;
 				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
 				dn = grid3d.dl{n,g}(ind_n);
 				J = this.K / dn;  % for t normal to both n and K, K*dt = (current through dn*dt) = J * (dn*dt)
@@ -216,12 +227,12 @@ classdef PlaneSrc < Source & WithBloch
 				end
 				
 				if Jw == 0
-					Jw_patch = [];
+					JMw_patch = [];
 					index_cell = cell(1, Axis.count);
 				else
 					%  Set Jw_patch.
-					lw = grid3d.l{w, GT.prim};
-					lv = grid3d.l{v, GT.dual};
+					lw = grid3d.l{w, alter(g)};
+					lv = grid3d.l{v, g};
 					kw = this.kBloch(w);
 					kv = this.kBloch(v);
 
@@ -232,8 +243,8 @@ classdef PlaneSrc < Source & WithBloch
 % 						Jw_patch = Jw .* (exp(-1i * (kv .* lv)).' * exp(-1i * (kw .* lw)));
 % 					end
 
-					Jw_patch = Jw .* (exp(-1i * (kw .* lw)).' * exp(-1i * (kv .* lv)));
-					Jw_patch = ipermute(Jw_patch, int([w v n]));
+					JMw_patch = Jw .* (exp(-1i * (kw .* lw)).' * exp(-1i * (kv .* lv)));
+					JMw_patch = ipermute(JMw_patch, int([w v n]));
 
 					% Set index_cell.
 					index_cell = {':', ':', ':'};

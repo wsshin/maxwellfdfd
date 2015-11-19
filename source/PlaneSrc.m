@@ -29,9 +29,13 @@
 % * |K|: amplitude of the surface current density that the dipoles drive.
 % * |kt_Bloch|: in-plane Bloch wavevector.  If unassigned, |kt_Bloch = [0 0]| is
 % used.
-% * |theta|: oblique incidence angle measured from |normal_axis|.  |abs(theta)|
-% should not exceed |pi/2| because the waves are emitted from the both sides of
-% the plane.
+% * |theta|: oblique incidence angle measured from |normal_axis|.  It is
+% positive toward |normal_axis x polarization| direction, and negative toward
+% |-normal_axis x polarization| direction. For example, if |normal_axis ==
+% Axis.y| and |polarization == Axis.z|, |theta| measured toward the +x-direction
+% is positive, and |theta| measured toward the -x-direction is negative.
+% |abs(theta)| should not exceed |pi/2|, because the waves are emitted from the
+% both sides of the plane anyway.
 % * |wvlen|: wavelength of the plane wave in the background medium.  It is
 % required to set up the Bloch boundary condition for oblique incidence.
 % |wvlen| is not the vacuum wavelength used in the frequency-domain Maxwell's
