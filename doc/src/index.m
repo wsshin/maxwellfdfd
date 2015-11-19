@@ -62,7 +62,6 @@
 % * <topic/basic.html Basic Usage>
 % * <topic/intermediate.html Intermediate Usage (for building complicated systems)>
 % * <topic/fd3d.html Using FD3D for Large Problems>
-% * <comp/components.html List of Functions and Classes>
 
 %% User Guides (to be written)
 % * <topic/material.html Assigning Material Parameters>
@@ -71,11 +70,11 @@
 % * <topic/flux.html Measuring Power Flux>
 % * <topic/tfsf.html Total-Field/Scattered-Field Method>
 % * <topic/bc.html Using Boundary Conditions as Symmetry Planes>
-
-%% Advanced Topics (to be written)
-% * <topic/fcnobj.html Function and Object Manuals>
 % * <topic/diel.html Adding Dielectric Constants>
 % * <topic/pml.html Changing PML Parameters>
 % * <topic/mathematica.html Exporting Solutions for Mathematica>
 % * <topic/trouble.html Troubleshooting>
+
+%% List of Functions and Classes
+% * <comp/components.html List of Functions and Classes>
 
