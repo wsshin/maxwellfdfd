@@ -36,8 +36,8 @@
 % * |kt_Bloch|: in-plane Bloch wavevector.  If unassigned, |kt_Bloch = [0 0]| is
 % used.
 % * |theta|: oblique incidence angle measured from |normal_axis|.  It is
-% positive toward |normal_axis| $\times$ |polarization| direction, and negative toward
-% |-normal_axis| $\times$ |polarization| direction. For example, if |normal_axis
+% positive toward |normal_axis| \(\times\) |polarization| direction, and negative toward
+% |-normal_axis| \(\times\) |polarization| direction. For example, if |normal_axis
 % == Axis.y| and |polarization == Axis.z|, |theta| measured toward the
 % +x-direction is positive, and |theta| measured toward the -x-direction is
 % negative. |abs(theta)| should not exceed |pi/2|, because the waves are emitted
