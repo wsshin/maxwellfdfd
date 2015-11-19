@@ -1,4 +1,10 @@
 %% PlaneSrc
+%
+% <html>
+% <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+% </script>
+% </html>
+%
 % Concrete subclass of <Source.html |Source|> representing a constant electric
 % dipole distribution over an entire plane.
 
@@ -23,19 +29,19 @@
 % When it is an instance of <Axis.html |Axis|>, it should be orthogonal to
 % |normal_axis|.  When it is an angle in radian, it is measured in the 2D
 % Cartesian coordinate system normal to |normal_axis|.  For example, if
-% |normal_axis == Axis.y|, then the angle is measured in the zx plane, and
+% |normal_axis == Axis.y|, then the angle is measured in the zx-plane, and
 % therefore it is measured in the counterclockwise direction from the z-axis in
-% the zx plane.
+% the zx-plane.
 % * |K|: amplitude of the surface current density that the dipoles drive.
 % * |kt_Bloch|: in-plane Bloch wavevector.  If unassigned, |kt_Bloch = [0 0]| is
 % used.
 % * |theta|: oblique incidence angle measured from |normal_axis|.  It is
-% positive toward |normal_axis x polarization| direction, and negative toward
-% |-normal_axis x polarization| direction. For example, if |normal_axis ==
-% Axis.y| and |polarization == Axis.z|, |theta| measured toward the +x-direction
-% is positive, and |theta| measured toward the -x-direction is negative.
-% |abs(theta)| should not exceed |pi/2|, because the waves are emitted from the
-% both sides of the plane anyway.
+% positive toward |normal_axis| $\times$ |polarization| direction, and negative toward
+% |-normal_axis| $\times$ |polarization| direction. For example, if |normal_axis
+% == Axis.y| and |polarization == Axis.z|, |theta| measured toward the
+% +x-direction is positive, and |theta| measured toward the -x-direction is
+% negative. |abs(theta)| should not exceed |pi/2|, because the waves are emitted
+% from the both sides of the plane anyway.
 % * |wvlen|: wavelength of the plane wave in the background medium.  It is
 % required to set up the Bloch boundary condition for oblique incidence.
 % |wvlen| is not the vacuum wavelength used in the frequency-domain Maxwell's
