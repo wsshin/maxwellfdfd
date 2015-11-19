@@ -1,4 +1,10 @@
 %% PlaneSrc
+%
+% <html>
+% <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+% </script>
+% </html>
+%
 % Concrete subclass of <Source.html |Source|> representing a constant electric
 % dipole distribution over an entire plane.
 
