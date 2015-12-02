@@ -45,14 +45,19 @@ classdef Ellipsoid < Shape
 			% The level set function is basically 1 - norm((r-center)./semiaxes)
 			% but it is vectorized, i.e., modified to handle r = [x y z] with
 			% column vectors x, y, z.
-			function level = lsf(r)
-				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
-					'"r" should be matrix with %d columns with real elements.', Axis.count);
-				N = size(r, 1);
-				c_vec = repmat(center, [N 1]);
-				s_vec = repmat(semiaxes, [N 1]);
-				x = (r - c_vec) ./ s_vec;
-				level = 1 - sqrt(sum(x.*x, 2));
+			function level = lsf(x, y, z)
+				chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+				chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+				chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+				chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+				
+				loc = {x, y, z};
+				level = zeros(size(x));
+				
+				for v = Axis.elems
+					level = level + ((loc{v}-center(v)) ./ semiaxes(v)).^2;
+				end
+				level = 1 - sqrt(level);
 			end
 			
 			lprim = cell(1, Axis.count);

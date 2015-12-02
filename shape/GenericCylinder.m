@@ -1,6 +1,10 @@
 classdef GenericCylinder < Shape
 	% GenericCylinder is a Shape for a cylinder whose cross section is any 2D
 	% shape.
+	
+	properties (SetAccess = immutable)
+		lsf2d  % level set function in lateral domain
+	end
 
 	methods
         function this = GenericCylinder(normal_axis, lsf2d, lprim_cell, dl_max)
@@ -15,22 +19,21 @@ classdef GenericCylinder < Shape
 			
 			[h, v, n] = cycle(normal_axis);
 			bound_n = [min(lprim_cell{n}), max(lprim_cell{n})];
-			sn = diff(bound_n) / 2;
-			cn = mean(bound_n);
+			sn = diff(bound_n) / 2;  % semiside in normal direction
+			cn = mean(bound_n);  % center in normal direction
 
 			% For rhv = r([h, v]), and rn = r(n), the level set
 			% function is basically min(lsf2d(rhv), 1 - abs(rn-cn)./sn, [], 2),
 			% but it is vectorized, i.e., modified to handle r = [x y z] with
 			% column vectors x, y, z.
-			function level = lsf(r)
-				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
-					'"r" should be matrix with %d columns with real elements.', Axis.count);
-				N = size(r, 1);
-				cn_vec = cn(ones(N, 1));
-				sn_vec = sn(ones(N, 1));
-				rhv = r(:, [h v]);
-				rn = r(:, n);
-				level = min([lsf2d(rhv), 1 - abs(rn-cn_vec)./sn_vec], [], 2);
+			function level = lsf(x, y, z)
+				chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+				chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+				chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+				chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+				
+				loc = {x, y, z};
+				level = min(lsf2d(loc{h}, loc{v}), 1 - abs(loc{n}-cn)./sn);  % intersection of regions defined by two level set functions
 			end
 			
 			if nargin < 4  % no dl_max
@@ -40,6 +43,7 @@ classdef GenericCylinder < Shape
 			end
 			
 			this = this@Shape(super_args{:});
+			this.lsf2d = lsf2d;
 		end
 	end
 end

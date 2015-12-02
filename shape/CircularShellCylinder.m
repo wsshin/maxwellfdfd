@@ -37,8 +37,6 @@
 % <maxwell_run.html |maxwell_run|>
 
 classdef CircularShellCylinder < GenericCylinder
-	% EllipticCylinder is a Shape for a cylinder whose cross section is an
-	% ellipse.
 
 	methods
         function this = CircularShellCylinder(normal_axis, height, center, r1, r2, dl_max)
@@ -49,7 +47,7 @@ classdef CircularShellCylinder < GenericCylinder
 			chkarg(istypesizeof(r1, 'real') && r1 > 0, '"r1" should be positive.');
 			chkarg(istypesizeof(r2, 'real') && r2 > 0, '"r2" should be positive.');
 
-			[h, v, n] = cycle(normal_axis);
+			[h, v, n] = cycle(normal_axis);  % h-axis, v-axis, n-axis
 			rs = sort([r1 r2]);
 			r = rs(1);
 			R = rs(2);
@@ -64,20 +62,24 @@ classdef CircularShellCylinder < GenericCylinder
 			% For c = center([h, v]), the level set function is
 			% basically 1 - norm((rho-c) ./ semiaxes) but it is vectorized,
 			% i.e., modified to handle rho = [p q] with column vectors p and q.
-			function level = lsf2d(rho)
-				chkarg(istypesizeof(rho, 'real', [0, Dir.count]), ...
-					'"rho" should be matrix with %d columns with real elements.', Dir.count);
-				N = size(rho, 1);
-				c = center([h, v]);
-				c_vec = repmat(c, [N 1]);
+			function level = lsf2d(p, q)
+				chkarg(istypeof(p, 'real'), '"p" should be array with real elements.');
+				chkarg(istypeof(q, 'real'), '"q" should be array with real elements.');
+				chkarg(isequal(size(p), size(q)), '"p" and "q" should have same size.');
 
-				X = (rho - c_vec) ./ R;
-				level1 = 1 - sqrt(sum(X.*X, 2));  % level set function for inside of R
-
-				x = (rho - c_vec) ./ r;
-				level2 = sqrt(sum(x.*x, 2)) - 1;  % level set function for outside of r
-
-				level = min([level1, level2], [], 2);  % intersection of two areas
+				c = center([h, v]);				
+				loc = {p, q};
+				
+				level1 = zeros(size(p));  % level set function for inside of R
+				level2 = zeros(size(p));  % level set function for outside of r
+				for d = Dir.elems
+					level1 = level1 + ((loc{d}-c(d)) ./ R).^2;
+					level2 = level2 + ((loc{d}-c(d)) ./ r).^2;
+				end
+				level1 = 1 - sqrt(level1);
+				level2 = sqrt(level2) - 1;
+				
+				level = min(level1, level2);  % intersection of two regions
 			end
 			
 			lprim = cell(1, Axis.count);

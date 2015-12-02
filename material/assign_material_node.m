@@ -67,8 +67,7 @@ for obj = object_array
 % 			end
 % 		end
 		[X, Y, Z] = ndgrid(ldual{Axis.x}(ind{Axis.x}), ldual{Axis.y}(ind{Axis.y}), ldual{Axis.z}(ind{Axis.z}));
-		is_in = shape.contains([X(:), Y(:), Z(:)]);
-		is_in = reshape(is_in, length(ind{Axis.x}), length(ind{Axis.y}), length(ind{Axis.z}));
+		is_in = shape.contains(X, Y, Z);
 		ind_tf = false(grid3d.N);  % logical indices
 		ind_tf(ind{Axis.x}, ind{Axis.y}, ind{Axis.z}) = is_in;
 		

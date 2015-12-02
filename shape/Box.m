@@ -43,13 +43,19 @@ classdef Box < Shape
 			% The level set function is basically 1 - max(abs(r-c) ./ s, [], 2),
 			% but it is vectorized, i.e., modified to handle r = [x y z] with
 			% column vectors x, y, z.
-			function level = lsf(r)
-				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
-					'"r" should be matrix with %d columns with real elements.', Axis.count);
-				N = size(r, 1);
-				c_vec = repmat(c, [N 1]);
-				s_vec = repmat(s, [N 1]);
-				level = 1 - max(abs(r - c_vec) ./ s_vec, [], 2);
+			function level = lsf(x, y, z)
+				chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+				chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+				chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+				chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+				
+				loc = {x, y, z};
+				level = -Inf(size(x));
+				
+				for v = Axis.elems
+					level = max(level, abs(loc{v}-c(v)) ./ s(v));
+				end
+				level = 1 - level;
 			end
 			
 			lprim = cell(1, Axis.count);

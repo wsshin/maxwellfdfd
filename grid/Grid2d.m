@@ -160,13 +160,15 @@ classdef Grid2d < handle
 			end
 		end
 				
-		function truth = contains(this, point)
-			chkarg(istypesizeof(point, 'real', [0, Dir.count]), ...
-				'"point" should be matrix with %d columns with real elements.', Dir.count);
-			n = size(point, 1);
-			truth = true(n, 1);
+		function truth = contains(this, h, v)
+			chkarg(istypeof(h, 'real'), '"h" should be array with real elements.');
+			chkarg(istypeof(v, 'real'), '"v" should be array with real elements.');
+			chkarg(isequal(size(h), size(v)), '"h" and "v" should have same size.');
+			
+			truth = true(size(h));
+			loc = {h, v};
 			for d = Dir.elems
-				truth = truth & this.comp(d).contains(point(:,d));  % &: elementwise AND operator
+				truth = truth & this.comp(d).contains(loc{d});  % &: elementwise AND operator
 			end
 		end
 		

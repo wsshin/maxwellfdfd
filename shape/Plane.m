@@ -42,11 +42,14 @@ classdef Plane < ZeroVolShape
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
 			chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');
 			
-			function level = lsf(r)
-				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
-					'"r" should be matrix with %d columns with real elements.', Axis.count);
-				r_normal = r(:, normal_axis);
-				level = -abs(r_normal - intercept);				
+			function level = lsf(x, y, z)
+				chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+				chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+				chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+				chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+				
+				loc = {x, y, z};
+				level = -abs(loc{normal_axis} - intercept);				
 			end
 			
 			lprim = cell(1, Axis.count);

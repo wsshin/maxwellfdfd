@@ -184,13 +184,16 @@ classdef Grid3d < handle
 			end
 		end
 		
-		function truth = contains(this, point)
-			chkarg(istypesizeof(point, 'real', [0, Axis.count]), ...
-				'"point" should be matrix with %d columns with real elements.', Axis.count);
-			n = size(point, 1);
-			truth = true(n, 1);
+		function truth = contains(this, x, y, z)
+			chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+			chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+			chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+			chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+			
+			truth = true(size(x));
+			loc = {x, y, z};
 			for w = Axis.elems
-				truth = truth & this.comp(w).contains(point(:,w));
+				truth = truth & this.comp(w).contains(loc{w});  % &: elementwise AND operator
 			end
 		end
 		

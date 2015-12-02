@@ -27,14 +27,15 @@ classdef Interval
 		end
 						
 		function [truth, distance] = contains(this, val)
-			chkarg(istypesizeof(val, 'real', [0 1]), '"val" should be column vector with real elements.');
+			% This function can handle "val" as an array.
+			chkarg(istypeof(val, 'real'), '"val" should be array with real elements.');
 			bn = this.bound(Sign.n);
 			bp = this.bound(Sign.p);
 			
 			truth = (val >= bn) & (val <= bp);
 			
 			if nargout >= 2  % distance
-				distance = min(abs([val-bn, val-bp]), [], 2);
+				distance = min(abs(val-bn), abs(val-bp));
 			end
 		end
 	end

@@ -80,15 +80,18 @@ classdef Scalar3d
 		end
 		
 		function [val, loc] = value(this, x, y, z)
+			% Return the values of this Scalar3d along a line.  The line should
+			% be along one of the x, y, z directions, so at least two of the
+			% given x, y, z should be scalar.
 			loc = {x, y, z};
 			lavail = this.l;  % available locations
-			num_len1 = 0;
+			num_len1 = 0;  % at least two of x, y, z should be scalar
 			for w = Axis.elems
 				coord_w = loc{w};
 				chkarg(isempty(coord_w) || isvector(coord_w) && istypeof(coord_w, 'real'), ...
 				'"%s" should be empty or real vector.', char(w));
 				if isempty(coord_w)
-					coord_w = lavail{w};
+					coord_w = lavail{w};  % if empty, use all available locations
 				else
 					chkarg(this.grid3d.comp(w).contains(coord_w), '"%s" should be inside grid.', char(w));
 					coord_w = sort(coord_w);

@@ -370,10 +370,10 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		for src = src_array
 			if istypesizeof(src, 'TFSFPlaneSrc')
 				tfsfsrc = src;
-				cb_center = tfsfsrc.shape.cb_center;
+				cb_center = num2cell(tfsfsrc.shape.cb_center);
 				for bgobj = fliplr(obj_array)
-					if bgobj.shape.contains(cb_center)
-						break;
+					if bgobj.shape.contains(cb_center{:})
+						break;  % assume that last object containing TF box center fills TF box
 					end
 				end
 				tfsfsrc.set_bg_material(bgobj.material);

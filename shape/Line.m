@@ -44,28 +44,28 @@ classdef Line < ZeroVolShape
 			chkarg(istypesizeof(intercept, 'real', [1, Dir.count]), ...
 				'"intercept" should be length-%d row vector with real elements.', Dir.count);
 			
-			[h_axis, v_axis] = cycle(axis);
+			[h, v] = cycle(axis);  % h-axis, v-axis
 			
-			function level = lsf(r)
-				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
-					'"r" should be matrix with %d columns with real elements.', Axis.count);
-
-				r_trans = r(:, [h_axis v_axis]);  % transverse position
-				N = size(r, 1);
-				c = repmat(intercept, [N 1]);
-				level = -max(abs(r_trans - c), [], 2);
+			function level = lsf(x, y, z)
+				chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+				chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+				chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+				chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+				
+				loc = {x, y, z};
+				level = -max(abs(loc{h} - intercept(Dir.h)), abs(loc{v} - intercept(Dir.v)));
 			end
 			
 			lprim = cell(1, Axis.count);
 			lprim{axis} = [-Inf Inf];
-			lprim{h_axis} = intercept(Dir.h);
-			lprim{v_axis} = intercept(Dir.v);
+			lprim{h} = intercept(Dir.h);
+			lprim{v} = intercept(Dir.v);
 			
 			if nargin < 3  % no dl_max
 				super_args = {lprim, @lsf};
 			else
 				dl_max = expand2row(dl_max, Axis.count);
-				dl_max(h_axis) = Inf;  dl_max(v_axis) = Inf;  % dl_max is meaningful only in direction of line
+				dl_max(h) = Inf;  dl_max(v) = Inf;  % dl_max is meaningful only in direction of line
 				super_args = {lprim, @lsf, dl_max};
 			end
 

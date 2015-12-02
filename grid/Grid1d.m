@@ -101,7 +101,7 @@ classdef Grid1d < handle
 		
 		function truth = contains(this, l)
 			% This function can handle "l" as an array.
-			chkarg(istypesizeof(l, 'real', [0 1]), '"l" should be column vector with real elements.');
+			chkarg(istypeof(l, 'real'), '"l" should be array with real elements.');
 			truth = (l >= this.lall{GT.prim}(1)) & (l <= this.lall{GT.prim}(end));  % &: elementwise AND operator
 		end
 		

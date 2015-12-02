@@ -76,11 +76,10 @@ for obj = [obj_array, srcobj_array, boxes_pml]
 			if ~istypesizeof(shape, 'ZeroVolShape')
 				lsf = shape.lsf;
 			else
-				lsf = @(r) shape.lsf(r, true);
+				lsf = @(x,y,z) shape.lsf(x, y, z, true);
 			end
 			[X, Y, Z] = meshgrid(lplotobj{:});
-			Level = lsf([X(:), Y(:), Z(:)]);
-			Level = reshape(Level, size(X));
+			Level = lsf(X, Y, Z);
 			hp = patch(isosurface(X, Y, Z, Level, -eps));  % -eps instead of 0 for ZeroVolumeShape
 			isonormals(X, Y, Z, Level, hp)
 

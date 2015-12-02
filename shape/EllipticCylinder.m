@@ -38,8 +38,6 @@
 % <maxwell_run.html |maxwell_run|>
 
 classdef EllipticCylinder < GenericCylinder
-	% EllipticCylinder is a Shape for a cylinder whose cross section is an
-	% ellipse.
 
 	methods
         function this = EllipticCylinder(normal_axis, height, center, semiaxes, dl_max)
@@ -50,7 +48,7 @@ classdef EllipticCylinder < GenericCylinder
 			chkarg(istypesizeof(semiaxes, 'real', [1, Dir.count]) && all(semiaxes > 0), ...
 				'"semiaxes" should be length-%d row vector with positive elements.', Axis.count);
 
-			[h, v, n] = cycle(normal_axis);
+			[h, v, n] = cycle(normal_axis);  % h-axis, v-axis, n-axis
 			s = NaN(1, Axis.count);  % semisides
 			s(h) = semiaxes(Dir.h);
 			s(v) = semiaxes(Dir.v);
@@ -61,15 +59,19 @@ classdef EllipticCylinder < GenericCylinder
 			% For c = center([h, v]), the level set function is
 			% basically 1 - norm((rho-c) ./ semiaxes) but it is vectorized,
 			% i.e., modified to handle rho = [p q] with column vectors p and q.
-			function level = lsf2d(rho)
-				chkarg(istypesizeof(rho, 'real', [0, Dir.count]), ...
-					'"rho" should be matrix with %d columns with real elements.', Dir.count);
-				N = size(rho, 1);
-				c = center([h, v]);
-				c_vec = repmat(c, [N 1]);
-				s_vec = repmat(semiaxes, [N 1]);
-				x = (rho - c_vec) ./ s_vec;
-				level = 1 - sqrt(sum(x.*x, 2));
+			function level = lsf2d(p, q)
+				chkarg(istypeof(p, 'real'), '"p" should be array with real elements.');
+				chkarg(istypeof(q, 'real'), '"q" should be array with real elements.');
+				chkarg(isequal(size(p), size(q)), '"p" and "q" should have same size.');
+				
+				c = center([h, v]);				
+				loc = {p, q};
+				
+				level = zeros(size(p));
+				for d = Dir.elems
+					level = level + ((loc{d}-c(d)) ./ semiaxes(d)).^2;
+				end
+				level = 1 - sqrt(level);
 			end
 			
 			lprim = cell(1, Axis.count);

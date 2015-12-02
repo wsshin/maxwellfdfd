@@ -9,7 +9,7 @@ end
 chkarg(istypesizeof(rect, 'real', [2 2]), '"rect" should be %d-by-%d array with real elements.');
 
 chkarg(issorted(rect(Dir.h,:)) && issorted(rect(Dir.v,:)), 'each row of "rect" should be sorted in ascending order.');
-chkarg(grid2d.contains(rect.'), '"rect" should be contained in grid.');
+chkarg(grid2d.contains(rect(Dir.h,:), rect(Dir.v,:)), '"rect" should be contained in grid.');
 
 gt = scalar2d.gt_array;
 % l = grid2d.lall(Dir.elems + Dir.count*subsindex(gt));

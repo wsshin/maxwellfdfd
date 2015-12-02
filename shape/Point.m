@@ -35,13 +35,18 @@ classdef Point < ZeroVolShape
 			chkarg(istypesizeof(location, 'real', [1, Axis.count]), ...
 				'"intercept" should be length-%d row vector with real elements.', Axis.count);
 			
-			function level = lsf(r)
-				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
-					'"r" should be matrix with %d columns with real elements.', Axis.count);
+			function level = lsf(x, y, z)
+				chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+				chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+				chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+				chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
 				
-				N = size(r, 1);
-				c = repmat(location, [N 1]);
-				level = -max(abs(r - c), [], 2);
+				loc = {x, y, z};
+				level = -Inf(size(x));
+				for v = Axis.elems
+					level = max(level, abs(loc{v} - location(v)));
+				end
+				level = -level;
 			end
 			
 			lprim = cell(1, Axis.count);

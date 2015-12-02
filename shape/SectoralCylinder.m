@@ -43,6 +43,10 @@
 
 classdef SectoralCylinder < GenericCylinder
 
+	properties (SetAccess = immutable)
+		lsf_th  % level set function for angles
+	end
+
 	methods
         function this = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)
 			chkarg(istypesizeof(normal_axis, 'Axis'), '"normal_axis" should be instance of Axis.');
@@ -64,7 +68,7 @@ classdef SectoralCylinder < GenericCylinder
 			function level = lsf_th(th)
 				dth = th - cth;
 				dth = mod(dth + pi, 2*pi) - pi;
-				level = 1 - abs(dth/sth);
+				level = 1 - abs(dth./sth);
 			end
 
 			[h, v, n] = cycle(normal_axis);
@@ -72,20 +76,19 @@ classdef SectoralCylinder < GenericCylinder
 			% lsf2d() can handle rho = [p q] with column vectors p and q.  The
 			% level set function is the one for a rectangle defined in the
 			% (theta, radius) domain.
-			function level = lsf2d(rho)
-				chkarg(istypesizeof(rho, 'real', [0, Dir.count]), ...
-					'"rho" should be matrix with %d columns with real elements.', Dir.count);
-				N = size(rho, 1);
-				c = center([h, v]);
-				c_vec = repmat(c, [N 1]);
+			function level = lsf2d(p, q)
+				chkarg(istypeof(p, 'real'), '"p" should be array with real elements.');
+				chkarg(istypeof(q, 'real'), '"q" should be array with real elements.');
+				chkarg(isequal(size(p), size(q)), '"p" and "q" should have same size.');
+
+				lc = {p - center(h), q - center(v)};  % locations in center-of-mass coordinates
 				
-				rc = rho - c_vec;
-				theta_pt = atan2(rc(:,Dir.v), rc(:,Dir.h));  % -pi <= theta_rho < pi
-				r_pt = sqrt(sum(rc.^2, 2));
-				zero_r_pt = (r_pt==0);  % atan2(0,0) is not well-defined
+				theta_pt = atan2(lc{Dir.v}, lc{Dir.h});  % -pi <= theta_rho < pi
+				r_pt = sqrt(lc{Dir.h}.^2 + lc{Dir.v}.^2);
+				zero_r_pt = (r_pt==0);  % atan2(0,0) is not well-defined; handle such cases separately
 				
 				dr = r_pt - cr;
-				level = min([lsf_th(theta_pt), 1 - abs(dr/sr)], [], 2);
+				level = min(lsf_th(theta_pt), 1 - abs(dr./sr));
 				level(zero_r_pt) = 0;
 			end
 			
@@ -94,16 +97,16 @@ classdef SectoralCylinder < GenericCylinder
 			lprim{v} = [radius * sin(thetas) + center(v), center(v)];
 			lprim{n} = [-height height]/2 + center(n);
 			
-			if lsf_th(0) > 0
+			if lsf_th(0) > 0  % sector contains +x-direction from center
 				lprim{h} = [lprim{h}, center(h) + radius];
 			end
-			if lsf_th(pi/2) > 0
+			if lsf_th(pi/2) > 0  % sector contains +y-direction from center
 				lprim{v} = [lprim{v}, center(v) + radius];
 			end
-			if lsf_th(pi) > 0
+			if lsf_th(pi) > 0  % sector contains -x-direction from center
 				lprim{h} = [lprim{h}, center(h) - radius];
 			end
-			if lsf_th(3*pi/2) > 0
+			if lsf_th(3*pi/2) > 0  % sector contains -y-direction from center
 				lprim{v} = [lprim{v}, center(v) - radius];
 			end
 						
@@ -114,6 +117,7 @@ classdef SectoralCylinder < GenericCylinder
 			end
 			
 			this = this@GenericCylinder(super_args{:});
+			this.lsf_th = @lsf_th;
 		end
 	end
 end

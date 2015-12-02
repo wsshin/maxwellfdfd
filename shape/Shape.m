@@ -19,11 +19,11 @@ classdef Shape < matlab.mixin.Heterogeneous
 		cb_center  % center of circumbox
 		L  % [Lx, Ly, Lz]: range of circumbox
 		dl_max  % [dx_max, dy_max, dz_max]: maximum grid cell size in this shape
-	end		
+	end
 	
-% 	methods (Abstract)  % no abstract methods allowed for periodize_object()
-% 		[n_dir, r_vol] = ndir_and_rvol(this, pixel)  % for subpixel smoothing
-% 	end
+	properties (Access = public)
+		n_subpxls  % number of uniform sampling points in each Cartesian direction for subpixel smoothing
+	end
 	
 	methods
 		function this = Shape(lprim_cell, lsf, dl_max)
@@ -48,6 +48,8 @@ classdef Shape < matlab.mixin.Heterogeneous
 			for w = Axis.elems
 				this.interval(w) = Interval(lprim_cell{w}, dl_max(w));
 			end
+			
+			this.n_subpxls = 10;
 		end
 		
 		function lprim = get.lprim(this)
@@ -83,33 +85,71 @@ classdef Shape < matlab.mixin.Heterogeneous
 			end
 		end
 		
-		function truth = circumbox_contains(this, point, axes)
-			chkarg(istypesizeof(point, 'real', [0 Axis.count]), ...
-				'"point" should be matrix with %d columns with real elements.', Axis.count);
-			
-			if nargin < 3  % no axes
-				axes = Axis.elems;
-			end
-			chkarg(istypesizeof(axes, 'Axis', [1 0]) && length(axes) <= Axis.count, ...
-				'"axes" should be length-%d or shorter row vector of instances of Axis.', Axis.count);
+		function truth = circumbox_contains(this, x, y, z)
+			chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+			chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+			chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+			chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
 
-			n = size(point, 1);
-			truth = true(n, 1);
-			for w = axes
-				truth = truth & this.interval(w).contains(point(:,w));
+			truth = true(size(x));
+			loc = {x, y, z};
+			for w = Axis.elems
+				truth = truth & this.comp(w).contains(loc{w});  % &: elementwise AND operator
 			end
 		end
 		
-		function truth = contains(this, point)
-			chkarg(istypesizeof(point, 'real', [0 Axis.count]), ...
-				'"point" should be matrix with %d columns with real elements.', Axis.count);
-			truth = this.lsf(point) >= 0;
+		function truth = contains(this, x, y, z)
+			chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+			chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+			chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+			chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+
+			truth = this.lsf(x, y, z) >= 0;
 			
 % 			% Check if circumbox is correctly set.
 % 			if truth
 % 				chkarg(this.circumbox_contains(point), ...
 % 					'circumbox of this shape does not contain the shape.');
 % 			end
+		end
+		
+		function [rvol, ndir] = smoothing_params(this, box)
+			chkarg(istypesizeof(box, 'real', [Axis.count, Sign.count]), ...
+				'"box" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
+
+			l_probe = cell(1, Axis.count);	
+			dl_sub = diff(box.') ./ this.n_subpxls;
+			N_subpxls = this.n_subpxls^3;
+			
+			for w = Axis.elems
+				bnd = box(w, :);  % interval in w-direction
+				
+				% Below, probing points are at the centers of subpixels.  One
+				% extra subpixel beyond each boundary of the box is considered
+				% to discard single-sided differences in gradient().
+				l_probe{w} = linspace(bnd(Sign.n) - dl_sub(w)/2, bnd(Sign.p) + dl_sub(w)/2, this.n_subpxls + 2);
+			end
+			
+			[X, Y, Z] = ndgrid(l_probe{:});
+			F = this.lsf(X, Y, Z);
+			
+			Fint = F(2:end-1, 2:end-1, 2:end-1);  % values at interior points of box
+			is_contained = (Fint > 0);
+			at_interface = (Fint == 0);
+			rvol = sum(double(is_contained(:))) + 0.5 * sum(double(at_interface(:)));
+			rvol = rvol / N_subpxls;
+			
+			[Fy, Fx, Fz] = gradient(F, dl_sub(Axis.y), dl_sub(Axis.x), dl_sub(Axis.z));  % x and y are swapped due to MATLAB's definiton of gradient
+			Fx = Fx(2:end-1, 2:end-1, 2:end-1);
+			Fy = Fy(2:end-1, 2:end-1, 2:end-1);
+			Fz = Fz(2:end-1, 2:end-1, 2:end-1);
+			
+			gradF = [Fx(:), Fy(:), Fz(:)];
+			normF = sqrt(sum(gradF.^2, 2));
+			gradF = bsxfun(@rdivide, gradF, normF);
+			
+			ndir = sum(gradF) ./ N_subpxls;
+			ndir = -ndir ./ norm(ndir);
 		end
 	end
 end

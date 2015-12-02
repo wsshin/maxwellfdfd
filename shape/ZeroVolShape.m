@@ -19,12 +19,12 @@ classdef ZeroVolShape < Shape
 	
 	methods
 		function this = ZeroVolShape(lprim_cell, lsf, dl_max)
-			function level = lsf_zv(r, force_draw)
-				if nargin < 2  % no force_draw
+			function level = lsf_zv(x, y, z, force_draw)
+				if nargin < 4  % no force_draw
 					force_draw = false;
 				end
 				
-				level = lsf(r);
+				level = lsf(x, y, z);
 				if force_draw && all(level <= 0)
 					% If the level set function is negative, nothing is drawn,
 					% so shift the function upward.

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>SegmentalCylinder</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-08"><meta name="DC.source" content="SegmentalCylinder.m"><style type="text/css">
+      --><title>SegmentalCylinder</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-12-02"><meta name="DC.source" content="SegmentalCylinder.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,11 +67,11 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>SegmentalCylinder</h1><!--introduction--><p>Concrete subclass of <a href="GenericCylinder.html"><tt>GenericCylinder</tt></a> representing a cylinder with a cross section of a circular segment.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>SegmentalCylinder</tt> represents the shape of a segmental cylinder.  Its cross section is a circular segment (region surrounded by an arc and the chord connecting its end points).  The axis of the cylinder should be aligned with one of the axes of the Cartesian coordinate system.</p><h2>Construction<a name="2"></a></h2><pre>shape = SegmentalCylinder(normal_axis, height, center, radius, theta, d_theta)
-shape = SegmentalCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: axis of the cylinder.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>height</tt>: size of the cylinder along its axis.</li><li><tt>center</tt>: center of the cylinder in the format of <tt>[x y z]</tt>.  For <tt>normal_axis = Axis.z</tt>, <tt>(x, y)</tt> is the coordinate of the center of the circle.</li><li><tt>radius</tt>: radius of the circle</li><li><tt>theta</tt>: beginning angle of the segment in radian</li><li><tt>d_theta</tt>: angular width of the segment in radian between -2*pi and 2*pi.</li><li><tt>dl_max</tt>: maximum grid size allowed in the cylinder.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If unassigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of SegmentalCylinder.</span>
+shape = SegmentalCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: axis of the cylinder.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>height</tt>: size of the cylinder along its axis.</li><li><tt>center</tt>: center of the cylinder in the format of <tt>[x y z]</tt>.  For <tt>normal_axis = Axis.z</tt>, <tt>(x, y)</tt> is the coordinate of the center of the circle.</li><li><tt>radius</tt>: radius of the circle</li><li><tt>theta</tt>: beginning angle of the segment in radian</li><li><tt>d_theta</tt>: angular width of the segment in radian between -|pi| and <tt>pi</tt> (the central angle of a segment should not exceed <tt>pi</tt>)</li><li><tt>dl_max</tt>: maximum grid size allowed in the cylinder.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If unassigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of SegmentalCylinder.</span>
 shape = SegmentalCylinder(Axis.z, 100, [0 0 50], 50, pi/6, pi/3);
 </pre><pre class="language-matlab"><span class="comment">% Use the constructed shape in maxwell_run().</span>
 [E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'OBJ'</span>, {<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0}, shape, {REMAINING ARGUMENTS});
-</pre><h2>See Also<a name="4"></a></h2><p><a href="SectoralCylinder.html"><tt>CircularCylinder</tt></a>, <a href="CircularCylinder.html"><tt>CircularCylinder</tt></a>, <a href="CircularShellCylinder.html"><tt>CircularShellCylinder</tt></a>, <a href="EllipticCylinder.html"><tt>EllipticCylinder</tt></a>, <a href="PolyognalCylinder.html"><tt>PolygonalCylinder</tt></a>, <a href="Shape.html"><tt>Shape</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+</pre><h2>See Also<a name="4"></a></h2><p><a href="SectoralCylinder.html"><tt>CircularCylinder</tt></a>, <a href="CircularCylinder.html"><tt>CircularCylinder</tt></a>, <a href="CircularShellCylinder.html"><tt>CircularShellCylinder</tt></a>, <a href="EllipticCylinder.html"><tt>EllipticCylinder</tt></a>, <a href="PolyognalCylinder.html"><tt>PolygonalCylinder</tt></a>, <a href="Shape.html"><tt>Shape</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% SegmentalCylinder
 % Concrete subclass of <GenericCylinder.html |GenericCylinder|>
@@ -97,7 +97,8 @@ shape = SegmentalCylinder(Axis.z, 100, [0 0 50], 50, pi/6, pi/3);
 % circle.
 % * |radius|: radius of the circle
 % * |theta|: beginning angle of the segment in radian
-% * |d_theta|: angular width of the segment in radian between -2*pi and 2*pi.
+% * |d_theta|: angular width of the segment in radian between -|pi| and |pi|
+% (the central angle of a segment should not exceed |pi|)
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
 % dy dz]| or a single real number |dl| for |dx = dy = dz|.  If unassigned,
 % |dl_max = Inf| is used.
@@ -128,48 +129,46 @@ classdef SegmentalCylinder < GenericCylinder
 			chkarg(istypesizeof(theta, 'real'), '"theta" should be real.');
 			chkarg(istypesizeof(d_theta, 'real') && (d_theta <= 2*pi || d_theta >= -2*pi), '"d_theta" should be real between -pi and pi.');
 			
+			sectoral = SectoralCylinder(normal_axis, height, center, radius, theta, d_theta, dl_max);
+			
+			
 			thetas = sort([theta, theta + d_theta]);
 			cth = mean(thetas);  % center of theta range
 			cth = mod(cth + pi, 2*pi) - pi;  % -pi <= c_th < pi (range of atan2(y,x))
-			sth = diff(thetas) / 2;  % semiwidth of theta range
 			
-			cr = radius/2;  % center of radius range
-			sr = radius/2;  % semiwidth of radius range
-			
-			function level = lsf_th(th)
-				dth = th - cth;
-				dth = mod(dth + pi, 2*pi) - pi;
-				level = 1 - abs(dth/sth);
-			end
+			mc_dir = [cos(cth) sin(cth)];  % direction bisecting the segment
 
 			[h, v, n] = cycle(normal_axis);
+			m = center([h, v]) + mean(radius * [cos(thetas.') sin(thetas.')]);
+			
+			
+			
 
 			% lsf2d() can handle rho = [p q] with column vectors p and q.  The
 			% level set function is the one for a rectangle defined in the
 			% (theta, radius) domain.
-			function level = lsf2d(rho)
-				chkarg(istypesizeof(rho, 'real', [0, Dir.count]), ...
-					'"rho" should be matrix with %d columns with real elements.', Dir.count);
-				N = size(rho, 1);
+			function level = lsf2d(p, q)
+				chkarg(istypeof(p, 'real'), '"p" should be array with real elements.');
+				chkarg(istypeof(q, 'real'), '"q" should be array with real elements.');
+				chkarg(isequal(size(p), size(q)), '"p" and "q" should have same size.');
+				
+				level1 = sectoral.lsf2d(p, q);  % level set function of sectoral cylinder
+
+								
+				
+				
 				
 				c = center([h, v]);
-				c_vec = repmat(c, [N 1]);
 				
 				m = c + mean(radius * [cos(thetas.') sin(thetas.')]);
-				m_vec = repmat(m, [N 1]);
 				
 				n_cth = [cos(cth) sin(cth)];  % normal vector in centeral angle direction
 				
-				rc = rho - c_vec;
-				theta_pt = atan2(rc(:,Dir.v), rc(:,Dir.h));  % -pi <= theta_rho < pi
-				r_pt = sqrt(sum(rc.^2, 2));
-				zero_r_pt = (r_pt==0);  % atan2(0,0) is not well-defined
+
+				level2 = rm * n_cth.';
 				
-				rm = rho - m_vec;
 				
-				dr = r_pt - cr;
-				level = min([lsf_th(theta_pt), 1 - abs(dr/sr), rm * n_cth.'], [], 2);
-				level(zero_r_pt) = 0;
+				level = min(level1, level2);
 			end
 			
 			lprim = cell(1, Axis.count);

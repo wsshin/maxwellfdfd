@@ -400,16 +400,16 @@ classdef Painter2d < handle
 						if w_line < 3;
 							w_line = 3;
 						end
-					else
-						lsf = @(r) shape.lsf(r, true);
+					else  % ZeroVolShape
+						lsf = @(x, y, z) shape.lsf(x, y, z, true);
 					end
 					
 					if n_axis == Axis.x
-						lsf2d_temp = @(h,v) lsf([intercept(ones(size(h))), h, v]);
+						lsf2d_temp = @(h,v) lsf(intercept(ones(size(h))), h, v);
 					elseif n_axis == Axis.y
-						lsf2d_temp = @(h,v) lsf([v, intercept(ones(size(h))), h]);
+						lsf2d_temp = @(h,v) lsf(v, intercept(ones(size(h))), h);
 					else  % n == Axis.z
-						lsf2d_temp = @(h,v) lsf([h, v, intercept(ones(size(h)))]);
+						lsf2d_temp = @(h,v) lsf(h, v, intercept(ones(size(h))));
 					end
 
 					if ~this.isswapped

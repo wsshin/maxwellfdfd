@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>PolygonalCylinder</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-22"><meta name="DC.source" content="PolygonalCylinder.m"><style type="text/css">
+      --><title>PolygonalCylinder</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-12-01"><meta name="DC.source" content="PolygonalCylinder.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -23,7 +23,7 @@ a:visited { color:#004aa0; text-decoration:none; }
 
 p { padding:0px; margin:0px 0px 20px; }
 img { padding:0px; margin:0px 0px 20px; border:none; }
-p img, pre img, tt img, li img { margin-bottom:0px; } 
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
 
 ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
 ul li { padding:0px; margin:0px 0px 7px 0px; }
@@ -38,11 +38,12 @@ ol li ul li { list-style:square; }
 
 .content { font-size:1.2em; line-height:140%; padding: 20px; }
 
-pre, tt, code { font-size:12px; }
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
 pre { margin:0px 0px 20px; }
-pre.error { color:red; }
 pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
 pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
 
 @media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
 
@@ -65,12 +66,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>PolygonalCylinder</h1><!--introduction--><p>Concrete subclass of <a href="GenericCylinder.html"><tt>GenericCylinder</tt></a> representing a cylinder with a polygonal cross section.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>PolygonalCylinder</tt> is a Shape for a cylinder whose cross section is a polygon.  It is assumed that the polygon is convex and the mean of its vertices is inside the polygon.  The axis of the cylinder should be aligned with one of the axes of the Cartesian coordinate system.</p><h2>Construction<a name="2"></a></h2><pre>shape = PolygonalCylinder(normal_axis, height, normal_center, point_array)
-shape = PolygonalCylinder(normal_axis, height, normal_center, point_array, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: axis of the cylinder.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>height</tt>: size of the cylinder along its axis.</li><li><tt>normal_center</tt>: center of the axis of the cylinder.  It is a real number.</li><li><tt>radius</tt>: radius of the circle</li><li><tt>point_array</tt>: <tt>n</tt>-by-|2| array of the vertices of the polygon with <tt>n</tt> vertices.  For <tt>normal_axis == Axis.y</tt>, it is in the format of <tt>[z1 x1; ...; zn xn]</tt>.</li><li><tt>dl_max</tt>: maximum grid size allowed in the cylinder.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If unassigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of SectoralCylinder.</span>
+  </style></head><body><div class="content"><h1>PolygonalCylinder</h1><!--introduction--><p>Concrete subclass of <a href="GenericCylinder.html"><tt>GenericCylinder</tt></a> representing a cylinder with a polygonal cross section.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Construction</a></li><li><a href="#3">Example</a></li><li><a href="#4">See Also</a></li></ul></div><h2>Description<a name="1"></a></h2><p><tt>PolygonalCylinder</tt> is a Shape for a cylinder whose cross section is a polygon.  It is assumed that the polygon is convex and the mean of its vertices is inside the polygon.  The axis of the cylinder should be aligned with one of the axes of the Cartesian coordinate system.</p><h2>Construction<a name="2"></a></h2><pre>shape = PolygonalCylinder(normal_axis, height, normal_center, vertex_array)
+shape = PolygonalCylinder(normal_axis, height, normal_center, vertex_array, dl_max)</pre><p><b>Input Arguments</b></p><div><ul><li><tt>normal_axis</tt>: axis of the cylinder.  It should be one of <tt>Axis.x</tt>, <tt>Axis.y</tt>, <tt>Axis.z</tt>.</li><li><tt>height</tt>: size of the cylinder along its axis.</li><li><tt>normal_center</tt>: center of the axis of the cylinder.  It is a real number.</li><li><tt>radius</tt>: radius of the circle</li><li><tt>vertex_array</tt>: <tt>n</tt>-by-|2| array of the vertices of the polygon with <tt>n</tt> vertices.  For <tt>normal_axis == Axis.y</tt>, it is in the format of <tt>[z1 x1; ...; zn xn]</tt>.</li><li><tt>dl_max</tt>: maximum grid size allowed in the cylinder.  It can be either <tt>[dx dy dz]</tt> or a single real number <tt>dl</tt> for <tt>dx = dy = dz</tt>.  If unassigned, <tt>dl_max = Inf</tt> is used.</li></ul></div><h2>Example<a name="3"></a></h2><pre class="language-matlab"><span class="comment">% Create an instance of SectoralCylinder.</span>
 shape = PolygonalCylinder(Axis.z, 100, 50, [0 0; 50 0; 25 25*sqrt(3)]);  <span class="comment">% cross section is regular triangle</span>
 </pre><pre class="language-matlab"><span class="comment">% Use the constructed shape in maxwell_run().</span>
 [E, H] = maxwell_run({INITIAL ARGUMENTS}, <span class="string">'OBJ'</span>, {<span class="string">'vacuum'</span>, <span class="string">'none'</span>, 1.0}, shape, {REMAINING ARGUMENTS});
-</pre><h2>See Also<a name="4"></a></h2><p><a href="CircularCylinder.html"><tt>CircularCylinder</tt></a>, <a href="EllipticCylinder.html"><tt>EllipticCylinder</tt></a>, <a href="SectoralCylinder.html"><tt>SectoralCylinder</tt></a>, <a href="Shape.html"><tt>Shape</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+</pre><h2>See Also<a name="4"></a></h2><p><a href="CircularCylinder.html"><tt>CircularCylinder</tt></a>, <a href="CircularShellCylinder.html"><tt>CircularShellCylinder</tt></a>, <a href="EllipticCylinder.html"><tt>EllipticCylinder</tt></a>, <a href="SectoralCylinder.html"><tt>SectoralCylinder</tt></a>, <a href="Shape.html"><tt>Shape</tt></a>, <a href="maxwell_run.html"><tt>maxwell_run</tt></a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% PolygonalCylinder
 % Concrete subclass of <GenericCylinder.html |GenericCylinder|> representing a
@@ -83,8 +84,8 @@ shape = PolygonalCylinder(Axis.z, 100, 50, [0 0; 50 0; 25 25*sqrt(3)]);  <span c
 % with one of the axes of the Cartesian coordinate system.
 
 %%% Construction
-%  shape = PolygonalCylinder(normal_axis, height, normal_center, point_array)
-%  shape = PolygonalCylinder(normal_axis, height, normal_center, point_array, dl_max)
+%  shape = PolygonalCylinder(normal_axis, height, normal_center, vertex_array)
+%  shape = PolygonalCylinder(normal_axis, height, normal_center, vertex_array, dl_max)
 % 
 % *Input Arguments*
 %
@@ -93,7 +94,7 @@ shape = PolygonalCylinder(Axis.z, 100, 50, [0 0; 50 0; 25 25*sqrt(3)]);  <span c
 % * |height|: size of the cylinder along its axis.
 % * |normal_center|: center of the axis of the cylinder.  It is a real number.
 % * |radius|: radius of the circle
-% * |point_array|: |n|-by-|2| array of the vertices of the polygon with |n|
+% * |vertex_array|: |n|-by-|2| array of the vertices of the polygon with |n|
 % vertices.  For |normal_axis == Axis.y|, it is in the format of |[z1 x1; ...;
 % zn xn]|.
 % * |dl_max|: maximum grid size allowed in the cylinder.  It can be either |[dx
@@ -108,7 +109,8 @@ shape = PolygonalCylinder(Axis.z, 100, 50, [0 0; 50 0; 25 25*sqrt(3)]);  <span c
 %   [E, H] = maxwell_run({INITIAL ARGUMENTS}, 'OBJ', {'vacuum', 'none', 1.0}, shape, {REMAINING ARGUMENTS});
 
 %%% See Also
-% <CircularCylinder.html |CircularCylinder|>, <EllipticCylinder.html
+% <CircularCylinder.html |CircularCylinder|>, <CircularShellCylinder.html
+% |CircularShellCylinder|>, <EllipticCylinder.html
 % |EllipticCylinder|>, <SectoralCylinder.html |SectoralCylinder|>, <Shape.html
 % |Shape|>, <maxwell_run.html |maxwell_run|>
 
@@ -122,10 +124,11 @@ classdef PolygonalCylinder < GenericCylinder
 			chkarg(istypesizeof(point_array, 'real', [0 Dir.count]), ...
 				'"point_array" should be %d-column matrix with real elements', Dir.count);
 
-			Np = size(point_array, 1);
+			Np = size(point_array, 1);  % number of points
 			p_array = point_array.';
+			c = mean(p_array, 2);  % center of mass
+			
 			p_array = [p_array, p_array(:,1)];  % # of columns: Np+1
-			c = mean(p_array, 2);
 			pc_array = [p_array(1,:) - c(1); p_array(2,:) - c(2)];
 			z_array = pc_array(1,:) + 1i * pc_array(2,:);
 			theta_array = angle(z_array(2:end) ./ z_array(1:end-1));  % length: Np
@@ -144,9 +147,13 @@ classdef PolygonalCylinder < GenericCylinder
 			chkarg(all(s_array > 0), 'mean point of vertices should be in polygon.');
 			
 			% lsf2d() can andle rho = [p q] with column vectors p and q.
-			function level = lsf2d(rho)
-				chkarg(istypesizeof(rho, 'real', [0, Dir.count]), ...
-					'"rho" should be matrix with %d columns with real elements.', Dir.count);
+			function level = lsf2d(p, q)
+				chkarg(istypeof(p, 'real'), '"p" should be array with real elements.');
+				chkarg(istypeof(q, 'real'), '"q" should be array with real elements.');
+				chkarg(isequal(size(p), size(q)), '"p" and "q" should have same size.');
+
+				loc = {p, q};
+
 				N = size(rho, 1);
 				c_vec = repmat(c.', [N 1]);
 				rc = rho - c_vec;
