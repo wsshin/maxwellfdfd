@@ -456,7 +456,7 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 				fprintf('\t# of iteration steps = %d\n', iter);
 				fprintf('\trelative residual error = %e\n', relres);
 			end
-			fprintf('unknowns: %s-field\n', char(solveropts.eqtype.f));
+			fprintf('solves for: %s-field\n', char(solveropts.eqtype.f));
 			fprintf('%s finishes.\n\n', mfilename);
 		end
 	end
