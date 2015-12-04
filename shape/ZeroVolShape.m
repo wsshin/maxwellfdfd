@@ -25,12 +25,13 @@ classdef ZeroVolShape < Shape
 				end
 				
 				level = lsf(x, y, z);
-				if force_draw && all(level <= 0)
+				level_copy = level(:);
+				if force_draw && all(level_copy <= 0)
 					% If the level set function is negative, nothing is drawn,
 					% so shift the function upward.
-					max_level = max(level);
-					max_level = max(level(level<max_level));  % second largest
-% 					max_level = max(level(level<max_level));  % third largest
+					max_level = max(level_copy);
+					max_level = max(level_copy(level_copy<max_level));  % second largest
+% 					max_level = max(level_copy(level_copy<max_level));  % third largest
 					level = level - max_level;
 				end
 			end

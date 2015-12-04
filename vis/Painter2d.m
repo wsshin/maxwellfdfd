@@ -401,7 +401,7 @@ classdef Painter2d < handle
 							w_line = 3;
 						end
 					else  % ZeroVolShape
-						lsf = @(x, y, z) shape.lsf(x, y, z, true);
+						lsf = @(x,y,z) shape.lsf(x, y, z, true);
 					end
 					
 					if n_axis == Axis.x

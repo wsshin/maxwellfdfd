@@ -51,61 +51,40 @@ shape0 = shape;
 
 lsf0 = shape0.lsf;  % level set function
 lprim0 = shape0.lprim;  % primary grid planes
-c0 = shape0.cb_center;  % center of circumbox
+c0 = shape0.cb_center.';  % center of circumbox in column
 dl_max0 = shape0.dl_max;  % dl_max
 
 box_bound = boundshape.bound;  % circumbox of boundshape
-n_corners = Sign.count^Axis.count;  % 8
-corners = NaN(n_corners, Axis.count);  % 8-by-3
-ic = 1;
-for sz = Sign.elems
-	for sy = Sign.elems
-		for sx = Sign.elems
-			corners(ic, Axis.x) = box_bound(Axis.x, sx);
-			corners(ic, Axis.y) = box_bound(Axis.y, sy);
-			corners(ic, Axis.z) = box_bound(Axis.z, sz);
-			ic = ic + 1;
-		end
-	end
-end
+[Xbox, Ybox, Zbox] = ndgrid(box_bound(Axis.x,:), box_bound(Axis.y,:), box_bound(Axis.z,:));
+corners = [Xbox(:), Ybox(:), Zbox(:)].';  % each column of corners is coordinates of one corner
 
+A = [a{1}; a{2}; a{3}].';  % columns of A are primitive vectors
 
-A = [a{1}; a{2}; a{3}];
-
-% Calculate all n = [nx ny nz] that make n*A + c0 corners.  These are extreme n's.
-n_ext = (corners - repmat(c0, [n_corners, 1])) / A;  % n * A + c0 = corner
+% Calculate all n = [nx ny nz] that make A * n + c0 corners.  These are extreme n's.
+% n_ext = (corners - repmat(c0, [n_corners, 1])) / A;  % n * A + c0 = corner
+n_ext = A \ bsxfun(@minus, corners, c0);  % A * n + c0 = corner
 
 % nmax = round(max(n_ext-eps, [], 1));  % round() instead of floor() to account for round-off error; -eps is to round down +X.5
 % nmin = round(min(n_ext+eps, [], 1));  % round() instead of ceil() to account for round-off error; +eps is to round up -X.5
-nmax = floor(max(n_ext-eps, [], 1));
-nmin = ceil(min(n_ext+eps, [], 1));
+nmax = floor(max(n_ext, [], 2) - eps);
+nmin = ceil(min(n_ext, [], 2) + eps);
 
 nshape = prod((nmax-nmin)+1);  % tentative number of shapes
-% for nz = nmin(Axis.z):nmax(Axis.z)
-% 	for ny = nmin(Axis.y):nmax(Axis.y)
-% 		for nx = nmin(Axis.x):nmax(Axis.x)
-% 			n = [nx ny nz];
-% 			R = n * A;  % lattice vector
-% 			if boundshape.contains(c0 + R)
-% 				nshape = nshape + 1;
-% 			end
-% 		end
-% 	end
-% end
 shape_array = Shape.empty(0, nshape);
 
 ishape = 0;
 for nz = nmin(Axis.z):nmax(Axis.z)
 	for ny = nmin(Axis.y):nmax(Axis.y)
 		for nx = nmin(Axis.x):nmax(Axis.x)
-			n = [nx ny nz];
-			R = n * A;  % lattice vector
-			if boundshape.contains(c0 + R)
+			n = [nx; ny; nz];
+			R = A * n;  % lattice vector
+			loc = num2cell(c0 + R);
+			if boundshape.contains(loc{:})
 				lprim = cell(1, Axis.count);
 				for w = Axis.elems
 					lprim{w} = lprim0{w} + R(w);
 				end
-				lsf = @(r) lsf0(r - repmat(R, [size(r,1), 1]));
+				lsf = @(x,y,z) lsf0(x-R(Axis.x), y-R(Axis.y), z-R(Axis.z));
 				shape = Shape(lprim, lsf, dl_max0);
 				ishape = ishape + 1;
 				shape_array(ishape) = shape;
