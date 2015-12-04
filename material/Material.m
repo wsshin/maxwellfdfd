@@ -35,7 +35,7 @@
 %%% See Also
 % <maxwell_run.html |maxwell_run|>
 
-classdef Material
+classdef Material < handle
 	
 	properties (SetAccess = immutable)
 		eps
@@ -60,9 +60,20 @@ classdef Material
 			chkarg(istypeof(color, 'char') ...
 				|| (istypesizeof(color, 'real', [1 3]) && all(color <= 1) && all(color >= 0)), ...
 				'"color" should be string or [r g b].');
-			chkarg(istypeof(eps, 'complex') && isexpandable2row(eps, Axis.count), ...
-				'"eps" should be complex scalar or length-%d row vector.', Axis.count);
-			eps = expand2row(eps, Axis.count);
+			chkarg(istypeof(eps, 'complex') ...
+				&& (isexpandable2row(eps, Axis.count) || isequal(size(eps), [Axis.count Axis.count]) ...
+				|| isequal(size(eps), [Axis.count 2*Axis.count])), ...
+				'"eps" should be complex scalar, length-%d row vector, %d-by-%d matrix, or %d-by-%d matrix.', ...
+				Axis.count, Axis.count, Axis.count, Axis.count, 2*Axis.count);
+			
+			% Make eps a 3-by-3 tensor
+			if isexpandable2row(eps, Axis.count)
+				eps = diag(expand2row(eps, Axis.count));
+			elseif isequal(size(eps), [Axis.count 2*Axis.count])
+				S = eps(:, (Axis.count+1):2*Axis.count);  % columns of S are crystal axes
+				eps = eps(:, 1:Axis.count);
+				eps = S * eps / S;
+			end
 			
 			mu_temp = 1.0;
 			islossless = false;
@@ -77,9 +88,20 @@ classdef Material
 				end
 			end
 			
-			chkarg(istypeof(mu_temp, 'complex') && isexpandable2row(mu_temp, Axis.count), ...
-				'"mu" should be complex scalar or length-%d row vector.', Axis.count);
-			mu_temp = expand2row(mu_temp, Axis.count);
+			chkarg(istypeof(mu_temp, 'complex') ...
+				&& (isexpandable2row(mu_temp, Axis.count) || isequal(size(mu_temp), [Axis.count Axis.count]) ...
+				|| isequal(size(mu_temp), [Axis.count 2*Axis.count])), ...
+				'"mu" should be complex scalar, length-%d row vector, %d-by-%d matrix, or %d-by-%d matrix.', ...
+				Axis.count, Axis.count, Axis.count, Axis.count, 2*Axis.count);
+
+			% Make mu a 3-by-3 tensor
+			if isexpandable2row(mu_temp, Axis.count)
+				mu_temp = diag(expand2row(mu_temp, Axis.count));
+			elseif isequal(size(mu_temp), [Axis.count 2*Axis.count])
+				S = mu_temp(:, (Axis.count+1):2*Axis.count);  % columns of S are crystal axes
+				mu_temp = mu_temp(:, 1:Axis.count);
+				mu_temp = S * mu_temp / S;
+			end
 			
 			chkarg(istypesizeof(islossless, 'logical'), '"islossless" should be logical.');
 			
@@ -95,11 +117,11 @@ classdef Material
 		end
 		
 		function truth = get.hasisoeps(this)
-			truth = all(this.eps == this.eps(1));
+			truth = isdiag(this.eps) && all(diag(this.eps) == this.eps(1,1));
 		end
 		
 		function truth = get.hasisomu(this)
-			truth = all(this.mu == this.mu(1));
+			truth = isdiag(this.eps) && all(diag(this.mu) == this.mu(1,1));
 		end
 		
 		function truth = get.isiso(this)
@@ -142,34 +164,35 @@ classdef Material
 			material =  Material(name, color, epsilon, islossless);
 		end
 	end
-	
-	methods
-		function [sorted, ind] = sort(this, varargin)
-			% varargin is the optional parameters (such as 'descend') of sort().
-			n = length(this);
-			names = cell(1, n);
-			for i = 1:n
-				names{i} = this(i).name;
-			end
-			[~, ind] = sort(names, varargin{:}); 
-			sorted = this(ind);
-		end
-		
-		function truth = ne(this, another)
-			chkarg(all(size(this) == size(another)), '"this" and "another" should have same size.');
-			dims = size(this);
-			n = numel(this);
-			this = this(:);
-			another = another(:);
-			truth = true(n,1);
-			for i = 1:n
-				truth(i)= ~isequal(this(i).name, another(i).name) || ...
-						~isequal(this(i).color, another(i).color) || ...
-						any(this(i).eps ~= another(i).eps) || ...
-						any(this(i).mu ~= another(i).mu);
-			end
-			truth = reshape(truth, dims);
-		end
-	end
+
+% Don't need the following definitions once defining Material as a handle class.
+% 	methods
+% 		function [sorted, ind] = sort(this, varargin)
+% 			% varargin is the optional parameters (such as 'descend') of sort().
+% 			n = length(this);
+% 			names = cell(1, n);
+% 			for i = 1:n
+% 				names{i} = this(i).name;
+% 			end
+% 			[~, ind] = sort(names, varargin{:}); 
+% 			sorted = this(ind);
+% 		end
+% 		
+% 		function truth = ne(this, another)
+% 			chkarg(all(size(this) == size(another)), '"this" and "another" should have same size.');
+% 			dims = size(this);
+% 			n = numel(this);
+% 			this = this(:);
+% 			another = another(:);
+% 			truth = true(n,1);
+% 			for i = 1:n
+% 				truth(i)= ~isequal(this(i).name, another(i).name) || ...
+% 						~isequal(this(i).color, another(i).color) || ...
+% 						any(this(i).eps(:) ~= another(i).eps(:)) || ...
+% 						any(this(i).mu(:) ~= another(i).mu(:));
+% 			end
+% 			truth = reshape(truth, dims);
+% 		end
+% 	end
 end
 

@@ -1,4 +1,4 @@
-classdef Shape < matlab.mixin.Heterogeneous
+classdef Shape < handle & matlab.mixin.Heterogeneous
 	% Shape is a superclass for all shapes.
 	
 	properties (SetAccess = immutable)

@@ -61,7 +61,7 @@
 %   end
 %   fprintf('\n');
 
-classdef Enumerated
+classdef Enumerated < handle
 	properties (SetAccess = immutable, GetAccess = private)
 		name
 	end

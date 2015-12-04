@@ -1,4 +1,4 @@
-classdef Object
+classdef Object < handle
 	% Object is the combination of Shape and Material.
 	
 	properties (SetAccess = immutable)

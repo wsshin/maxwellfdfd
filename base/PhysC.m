@@ -1,4 +1,4 @@
-classdef PhysC
+classdef PhysC < handle
 	% PhysC is the class defining fundamental physical constants.
 	
 	properties (Constant)

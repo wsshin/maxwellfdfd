@@ -1,4 +1,4 @@
-classdef PhysUnit
+classdef PhysUnit < handle
 	% PhysUnit defines the units of the physical quantities used in MaxwellFDFD.
 	
 	properties (SetAccess = immutable, GetAccess = public)
