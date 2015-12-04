@@ -25,8 +25,7 @@ if istypesizeof(varargin{iarg+1}, 'Scalar3d')
 	iarg = iarg + 1; intercept = varargin{iarg};
 	chkarg(istypesizeof(intercept, 'real'), 'argument %d should be "intercept" (real).', iarg);
 		
-	grid3d = Ep3d.grid3d;
-	chkarg(isequal(Eq3d.grid3d, grid3d) && isequal(Hp3d.grid3d, grid3d) && isequal(Hq3d.grid3d, grid3d), ... 
+	chkarg(isequal(Ep3d.grid3d, Eq3d.grid3d, Hp3d.grid3d, Hq3d.grid3d), ... 
 		'instances of Scalar3d do not have same grid3d.');
 	
 	% This makes the Poynting vector calculation independnet of whether the
@@ -52,47 +51,55 @@ else
 	chkarg(istypesizeof(Hq2d, 'Scalar2d'), '"argument %d should be "Hq2d" (instance of Scalar2d)."', iarg);
 	
 	
-	grid2d = Ep2d.grid2d;
-	intercept = Ep2d.intercept;
-	chkarg(Eq2d.intercept==intercept && Hp2d.intercept==intercept && Hq2d.intercept==intercept, ...
+	chkarg(isequal(Ep2d.grid2d, Eq2d.grid2d, Hp2d.grid2d, Hq2d.grid2d), ... 
+		'instances of Scalar2d do not have same grid2d.');  % Grid2d has normal_axis, so passing this test implies shared normal axis
+	chkarg(isequal(Ep2d.intercept, Eq2d.intercept, Hp2d.intercept, Hq2d.intercept), ...
 		'instances of Scalar2d do not have same intercept.');
-	chkarg(isequal(Eq2d.grid2d, grid2d) && isequal(Hp2d.grid2d, grid2d) && isequal(Hq2d.grid2d, grid2d), ... 
-		'instances of Scalar2d do not have same grid2d.');
+
+	grid2d = Ep2d.grid2d;
+	normal_axis = grid2d.normal_axis;
+	intercept = Ep2d.intercept;
 end
 
-% Interpolate fields at face centers of grid cells.
-pi = grid2d.l{Dir.h,GT.dual};
-qi = grid2d.l{Dir.v,GT.dual};
-[PI, QI] = ndgrid(pi, qi);
+if polarization == normal_axis
+	assert(all(Ep2d.gt_array==Hq2d.gt_array) && all(Eq2d.gt_array==Hp2d.gt_array));
 
-assert(all(Ep2d.gt_array==Hq2d.gt_array) && all(Eq2d.gt_array==Hp2d.gt_array));
+	pi = grid2d.l{Dir.h,GT.dual};
+	qi = grid2d.l{Dir.v,GT.dual};
+	[PI, QI] = ndgrid(pi, qi);  % centers of grid cell faces
 
-[ep, l1] = Ep2d.data_expanded();
-hq = Hq2d.data_expanded();  % hq and ep have same location
-[eq, l2] = Eq2d.data_expanded();
-hp = Hp2d.data_expanded();  % hp and eq have same location
+	[ep, l1] = Ep2d.data_expanded();
+	hq = Hq2d.data_expanded();  % hq and ep have same location
+	[eq, l2] = Eq2d.data_expanded();
+	hp = Hp2d.data_expanded();  % hp and eq have same location
 
-sr1 = ep .* conj(hq);
-sr2 = eq .* conj(hp);
+	sr1 = ep .* conj(hq);
+	sr2 = eq .* conj(hp);
 
-[P1, Q1] = ndgrid(l1{:});
-[P2, Q2] = ndgrid(l2{:});
+	[P1, Q1] = ndgrid(l1{:});  % locations of sr1
+	[P2, Q2] = ndgrid(l2{:});  % locations of sr2
 
-sr1 = interpn(P1, Q1, sr1, PI, QI);
-sr2 = interpn(P2, Q2, sr2, PI, QI);
+	% Interpolate sr1 and sr2 at the centers of grid cell faces.
+	sr1 = interpn(P1, Q1, sr1, PI, QI);
+	sr2 = interpn(P2, Q2, sr2, PI, QI);
 
-array = real(sr1 - sr2) / 2;
+	array = real(sr1 - sr2) / 2;
 
-% Attach extra points.
-for d = Dir.elems
-	array = attach_extra_S(array, d, grid2d);
+	% Attach extra points.
+	for d = Dir.elems
+		array = attach_extra_S(array, d, grid2d);
+	end
+
+	osc = Ep2d.osc;
+	physQ = PhysQ.S;
+	gt_array = [GT.dual, GT.dual];  % face centers
+else  % polarization ~= normal_axis
+	% To be implemented.  See an attempted usage in example/2d/pc_2d_basic.m.
+	% Note that in this case, Ep and Hq are not co-located.  Neither are Eq and
+	% Hp.  (Draw their locations, and compare it with Ew2d.gt_array and
+	% Hw2d.gt_array.)
 end
 
-osc = Ep2d.osc;
-physQ = PhysQ.S;
-gt_array = [GT.dual, GT.dual];  % face centers
-
-% Resume here.
 % The attached values to array should be the same as the ones inside the array
 % if BC is not periodic.
 S_scalar2d = Scalar2d(array, grid2d, gt_array, osc, physQ, ['<', physQ.symbol, '_', char(polarization), '>'], intercept);
