@@ -165,34 +165,35 @@ classdef Material < handle
 		end
 	end
 
-% Don't need the following definitions once defining Material as a handle class.
-% 	methods
-% 		function [sorted, ind] = sort(this, varargin)
-% 			% varargin is the optional parameters (such as 'descend') of sort().
-% 			n = length(this);
-% 			names = cell(1, n);
-% 			for i = 1:n
-% 				names{i} = this(i).name;
-% 			end
-% 			[~, ind] = sort(names, varargin{:}); 
-% 			sorted = this(ind);
-% 		end
-% 		
-% 		function truth = ne(this, another)
-% 			chkarg(all(size(this) == size(another)), '"this" and "another" should have same size.');
-% 			dims = size(this);
-% 			n = numel(this);
-% 			this = this(:);
-% 			another = another(:);
-% 			truth = true(n,1);
-% 			for i = 1:n
-% 				truth(i)= ~isequal(this(i).name, another(i).name) || ...
-% 						~isequal(this(i).color, another(i).color) || ...
-% 						any(this(i).eps(:) ~= another(i).eps(:)) || ...
-% 						any(this(i).mu(:) ~= another(i).mu(:));
-% 			end
-% 			truth = reshape(truth, dims);
-% 		end
-% 	end
+	% Need the following definitions to eliminate duplication in 'materials
+	% used' information printed out in build_system().
+	methods
+		function [sorted, ind] = sort(this, varargin)
+			% varargin is the optional parameters (such as 'descend') of sort().
+			n = length(this);
+			names = cell(1, n);
+			for i = 1:n
+				names{i} = this(i).name;
+			end
+			[~, ind] = sort(names, varargin{:}); 
+			sorted = this(ind);
+		end
+		
+		function truth = ne(this, another)
+			chkarg(all(size(this) == size(another)), '"this" and "another" should have same size.');
+			dims = size(this);
+			n = numel(this);
+			this = this(:);
+			another = another(:);
+			truth = true(n,1);
+			for i = 1:n
+				truth(i)= ~isequal(this(i).name, another(i).name) || ...
+						~isequal(this(i).color, another(i).color) || ...
+						any(this(i).eps(:) ~= another(i).eps(:)) || ...
+						any(this(i).mu(:) ~= another(i).mu(:));
+			end
+			truth = reshape(truth, dims);
+		end
+	end
 end
 
