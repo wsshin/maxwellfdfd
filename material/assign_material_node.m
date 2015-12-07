@@ -37,25 +37,14 @@ for obj = object_array
 
 	if istypesizeof(shape, 'Box')
 		for w = Axis.elems
-			eps_node_cell{w}(ind{Axis.x}, ind{Axis.y}, ind{Axis.z}) = material.eps(w,w);
-			mu_node_cell{w}(ind{Axis.x}, ind{Axis.y}, ind{Axis.z}) = material.mu(w,w);
+			eps_node_cell{w}(ind{:}) = material.eps(w,w);
+			mu_node_cell{w}(ind{:}) = material.mu(w,w);
 		end
 	else  % shape is not a Box
-% 		for ix = ind{Axis.x}
-% 			for iy = ind{Axis.y}
-% 				for iz = ind{Axis.z}
-% 					pt = [lprim{Axis.x}(ix), lprim{Axis.y}(iy), lprim{Axis.z}(iz)];
-% 					if shape.contains(pt)
-% 						eps_node(ix, iy, iz) = material.eps;
-% 						mu_node(ix, iy, iz) = material.mu;
-% 					end
-% 				end
-% 			end
-% 		end
 		[X, Y, Z] = ndgrid(ldual{Axis.x}(ind{Axis.x}), ldual{Axis.y}(ind{Axis.y}), ldual{Axis.z}(ind{Axis.z}));
 		is_in = shape.contains(X, Y, Z);
 		ind_tf = false(grid3d.N);  % logical indices
-		ind_tf(ind{Axis.x}, ind{Axis.y}, ind{Axis.z}) = is_in;
+		ind_tf(ind{:}) = is_in;
 		
 		for w = Axis.elems
 			eps_node_cell{w}(ind_tf) = material.eps(w,w);
