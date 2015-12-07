@@ -4,7 +4,7 @@ chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid.');
 chkarg(istypesizeof(gt, 'GT'), '"gt" should be instance of GT.');
 chkarg(istypesizeof(material_node, 'complexcell', [1 Axis.count], grid3d.N), ...
 	'"material_node" should be length-%d cell array, whose each element is %d-by-%d-by-%d array with complex elements.', ...
-	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+	Axis.count, grid3d.Ncell{:});
 
 for w = Axis.elems
 	material_node{w} = expand_node_array(grid3d, material_node{w});  % (Nx+2) x (Ny+2) x (Nz+2)

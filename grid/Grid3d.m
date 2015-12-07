@@ -25,6 +25,7 @@ classdef Grid3d < handle
         dl  % {diff(x_dual), diff(x_prim); diff(y_dual), diff(y_prim); diff(z_dual), diff(z_prim)}
         bc  % [bc_x, bc_y, bc_zp]
         N  % [Nx, Ny, Nz]: # of grid cells in the x, y, z directions
+		Ncell  % {[Nx], [Ny], [Nz]}: to pass as function arguments
 		Ntot  % Nx*Ny*Nz
 		L  % [Lx, Ly, Lz]: size of the domain
         Npml  % [Npml_xn, Npml_xp; Npml_yn, Npml_yp; Npml_zn, Npml_zp]: # of primary grid cells inside PML
@@ -130,6 +131,10 @@ classdef Grid3d < handle
 			for w = Axis.elems
 				N(w) = this.comp(w).N;
 			end
+		end
+
+		function Ncell = get.Ncell(this)
+			Ncell = num2cell(this.N);
 		end
 		
 		function Ntot = get.Ntot(this)

@@ -25,8 +25,7 @@ gt_array(axis) = alter(gt);
 if is3D
 	grid3d = grid;
 	chkarg(istypesizeof(F_array, 'complex', grid3d.N), ...
-		'"F_array" should be %d-by-%d-by-%d array with complex elements.', ...
-		grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+		'"F_array" should be %d-by-%d-by-%d array with complex elements.', grid3d.Ncell{:});
 
 	V = F_array;
 	for w = Axis.elems
@@ -42,7 +41,7 @@ else  % grid is Grid2d
 	
 	grid2d = grid;
 	chkarg(istypesizeof(F_array, 'complex', grid2d.N), ...
-		'"F_array" should be %d-by-%d array with complex elements.', grid2d.N(Dir.h), grid2d.N(Dir.v));
+		'"F_array" should be %d-by-%d array with complex elements.', grid2d.Ncell{:});
 
 	gt_array = gt_array(grid2d.axis);
 

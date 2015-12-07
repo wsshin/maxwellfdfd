@@ -19,6 +19,7 @@ classdef Grid2d < handle
         dl  % {diff(h_dual), diff(h_prim); diff(v_dual), diff(v_prim)}
         bc  % [bc_h, bc_v]
         N  % [Nh, Nv]: # of grid cells in the horizontal and vertical directions
+		Ncell  % {[Nh], [Nv]}: to pass as function arguments
 		Ntot  % Nh * Nv
 		L  % [Lh, Lv]; size of the domain
         Npml  % [Npml_hn, Npml_hp; Npml_vn, Npml_vp]
@@ -112,6 +113,10 @@ classdef Grid2d < handle
 			for d = Dir.elems
 				N(d) = this.comp(d).N;
 			end
+		end
+		
+		function Ncell = get.Ncell(this)
+			Ncell = num2cell(this.N);
 		end
 		
 		function Ntot = get.Ntot(this)

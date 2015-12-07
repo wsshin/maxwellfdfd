@@ -9,14 +9,14 @@ if nargin < 3  % no eps_node_cell
 end
 chkarg(istypesizeof(eps_node_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 	'"eps_node_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
-	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+	Axis.count, grid3d.Ncell{:});
 
 if nargin < 4  % no mu_node_cell
 	mu_node_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
 end
 chkarg(istypesizeof(mu_node_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 	'"mu_node_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
-	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+	Axis.count, grid3d.Ncell{:});
 
 ldual = cell(1, Axis.count);  % locations of cell centers
 for w = Axis.elems

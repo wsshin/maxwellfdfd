@@ -168,7 +168,7 @@ classdef TFSFPlaneSrc < Source
 			chkarg(isequal(grid3d, this.grid3d), 'same "grid3d" should be used as in create_incidentF().');
 			chkarg(istypesizeof(JM_cell, 'complexcell', [1 Axis.count], grid3d.N), ...
 				'"JM_cell" should be length-%d row cell array whose each element is %d-by-%d-by-%d array with complex elements.', ...
-				Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+				Axis.count, grid3d.Ncell{:});
 			
 			this.JM = JM_cell;
 		end

@@ -1,7 +1,7 @@
 function patch_handle_array = draw_objsrc(obj_array, src_array, grid3d, withinterp, withpml)
 
 chkarg(istypesizeof(obj_array, 'Object', [1 0]), ...
-	'"object_array" should be row vector with Object as elements.');
+	'"obj_array" should be row vector with Object as elements.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
