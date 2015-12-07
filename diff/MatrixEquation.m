@@ -113,7 +113,8 @@ classdef MatrixEquation
             
 				A = A(this.r, this.r);
 				b = b(this.r);
-			else  % this.ft == FT.eh
+			else  % use both E and H
+				assert(isequal(this.ft, FT.elems));
 				EPS = create_spdiag(this.eps);
 				MU = create_spdiag(this.mu);
 				

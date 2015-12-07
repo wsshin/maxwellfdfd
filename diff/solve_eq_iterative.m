@@ -18,7 +18,7 @@ end
 save('resvec', 'resvec');
 
 %%
-if eqtype.f ~= FT.eh
+if length(eqtype.f) == 1
 	g = GfromF(f);
 	
 	if eqtype.f == FT.e
@@ -28,7 +28,8 @@ if eqtype.f ~= FT.eh
 		e = g;
 		h = f;
 	end	
-else
+else  % use both E and H
+	assert(isequal(eqtype.f, FT.elems));
 	f = reshape(f, [], 2);
 	e = f(:,1);
 	h = f(:,2);

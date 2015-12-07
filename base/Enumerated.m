@@ -95,7 +95,10 @@ classdef Enumerated < handle
 		end
 		
 		function name = char(this)
-			name = this.name;
+			% This function returned name = this.name originally, but it is
+			% modified to handle arguments given as arrays.
+% 			name = this.name;
+			name = cell2mat(arrayfun(@(x) x.name, this, 'UniformOutput', false));
 		end
 		
 		function n = int(this)

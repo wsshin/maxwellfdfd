@@ -7,7 +7,7 @@ classdef EquationType
 	
 	methods
         function this = EquationType(f, ge)
-			chkarg(istypesizeof(f, 'FT'), '"f" should be instance of FT.');
+			chkarg(istypesizeof(f, 'FT', [1 0]), '"f" should be row vector with FT as elements.');
 			chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');
 			this.f = f;
 			this.ge = ge;
