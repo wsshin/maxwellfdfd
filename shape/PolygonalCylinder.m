@@ -54,14 +54,14 @@ classdef PolygonalCylinder < GenericCylinder
 			Nv = size(v_array, 1);  % number of vertices
 			c = mean(v_array);  % center of mass
 			
-			v_array = [v_array; v_array(1,:)];  % # of vertices: Nv+1
-			vc_array = bsxfun(@minus, v_array, c);  % vertices in center-of-mass coordinates
+			vc_array = [v_array; v_array(1,:)];  % # of vertices: Nv+1
+			vc_array = bsxfun(@minus, vc_array, c);  % vertices in center-of-mass coordinates
 			z_array = vc_array(:,1) + 1i * vc_array(:,2);  % coordinates in complex plane
 			theta_array = angle(z_array(2:end) ./ z_array(1:end-1));  % length: Nv
 			chkarg(all(theta_array > 0), ...
 				'"vertex_array" should represent points arranged in counter-clockwise direction.');
 			
-			s_array = diff(v_array);  % array of side vectors
+			s_array = diff(vc_array);  % array of side vectors
 			
 			% Set up n_array, the array of outward unit vectors.
 			n_array = [s_array(:,2), -s_array(:,1)];  % unnormalized outward normal directions
@@ -104,8 +104,8 @@ classdef PolygonalCylinder < GenericCylinder
 
 			[h, v, n] = cycle(normal_axis);
 			lprim = cell(1, Axis.count);
-			lprim{h} = v_array(1, 1:end-1);
-			lprim{v} = v_array(2, 1:end-1);
+			lprim{h} = v_array(:, Dir.h).';
+			lprim{v} = v_array(:, Dir.v).';
 			lprim{n} = [-height height]/2 + normal_center;
 			
 			if nargin < 5  % no dl_max

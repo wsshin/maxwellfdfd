@@ -407,14 +407,10 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		end
 		
 		% Add sobj_array to the already-generated eps and mu.
-		eps_node_cell_temp = cell(1, Axis.count);
-		mu_node_cell_temp = cell(1, Axis.count);
 		for w = Axis.elems
-			eps_node_cell_temp{w} = eps_node_cell{w}(2:end-1,2:end-1,2:end-1);
-			mu_node_cell_temp{w} = mu_node_cell{w}(2:end-1,2:end-1,2:end-1);
+			eps_node_cell{w} = eps_node_cell{w}(2:end-1,2:end-1,2:end-1);
+			mu_node_cell{w} = mu_node_cell{w}(2:end-1,2:end-1,2:end-1);
 		end
-		eps_node_cell = eps_node_cell_temp;
-		mu_node_cell = mu_node_cell_temp;
 
 		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, sobj_array, eps_node_cell, mu_node_cell);  % Nx x Ny x Nz
 
