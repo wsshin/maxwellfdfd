@@ -1,7 +1,14 @@
-function material_cell = mean_material_node(gt, material_node)
+function material_cell = mean_material_node(grid3d, gt, material_node)
+
+chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid.');
 chkarg(istypesizeof(gt, 'GT'), '"gt" should be instance of GT.');
-chkarg(istypesizeof(material_node, 'complexcell', [1 Axis.count], zeros(1, Axis.count)), ...
-	'"material_node" should be length-%d cell array whose each element is %dD array with complex elements.', Axis.count, Axis.count);
+chkarg(istypesizeof(material_node, 'complexcell', [1 Axis.count], grid3d.N), ...
+	'"material_node" should be length-%d cell array, whose each element is %d-by-%d-by-%d array with complex elements.', ...
+	Axis.count, grid3d.N(Axis.x), grid3d.N(Axis.y), grid3d.N(Axis.z));
+
+for w = Axis.elems
+	material_node{w} = expand_node_array(grid3d, material_node{w});  % (Nx+2) x (Ny+2) x (Nz+2)
+end
 
 if gt == GT.prim
 	% material parameters for fields on primary grid

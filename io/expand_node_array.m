@@ -1,4 +1,4 @@
-function node_array = expand_node_array(node_array, grid3d)
+function node_array = expand_node_array(grid3d, node_array)
 
 % Extend eps and mu to the ghost points considering the boundary conditions.
 for w = Axis.elems

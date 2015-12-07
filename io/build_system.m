@@ -337,14 +337,8 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	if ~isepsgiven
 		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, obj_array);  % Nx x Ny x Nz
 	end
-	
-	for w = Axis.elems
-		eps_node_cell{w} = expand_node_array(eps_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
-		mu_node_cell{w} = expand_node_array(mu_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
-	end
-	
-	eps_cell = mean_material_node(ge, eps_node_cell);
-	mu_cell = mean_material_node(alter(ge), mu_node_cell);
+	eps_cell = mean_material_node(grid3d, ge, eps_node_cell);
+	mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);
 
 	% Construct PML s-factors.
 	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d, deg_pml, R_pml);
@@ -407,20 +401,9 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		end
 		
 		% Add sobj_array to the already-generated eps and mu.
-		for w = Axis.elems
-			eps_node_cell{w} = eps_node_cell{w}(2:end-1,2:end-1,2:end-1);
-			mu_node_cell{w} = mu_node_cell{w}(2:end-1,2:end-1,2:end-1);
-		end
-
 		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, sobj_array, eps_node_cell, mu_node_cell);  % Nx x Ny x Nz
-
-		for w = Axis.elems
-			eps_node_cell{w} = expand_node_array(eps_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
-			mu_node_cell{w} = expand_node_array(mu_node_cell{w}, grid3d);  % (Nx+2) x (Ny+2) x (Nz+2)
-		end
-
-		eps_cell = mean_material_node(ge, eps_node_cell);  % Nx x Ny x Nz
-		mu_cell = mean_material_node(alter(ge), mu_node_cell);  % Nx x Ny x Nz
+		eps_cell = mean_material_node(grid3d, ge, eps_node_cell);  % Nx x Ny x Nz
+		mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);  % Nx x Ny x Nz
 
 		pm.mark('TF/SF source assignment');
 	end
@@ -429,6 +412,9 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	eps_node = cell(1, Axis.count);
 	mu_node = cell(1, Axis.count);
 	for w = Axis.elems
+		eps_node_cell{w} = expand_node_array(grid3d, eps_node_cell{w});  % (Nx+2) x (Ny+2) x (Nz+2)
+		mu_node_cell{w} = expand_node_array(grid3d, mu_node_cell{w});  % (Nx+2) x (Ny+2) x (Nz+2)
+		
 		eps_node{w} = Scalar3d(eps_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.eps, '\epsilon');
 		mu_node{w} = Scalar3d(mu_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.mu, '\mu');
 	end
