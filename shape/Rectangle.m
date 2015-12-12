@@ -57,12 +57,23 @@ classdef Rectangle < ZeroVolShape
 			bound([h v], :) = rect;
 			
 			box = Box(bound);
-			function level = lsf(r)
-				chkarg(istypesizeof(r, 'real', [0, Axis.count]), ...
-					'"r" should be matrix with %d columns with real elements.', Axis.count);
-				r_normal = r(:, normal_axis);
-				r(:, normal_axis) = intercept;  % without this, box.lsf() returns -Inf in most cases, where ZeroVolShape.lsf(r, true) is in vain
-				level = box.lsf(r) - abs(r_normal - intercept);
+			plane = Plane(normal_axis, intercept);
+			function level = lsf(x, y, z)
+				chkarg(istypeof(x, 'real'), '"x" should be array with real elements.');
+				chkarg(istypeof(y, 'real'), '"y" should be array with real elements.');
+				chkarg(istypeof(z, 'real'), '"z" should be array with real elements.');
+				chkarg(isequal(size(x), size(y), size(z)), '"x", "y", "z" should have same size.');
+
+				% box.lsf(loc{:}) generates -Inf even for points slightly away
+				% from the rectangle plane, because of the division by
+				% s(normal_dir) == 0.  (Note: 1/0 = Inf.)  This is fine as a
+				% behavior of lsf(), but then ZeroVolShape.lsf(loc{:}, true)
+				% fails.  To solve this difficulty, modify lsf() not to divide
+				% by zero.
+				loc = {x, y, z};
+				loc{normal_axis} = intercept(ones(size(x)));
+				
+				level = min(box.lsf(loc{:}), plane.lsf(x, y, z));  % intersection between box and plane
 			end
 			
 			lprim = cell(1, Axis.count);
