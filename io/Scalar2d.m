@@ -60,6 +60,10 @@ classdef Scalar2d
 			l_cell = this.grid2d.lall(Dir.elems + Dir.count*subsindex(this.gt_array));
 		end
 		
+		function l_cell = lg(this)
+			l_cell = this.grid2d.lg(Dir.elems + Dir.count*subsindex(this.gt_array));
+		end
+		
 		function l_cell = l(this)
 			l_cell = this.grid2d.l(Dir.elems + Dir.count*subsindex(this.gt_array));
 		end
@@ -67,6 +71,16 @@ classdef Scalar2d
 		function [array, l_cell] = data_expanded(this)
 			l_cell = this.lall;
 			array = this.array;
+		end
+		
+		function [array, l_cell] = data_ghost_expanded(this)
+			l_cell = this.lg;
+			ind = cell(1, Axis.count);
+			
+			for w = Axis.elems
+				ind{w} = 1:(this.grid3d.N(w)+1);
+			end
+			array = this.array(ind{:});
 		end
 		
 		function [array, l_cell] = data_original(this)
