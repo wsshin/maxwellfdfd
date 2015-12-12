@@ -86,7 +86,7 @@ classdef RectSrc < Source
 			else  % w_axis == this.polarization
 				n = this.normal_axis;
 				p = w_axis;  % polarization axis
-				q = setdiff(Axis.elems, [n, p]);
+% 				q = setdiff(Axis.elems, [n, p]);
 				
 				g = this.gt;
 				ind_n = ind_for_loc(this.intercept, n, g, grid3d);
@@ -136,6 +136,7 @@ classdef RectSrc < Source
 
 			% Adjust interval as if the boundary condition is periodic;
 			% nonperiodic BC will be handled later.
+			interval_adjusted = false;
 			if ~grid1d.contains(interval(Sign.n))
 				interval(Sign.n) = interval(Sign.n) + diff(grid1d.bound);
 				interval_adjusted = true;
