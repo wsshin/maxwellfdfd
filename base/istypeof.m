@@ -80,8 +80,10 @@ elseif isequal(typename, 'int')
 	truth = isnumeric(obj) && isint(obj);  % note isint('abc') == true
 elseif isequal(typename, 'real')
 	truth = isnumeric(obj) && isreal(obj);  % note isreal('abc') == true
-elseif isequal(typename, 'complex');
+elseif isequal(typename, 'complex')
 	truth = isnumeric(obj);
+elseif isequal(typename, 'arbitrary')
+	truth = true;
 else
 	truth = isa(obj, typename);
 end
