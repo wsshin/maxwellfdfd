@@ -100,7 +100,7 @@ classdef Material < handle
 			elseif isequal(size(mu_temp), [Axis.count 2*Axis.count])
 				S = mu_temp(:, (Axis.count+1):2*Axis.count);  % columns of S are crystal axes
 				mu_temp = mu_temp(:, 1:Axis.count);
-				mu_temp = S * mu_temp / S;
+				mu_temp = (S * mu_temp) / S;
 			end
 			
 			chkarg(istypesizeof(islossless, 'logical'), '"islossless" should be logical.');

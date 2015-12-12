@@ -1,13 +1,15 @@
 function Dw = create_Dw(w, N, f1, fg)
-% f1: factor multiplied to the first element in the w-direction
-% fg: factor multiplied to the ghost element in the w-direction
-
-% This function creates the forward derivative matrix.  For the backward
-% derivative matrix, take the transpose or conjugate transpose appropriately.
+% Creates the forward difference matrix (without dl division).  For the backward
+% difference matrix, take the transpose or conjugate transpose appropriately, as
+% shown in create_Ds().
+%
+% f1: factor multiplied to the first element in the w-direction (for implementing the symmetry boundary)
+% fg: factor multiplied to the ghost element in the w-direction (for implementing the Bloch boundary)
 
 chkarg(istypesizeof(w, 'Axis') || istypesizeof(w, 'Dir'), '"w" should be instance of Axis or Dir.');
 chkarg(istypesizeof(N, 'int', [1 w.count]), '"N" should be length-%d row vector with integer elements.', w.count);
-chkarg(istypesizeof(fg, 'complex'), '"nL" should be complex.');
+chkarg(istypesizeof(f1, 'complex'), '"f1" should be complex.');
+chkarg(istypesizeof(fg, 'complex'), '"fg" should be complex.');
 
 % Translate spatial indices (i,j,k) into matrix indices.
 M = prod(N);

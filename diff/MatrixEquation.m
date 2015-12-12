@@ -95,7 +95,7 @@ classdef MatrixEquation
 		
         function [A, b] = matrix_op(this)
 			if this.ft == FT.e
-				INV_MU = create_spdiag(1./this.mu);  % when mu has Inf, "MU \ Mat" complains about singularity
+				INV_MU = create_spdiag(1./this.mu);  % create INV_MU instead of inverting MU; "MU \ Mat" complains about singularity when mu has Inf
 				EPS = create_spdiag(this.eps);
 				PM = create_spdiag(this.pm);	
 
@@ -105,7 +105,7 @@ classdef MatrixEquation
 				A = A(this.r, this.r);
 				b = b(this.r);
 			elseif this.ft == FT.h
-				INV_EPS = create_spdiag(1./this.eps);  % when mu has Inf, "MU \ Mat" complains about singularity
+				INV_EPS = create_spdiag(1./this.eps);  % create INV_EPS instead of inverting EPS; "EPS \ Mat" complains about singularity when eps has Inf
 				MU = create_spdiag(this.mu);
 
 				A = (this.Ce * INV_EPS * this.Cm) - this.omega^2 * MU;

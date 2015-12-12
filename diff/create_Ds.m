@@ -1,6 +1,7 @@
 function Ds_cell = create_Ds(s, ge, dl_factor_cell, gridnd)
+% Creates the forward or backward derivative matrix.
 
-chkarg(istypesizeof(s, 'Sign'), '"s" should be instance of Sign.');  % Ds = Df (or Df) when s == Sign.p (or Sign.n)
+chkarg(istypesizeof(s, 'Sign'), '"s" should be instance of Sign.');  % Ds = Df (or Db) when s == Sign.p (or Sign.n)
 chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');  % ge: grid type for the E-field
 chkarg(istypesizeof(gridnd, 'Grid2d') || istypesizeof(gridnd, 'Grid3d'), '"gridnd" should be instance of Grid2d or Grid3d.');
 
