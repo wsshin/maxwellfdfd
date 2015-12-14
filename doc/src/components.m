@@ -21,7 +21,6 @@
 % * <Point.html Point>
 % * <PolygonalCylinder.html PolygonalCylinder>
 % * <Rectangle.html Rectangle>
-% * <RectSrc.html RectSrc>
 % * <SectoralCylinder.html SectoralCylinder>
 % * <SegmentalCylinder.html SegmentalCylinder>
 % * <Sphere.html Sphere>
@@ -32,6 +31,7 @@
 % * <ModalSrc.html ModalSrc>
 % * <PlaneSrc.html PlaneSrc>
 % * <PointSrc.html PointSrc>
+% * <RectSrc.html RectSrc>
 % * <TFSFPlaneSrc.html TFSFPlaneSrc>
 
 %% Visualization
