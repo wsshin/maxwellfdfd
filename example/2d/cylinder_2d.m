@@ -1,7 +1,7 @@
 clear all; close all; clear classes; clc;
 
 %% Set flags.
-inspect_only = true;  % true to inspect structure before any calculation
+inspect_only = false;  % true to inspect structure before any calculation
 
 %% Solve the system.
 L0 = 1e-9;  % unit of length: nm
@@ -27,7 +27,7 @@ if ~inspect_only
 	%% Visualize the solution.
 	figure
 	clear opts
-	opts.withobjsrc = true;
+	opts.withobjsrc = false;
 % 	opts.withabs = true;
 % 	opts.withpml = true;
 % 	opts.withinterp = false;

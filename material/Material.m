@@ -180,7 +180,7 @@ classdef Material < handle
 		end
 		
 		function truth = ne(this, another)
-			chkarg(all(size(this) == size(another)), '"this" and "another" should have same size.');
+			chkarg(isequal(size(this), size(another)), '"this" and "another" should have same size.');
 			dims = size(this);
 			n = numel(this);
 			this = this(:);

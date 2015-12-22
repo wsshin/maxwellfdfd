@@ -6,6 +6,9 @@ chkarg(isempty(dl_factor_cell) || istypesizeof(dl_factor_cell, 'complexcell', [A
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 
 %% Create Df and Db.
+% Surprisingly, it seems that Ds used to create the curl operators can be reused
+% to create the divergence operators, while satisfying all the boundary
+% conditions.
 Df = create_Ds(Sign.p, ge, dl_factor_cell, grid3d);
 Db = create_Ds(Sign.n, ge, dl_factor_cell, grid3d);
 
@@ -13,10 +16,10 @@ Db = create_Ds(Sign.n, ge, dl_factor_cell, grid3d);
 % [Mp, Md] = create_masks(ge, grid3d);
 
 %% Form matrices
-Divp = [Db{Axis.x}, Db{Axis.y}, Db{Axis.z}];
+Divp = [Db{Axis.x}, Db{Axis.y}, Db{Axis.z}];  % primary fields use backward difference
 % Divp = Divp * Mp;
 
-Divd = [Df{Axis.x}, Df{Axis.y}, Df{Axis.z}];
+Divd = [Df{Axis.x}, Df{Axis.y}, Df{Axis.z}];  % dual fields use forward difference
 % Divd = Divd * Md;
 
 if ge == GT.prim

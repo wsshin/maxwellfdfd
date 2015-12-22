@@ -32,7 +32,7 @@ for w = v.elems  % mask w-component of field on primary grid
 	mask_p{w} = mask(:);
 end
 
-ind_Mp = cell2mat(mask_p);
+ind_Mp = cell2mat(mask_p);  % Nx*Ny*Nz-by-3 matrix
 ind_Mp = ind_Mp(:);
 
 mask_d = cell(1, v.count);

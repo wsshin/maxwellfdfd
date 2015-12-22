@@ -2,7 +2,7 @@
 % Build a system to solve by MaxwellFDFD.
 
 %%% Syntax
-%  [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell] = build_system(ge, OSC, DOM, OBJ, SRC, [progmark])
+%  [osc, grid3d, s_factor_cell, eps_array, mu_array, J_cell] = build_system(ge, OSC, DOM, OBJ, SRC, [progmark])
 %  [..., obj_array, src_array, mat_array] = build_system(ge, OSC, DOM, OBJ, SRC, [pragmark])
 %  [..., eps_node_array, mu_node_array] = build_system(ge, OSC, DOM, OBJ, SRC, [pragmark])
 
@@ -29,10 +29,10 @@
 % * |grid3d|, an instance of <Grid3d.html Grid3d>, 
 % * |s_factor_cell|, a cell array of PML s-factors: |{sx_array, sy_array,
 % sz_array}|
-% * |eps_cell|, a cell array of electric permittivity evaluated at the E-field
-% positions: |{eps_xx_array, eps_yy_array, eps_zz_array}|
-% * |mu_cell|,  a cell array of magnetic permeability evaluated at the H-field
-% positions: |{mu_xx_array, mu_yy_array, mu_zz_array}|
+% * |eps_array|, an array of subpixel-smoothed electric permittivity evaluated
+% at the E-field positions and E-field cell vertices
+% * |mu_array|,  an array of subpixel-smoothed magnetic permeability evaluated
+% at the H-field positions and H-field cell vertices
 % * |J_cell|, a cell array of electric current sources: |{Jx_array, Jy_array,
 % Jz_array}|
 % * |M_cell|, a cell array of electric current sources: |{Mx_array, My_array,
@@ -61,7 +61,7 @@
 %       'SRC', PointSrc(Axis.x, [0, 0, 200]) ...
 %       );
 
-function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
+function [osc, grid3d, s_factor_cell, eps_array, mu_array, J_cell, M_cell, ...
 	obj_array, src_array, mat_array, eps_node, mu_node, isiso] = build_system(varargin)
 
 	iarg = nargin; arg = varargin{iarg};
@@ -319,11 +319,13 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	% Generate a grid.
 	[lprim, Npml] = generate_lprim3d(domain, Lpml, [shape_array, sshape_array], src_array, withuniformgrid);
 	grid3d = Grid3d(osc.unit, lprim, Npml, bc);
+
 	if withuniformgrid
 		pm.mark('uniform grid generation');
 	else
 		pm.mark('nonuniform grid generation');
 	end
+	
 	fprintf('\t[Nx Ny Nz] = %s\n', mat2str(grid3d.N));
 	
 	% Generate a warning when a seemingly 2D simulation is defined on a 3D grid.
@@ -333,21 +335,28 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 			'check d%s''s of objects and locations of sources'], char(normal_axis), char(normal_axis));
 	end
 
-	% Construct material parameters.
-	if ~isepsgiven
-		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, obj_array);  % Nx x Ny x Nz
-	end
-	eps_cell = mean_material_node(grid3d, ge, eps_node_cell);
-	mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);
-
 	% Construct PML s-factors.
 	s_factor_cell = generate_s_factor(osc.in_omega0(), grid3d, deg_pml, R_pml);
+
+	% Construct material parameters.
+	if ~isepsgiven
+% 		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, obj_array);  % Nx x Ny x Nz
+		[eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] ...
+			= assign_mat_ind(grid3d, ge, obj_array);
+	end
 	pm.mark('eps and mu assignment');
+
+% 	eps_cell = mean_material_node(grid3d, ge, eps_node_cell);
+% 	mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);
+	[eps_array, mu_array] = mean_subpixel(grid3d, ge, domain, eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
+	pm.mark('eps and mu smoothing');
 
 	if ~isTFSF
 		% Solve for modes.
 		for src = src_array
 			if istypesizeof(src, 'ModalSrc')
+				error('subpixel smoothing currently does not support "ModalSrc".'); 
+				
 				modalsrc = src;
 				if ~modalsrc.ispreped
 					prep_modalsrc(ge, pml, osc, grid3d, eps_cell, mu_cell, s_factor_cell, modalsrc);
@@ -401,9 +410,12 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		end
 		
 		% Add sobj_array to the already-generated eps and mu.
-		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, sobj_array, eps_node_cell, mu_node_cell);  % Nx x Ny x Nz
-		eps_cell = mean_material_node(grid3d, ge, eps_node_cell);  % Nx x Ny x Nz
-		mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);  % Nx x Ny x Nz
+% 		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, sobj_array, eps_node_cell, mu_node_cell);  % Nx x Ny x Nz
+% 		eps_cell = mean_material_node(grid3d, ge, eps_node_cell);  % Nx x Ny x Nz
+% 		mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);  % Nx x Ny x Nz
+		[eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] ...
+			= assign_mat_ind(grid3d, ge, sobj_array, eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
+		[eps_array, mu_array] = mean_subpixel(grid3d, ge, domain, eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
 
 		pm.mark('TF/SF source assignment');
 	end
@@ -411,13 +423,13 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	
 	eps_node = cell(1, Axis.count);
 	mu_node = cell(1, Axis.count);
-	for w = Axis.elems
-		eps_node_cell{w} = expand_node_array(grid3d, eps_node_cell{w});  % (Nx+2) x (Ny+2) x (Nz+2)
-		mu_node_cell{w} = expand_node_array(grid3d, mu_node_cell{w});  % (Nx+2) x (Ny+2) x (Nz+2)
-		
-		eps_node{w} = Scalar3d(eps_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.eps, '\epsilon');
-		mu_node{w} = Scalar3d(mu_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.mu, '\mu');
-	end
+% 	for w = Axis.elems
+% 		eps_node_cell{w} = expand_node_array(grid3d, eps_node_cell{w});  % (Nx+2) x (Ny+2) x (Nz+2)
+% 		mu_node_cell{w} = expand_node_array(grid3d, mu_node_cell{w});  % (Nx+2) x (Ny+2) x (Nz+2)
+% 		
+% 		eps_node{w} = Scalar3d(eps_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.eps, '\epsilon');
+% 		mu_node{w} = Scalar3d(mu_node_cell{w}, grid3d, [GT.dual GT.dual GT.dual], osc, PhysQ.mu, '\mu');
+% 	end
 		
 	% Construct sources.
 	J_cell = assign_source(grid3d, srcj_array);

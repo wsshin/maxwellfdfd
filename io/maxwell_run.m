@@ -344,6 +344,8 @@ function [E_cell, H_cell, obj_array, src_array, extra] = maxwell_run(varargin)
 		H = {};
 	else  % inspect_only == false
 		if isequal(solveropts.method, 'inputfile')
+			error('subpixel smoothing currently does not support "inputfile".'); 
+			
 			% Define eps_node_array at vertices of the E-field edges.
 			chkarg(isiso, 'anisotropic materials are not supported for solveropts.method == ''inputfile''.');
 			

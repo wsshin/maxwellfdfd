@@ -1,6 +1,6 @@
 function s_factor_cell = generate_s_factor(omega, grid3d, m, R)
-% For example, s_factor_cell{Axis.x, GT.dual} is the s-factor multiplied to Ex
-% (or eps_ww).
+% For example, when the E-field grid is the primary grid, s_factor_cell{Axis.x,
+% GT.dual} is the s-factor multiplied to Ex (or eps_ww).
 
 chkarg(istypesizeof(omega, 'complex'), '"omega" should be complex.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');

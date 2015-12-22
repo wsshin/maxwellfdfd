@@ -90,4 +90,6 @@ end
 
 function truth = isint(obj)
 
-truth = isreal(obj) && all(mod(obj(:),1)==0);
+obj = obj(:);
+
+truth = isreal(obj) && all(mod(obj(~isnan(obj)),1)==0);

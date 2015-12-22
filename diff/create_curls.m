@@ -14,8 +14,8 @@ Db = create_Ds(Sign.n, ge, dl_factor_cell, grid3d);
 [ind_Mp, ind_Md] = create_masks(ge, grid3d);
 
 %% Form curl matrices.
-M = prod(grid3d.N);
-Z = sparse(M, M);
+Ntot = prod(grid3d.N);
+Z = sparse(Ntot, Ntot);
 
 Cp = [Z, -Df{Axis.z}, Df{Axis.y}; ...
 	Df{Axis.z}, Z, -Df{Axis.x}; ...

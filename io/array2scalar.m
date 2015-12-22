@@ -24,8 +24,9 @@ gt_array(axis) = alter(gt);
 
 if is3D
 	grid3d = grid;
-	chkarg(istypesizeof(F_array, 'arbitrary', grid3d.N), '"F_array" should be %d-by-%d-by-%d array.', grid3d.Ncell{:});
-
+	chkarg(istypesizeof(F_array, 'complex', grid3d.N), ...
+		'"F_array" should be %d-by-%d-by-%d array with complex elements.', grid3d.Ncell{:});
+	
 	V = F_array;
 	for w = Axis.elems
 		V = attach_extra_F(V, ft, gt_array(w), axis, grid3d.bc(w), w, grid3d.kBloch(w)*grid3d.L(w));
@@ -39,7 +40,8 @@ else  % grid is Grid2d
 	chkarg(istypesizeof(intercept, 'real'), '"intercept" should be real.');  % NaN is real
 	
 	grid2d = grid;
-	chkarg(istypesizeof(F_array, 'arbitrary', grid2d.N), '"F_array" should be %d-by-%d array.', grid2d.Ncell{:});
+	chkarg(istypesizeof(F_array, 'complex', grid2d.N), ...
+		'"F_array" should be %d-by-%d array with complex elements.', grid2d.Ncell{:});
 
 	gt_array = gt_array(grid2d.axis);
 
@@ -62,7 +64,7 @@ function Fw_array = attach_extra_F(Fw_array, ft, gt, w, bc_v, v, kvLv)
 % Augment the Fw array with ghost boundary elements in the v-axis.
 % Surprisingly, this function combines attach_extra_E() and attach_extra_H().
 
-% chkarg(istypesizeof(Fw_array, 'complex', [0 0 0]), '"Fw_array" should be 3D array with complex elements.');
+chkarg(istypesizeof(Fw_array, 'complex', [0 0 0]), '"Fw_array" should be 3D array with complex elements.');
 chkarg(istypesizeof(ft, 'FT'), '"ft" should be instance of FT.');
 chkarg(istypesizeof(gt, 'GT'), '"gt" should be instance of GT.');
 chkarg(istypesizeof(w, 'Axis'), '"w" should be instance of Axis.');

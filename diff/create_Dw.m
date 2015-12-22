@@ -1,4 +1,4 @@
-function Dw = create_Dw(w, N, f1, fg)
+function Dw = create_Dw(w, N, f1, fg, isaddition)
 % Creates the forward difference matrix (without dl division).  For the backward
 % difference matrix, take the transpose or conjugate transpose appropriately, as
 % shown in create_Ds().
@@ -11,12 +11,17 @@ chkarg(istypesizeof(N, 'int', [1 w.count]), '"N" should be length-%d row vector 
 chkarg(istypesizeof(f1, 'complex'), '"f1" should be complex.');
 chkarg(istypesizeof(fg, 'complex'), '"fg" should be complex.');
 
-% Translate spatial indices (i,j,k) into matrix indices.
-M = prod(N);
-row_ind = 1:M;
-col_ind_curr = 1:M;
+if nargin < 5  % no isaddition
+	isaddition = false;
+end
+chkarg(istypesizeof(isaddition, 'logical'), '"isaddition" should be logical.');
 
-col_ind_next = reshape(1:M, N);
+% Translate spatial indices (i,j,k) into matrix indices.
+Ntot = prod(N);
+row_ind = 1:Ntot;
+col_ind_curr = 1:Ntot;
+
+col_ind_next = reshape(1:Ntot, N);
 shift = zeros(1, w.count);
 shift(w) = -1;
 col_ind_next = circshift(col_ind_next, shift);
@@ -32,5 +37,9 @@ a_ind{w} = N(w);
 a_next(a_ind{:}) = fg;
 
 % Create the sparse matrix.
+if ~isaddition
+	a_curr = -a_curr;  % make Dw to perform subtraction
+end
+
 Dw = sparse([row_ind(:); row_ind(:)], [col_ind_curr(:); col_ind_next(:)], ...
-            [-a_curr(:); a_next(:)], M, M);
+	[a_curr(:); a_next(:)], Ntot, Ntot);
