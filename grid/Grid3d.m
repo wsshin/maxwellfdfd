@@ -22,6 +22,15 @@ classdef Grid3d < handle
 		lg  %  {x_prim with ghost, x_dual with ghost; y_prim with ghost, y_dual with ghost; z_prim with ghost, z_dual with ghost};
 		lall  %  {x_prim with ghost, x_dual with extra vertices; y_prim with ghost, y_dual with extra vertices; z_prim with ghost, z_dual with extra vertices};
 		bound  %  [xall_prim(1), xall_prim(end); yall_prim(1), yall_prim(end); zall_prim(1), zall_prim(end)]
+		
+		% Below, dl_prim is defined as diff(l_dual).  So, we should understand
+		% dl_prim as (dl)_prim rather than d(l_prim).  Initially this definitian
+		% may look counter-intuitive, but makes sense in the sense that it is
+		% evaluated at the dual grid locations.  The advantage of this
+		% definition is the consistency of subscripts when multiplying the PML
+		% scale factors with dl: there, s_prim, which is defined at the primary
+		% grid locations, is multiplied with dl_prim rather than dl_dual, so the
+		% same subscripts are used for dl and s.
         dl  % {diff(x_dual), diff(x_prim); diff(y_dual), diff(y_prim); diff(z_dual), diff(z_prim)}
         bc  % [bc_x, bc_y, bc_zp]
         N  % [Nx, Ny, Nz]: # of grid cells in the x, y, z directions
