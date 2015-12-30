@@ -32,6 +32,7 @@ eps_array = permute(eps_array, [3 4 5 1 2]);
 mu_array = permute(mu_array, [3 4 5 1 2]);
 
 [I, J, K] = ndgrid(1:grid3d.N(Axis.x), 1:grid3d.N(Axis.y), 1:grid3d.N(Axis.z));
+union_shape_map = containers.Map();
 for ft = FT.elems  % eps or mu
 	if ft == FT.e  % eps
 		gt = alter(ge);  % for smoothing eps, voxels to examine have H-fields at vertices
@@ -89,7 +90,7 @@ for ft = FT.elems  % eps or mu
 			assert(n_mat_ind >= 2);  % voxel is heterogeneous
 			
 			voxel = [l_voxel{Axis.x}(i:i+1); l_voxel{Axis.y}(j:j+1); l_voxel{Axis.z}(k:k+1)];  % voxel
-% 			voxel_center = [l_voxel_center{Axis.x}(i), l_voxel_center{Axis.y}(j), l_voxel_center{Axis.z}(k)];  % voxel
+			voxel_center = [l_voxel_center{Axis.x}(i), l_voxel_center{Axis.y}(j), l_voxel_center{Axis.z}(k)];  % voxel
 
 			mat_bg_ind = unique_mat_ind(1);  % background material
 			mat_bg = ind2mat_array(:, :, mat_bg_ind);
@@ -106,14 +107,25 @@ for ft = FT.elems  % eps or mu
 					unique_shape = ind2shape_array(unique_shape_inds);
 				else
 					assert(length(unique_shape_inds) >= 2);
-					unique_shape = union_shapes(ind2shape_array, unique_shape_inds);
+					key = mat2str(unique_shape_inds);
+					if union_shape_map.isKey(key)  % union shape already created
+						unique_shape = union_shape_map(key);
+					else % union shape not created yet
+						unique_shape = UnionShape(ind2shape_array(unique_shape_inds));
+						union_shape_map(key) = unique_shape;
+					end
 				end
 
 % 				[rvol, ndir] = unique_shape.smoothing_params(voxel, voxel_center);
-				[rvol, ndir] = unique_shape.smoothing_params(voxel);
+% 				[rvol, ndir] = unique_shape.smoothing_params(voxel);
+				rvol = unique_shape.fill_factor(voxel);
+				ndir = unique_shape.outward_normal(voxel);
+				xyz0 = 'xyz0'; fprintf('%s%s at %s: rvol = %f, ndir = %s\n', char(ft), xyz0(w), mat2str(voxel_center), rvol, mat2str(ndir));
+				
 				mat_bg = smooth_tensor(mat_fg, mat_bg, rvol, ndir);
-				if any(isnan(mat_bg(:)))
-					fprintf('here!\n');
+				if any(isnan(mat_bg(:)))  % possible if norm(ndir) = 0
+					exception = MException('Maxwell:subpixel', 'Material parameter tensor has NaN.');
+					throwAsCaller(exception);
 				end
 			end
 

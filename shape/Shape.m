@@ -236,50 +236,55 @@ classdef Shape < handle & matlab.mixin.Heterogeneous
 			shape = Shape(lprim_shifted, @lsf_shifted, this.dl_max);
 			shape.domain = domain_shifted;
 		end
-				
-		function [rvol, ndir] = smoothing_params(this, box)
-			chkarg(istypesizeof(box, 'real', [Axis.count, Sign.count]), ...
-				'"box" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
+		
+		function rvol = fill_factor(this, voxel)
+			chkarg(istypesizeof(voxel, 'real', [Axis.count, Sign.count]), ...
+				'"voxel" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
 
 			l_probe = cell(1, Axis.count);	
-			dl_sub = diff(box.') ./ this.n_subpxls;
+			dl_sub = diff(voxel.') ./ this.n_subpxls;
 			N_subpxls = this.n_subpxls^3;
 			
 			for w = Axis.elems
-				bnd = box(w, :);  % interval in w-direction
-
-				% Below, probing points are at the centers of subpixels.  One
-				% extra subpixel beyond each boundary of the box is considered
-				% to discard single-sided differences in gradient().
-				l_probe{w} = linspace(bnd(Sign.n) - dl_sub(w)/2, bnd(Sign.p) + dl_sub(w)/2, this.n_subpxls + 2);
+				bnd = voxel(w, :);  % interval in w-direction
+				l_probe{w} = linspace(bnd(Sign.n) + dl_sub(w)/2, bnd(Sign.p) - dl_sub(w)/2, this.n_subpxls);
 			end
 			
 			[X, Y, Z] = ndgrid(l_probe{:});
 			F = this.lsf(X, Y, Z);
 			
-			Fin = F(2:end-1, 2:end-1, 2:end-1);  % values at interior points of box
-			is_contained = (Fin > 0);
-			at_interface = (Fin == 0);
+			is_contained = (F > 0);
+			at_interface = (F == 0);
 			rvol = sum(double(is_contained(:))) + 0.5 * sum(double(at_interface(:)));
 			rvol = rvol / N_subpxls;
+		end
+		
+		function ndir = outward_normal(this, voxel)
+			chkarg(istypesizeof(voxel, 'real', [Axis.count, Sign.count]), ...
+				'"voxel" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
 			
-			[Fy, Fx, Fz] = gradient(F, dl_sub(Axis.y), dl_sub(Axis.x), dl_sub(Axis.z));  % x and y are swapped due to MATLAB's definiton of gradient
-			Fx = Fx(2:end-1, 2:end-1, 2:end-1);
-			Fy = Fy(2:end-1, 2:end-1, 2:end-1);
-			Fz = Fz(2:end-1, 2:end-1, 2:end-1);
-			
-			gradF = [Fx(:), Fy(:), Fz(:)];
-			normF = sqrt(sum(gradF.^2, 2));
-			gradF = bsxfun(@rdivide, gradF, normF);
-			
-			ndir = -sum(gradF) ./ N_subpxls;  % (-) sign is for outward direction
+			ndir = this.outward_normal_center(voxel);
+			if norm(ndir) == 0  % possile if voxel center is at crease of lsf in union shape
+				ndir = this.outward_normal_edge_avg(voxel);
+			end
+		end
+		
+		function ndir = outward_normal_edge_avg(this, voxel)
+			chkarg(istypesizeof(voxel, 'real', [Axis.count, Sign.count]), ...
+				'"voxel" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
 
+			dl = diff(voxel.');
+			l = mat2cell(voxel.', Sign.count, ones(1, Axis.count));
+			[X, Y, Z] = ndgrid(l{:});
+			F = this.lsf(X, Y, Z);
+			
+			ndir = NaN(1, Axis.count);
+			for w = Axis.elems
+				dFw = -diff(F, 1, int(w));
+				ndir(w) = mean(dFw(:)) / dl(w);
+			end
+			
 			norm_n = norm(ndir);
-
-			% Each row of gradF has norm == 1.  If the norm of the average
-			% gradient is much smaller than the norm of each gradient (== 1),
-			% assume that the average gradient is zero; otherwise the error is
-			% amplified by the division by a small number (= norm_n).
 			if norm_n < 10*eps
 				ndir = [0 0 0];
 			else
@@ -287,41 +292,192 @@ classdef Shape < handle & matlab.mixin.Heterogeneous
 			end
 		end
 		
-		function [rvol, ndir] = smoothing_params2(this, box, center)
+		function ndir = outward_normal_center(this, box)
 			chkarg(istypesizeof(box, 'real', [Axis.count, Sign.count]), ...
 				'"box" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
-			chkarg(istypesizeof(center, 'real', [1 Axis.count]), ...
-				'"center" should be length-%d row vector with real elements.', Axis.count);
-			chkarg(all(box(:,Sign.n) < center(:)) && all(box(:,Sign.p) > center(:)), ...
-				'"center" should be included in "box".');
 
-			l_probe = cell(1, Axis.count);	
-			dl_sub = diff(box.') ./ this.n_subpxls;
-			N_subpxls = this.n_subpxls^3;
-			
+			c = mean(box.');
+			dl = diff(box.');
+			l = mat2cell(repmat(c, Sign.count*Axis.count, 1), Sign.count*Axis.count, ones(1, Axis.count));
 			for w = Axis.elems
-				bnd = box(w, :);  % interval in w-direction
-
+				for s = Sign.elems
+					l{w}(Sign.count * subsindex(w) + int(s)) = box(w, s);
+				end
+			end
+			
+			ndir = this.lsf(l{:});
+			ndir = reshape(ndir, Sign.count, Axis.count);
+			ndir = -diff(ndir) ./ dl;			
+			
+			norm_n = norm(ndir);
+			if norm_n < 10*eps
+				ndir = [0 0 0];
+			else
+				ndir = ndir ./ norm_n;
+			end
+		end
+		
+% 		function [rvol, ndir] = smoothing_params4(this, box)
+% 			chkarg(istypesizeof(box, 'real', [Axis.count, Sign.count]), ...
+% 				'"box" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
+% 
+% 			l_probe = cell(1, Axis.count);	
+% 			dl_sub = diff(box.') ./ this.n_subpxls;
+% 			N_subpxls = this.n_subpxls^3;
+% 			
+% 			for w = Axis.elems
+% 				bnd = box(w, :);  % interval in w-direction
+% 
+% % 				% Below, probing points are at the centers of subpixels.  One
+% % 				% extra subpixel beyond each boundary of the box is considered
+% % 				% to discard single-sided differences in gradient().
+% % 				l_probe{w} = linspace(bnd(Sign.n) - dl_sub(w)/2, bnd(Sign.p) + dl_sub(w)/2, this.n_subpxls + 2);
+% 
+% 				l_probe{w} = linspace(bnd(Sign.n) + dl_sub(w)/2, bnd(Sign.p) - dl_sub(w)/2, this.n_subpxls);
+% 			end
+% 			
+% 			[X, Y, Z] = ndgrid(l_probe{:});
+% 			F = this.lsf(X, Y, Z);
+% 			
+% % 			Fin = F(2:end-1, 2:end-1, 2:end-1);  % values at interior points of box
+% % 			is_contained = (Fin > 0);
+% % 			at_interface = (Fin == 0);
+% 
+% 			is_contained = (F > 0);
+% 			at_interface = (F == 0);
+% 			rvol = sum(double(is_contained(:))) + 0.5 * sum(double(at_interface(:)));
+% 			rvol = rvol / N_subpxls;
+% 			
+% % 			[Fy, Fx, Fz] = gradient(F, dl_sub(Axis.y), dl_sub(Axis.x), dl_sub(Axis.z));  % x and y are swapped due to MATLAB's definiton of gradient
+% % 			Fx = Fx(2:end-1, 2:end-1, 2:end-1);
+% % 			Fy = Fy(2:end-1, 2:end-1, 2:end-1);
+% % 			Fz = Fz(2:end-1, 2:end-1, 2:end-1);
+% % 			
+% % 			gradF = [Fx(:), Fy(:), Fz(:)];
+% % 			normF = sqrt(sum(gradF.^2, 2));
+% % 			gradF = bsxfun(@rdivide, gradF, normF);
+% % 			
+% % 			ndir = sum(gradF) ./ N_subpxls;
+% 
+% 			dl = diff(box.');
+% 			l = mat2cell(box.', Sign.count, ones(1, Axis.count));
+% 			[X, Y, Z] = ndgrid(l{:});
+% 			F = this.lsf(X, Y, Z);
+% 			
+% 			ndir = NaN(1, Axis.count);
+% 			for w = Axis.elems
+% 				dFw = -diff(F, 1, int(w));
+% 				ndir(w) = mean(dFw(:)) / dl(w);
+% 			end
+% 			
+% 			norm_n = norm(ndir);
+% 
+% 			% Each row of gradF has norm == 1.  If the norm of the average
+% 			% gradient is much smaller than the norm of each gradient (== 1),
+% 			% assume that the average gradient is zero; otherwise the error is
+% 			% amplified by the division by a small number (= norm_n).
+% 			if norm_n < 10*eps
+% 				ndir = [0 0 0];
+% 			else
+% 				ndir = ndir ./ norm_n;
+% 			end
+% 		end
+% 		
+% 		function [rvol, ndir] = smoothing_params3(this, box)
+% 			chkarg(istypesizeof(box, 'real', [Axis.count, Sign.count]), ...
+% 				'"box" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
+% 
+% 			l_probe = cell(1, Axis.count);	
+% 			dl_sub = diff(box.') ./ this.n_subpxls;
+% 			N_subpxls = this.n_subpxls^3;
+% 			
+% 			for w = Axis.elems
+% 				bnd = box(w, :);  % interval in w-direction
+% 
+% % 				% Below, probing points are at the centers of subpixels.  One
+% % 				% extra subpixel beyond each boundary of the box is considered
+% % 				% to discard single-sided differences in gradient().
+% % 				l_probe{w} = linspace(bnd(Sign.n) - dl_sub(w)/2, bnd(Sign.p) + dl_sub(w)/2, this.n_subpxls + 2);
+% 
+% 				l_probe{w} = linspace(bnd(Sign.n) + dl_sub(w)/2, bnd(Sign.p) - dl_sub(w)/2, this.n_subpxls);
+% 			end
+% 			
+% 			[X, Y, Z] = ndgrid(l_probe{:});
+% 			F = this.lsf(X, Y, Z);
+% 			
+% % 			Fin = F(2:end-1, 2:end-1, 2:end-1);  % values at interior points of box
+% % 			is_contained = (Fin > 0);
+% % 			at_interface = (Fin == 0);
+% 
+% 			is_contained = (F > 0);
+% 			at_interface = (F == 0);
+% 			rvol = sum(double(is_contained(:))) + 0.5 * sum(double(at_interface(:)));
+% 			rvol = rvol / N_subpxls;
+% 			
+% % 			[Fy, Fx, Fz] = gradient(F, dl_sub(Axis.y), dl_sub(Axis.x), dl_sub(Axis.z));  % x and y are swapped due to MATLAB's definiton of gradient
+% % 			Fx = Fx(2:end-1, 2:end-1, 2:end-1);
+% % 			Fy = Fy(2:end-1, 2:end-1, 2:end-1);
+% % 			Fz = Fz(2:end-1, 2:end-1, 2:end-1);
+% % 			
+% % 			gradF = [Fx(:), Fy(:), Fz(:)];
+% % 			normF = sqrt(sum(gradF.^2, 2));
+% % 			gradF = bsxfun(@rdivide, gradF, normF);
+% % 			
+% % 			ndir = sum(gradF) ./ N_subpxls;
+% 
+% 			c = mean(box.');
+% 			dl = diff(box.');
+% 			l = mat2cell(repmat(c, Sign.count*Axis.count, 1), Sign.count*Axis.count, ones(1, Axis.count));
+% 			for w = Axis.elems
+% 				for s = Sign.elems
+% 					l{w}(Sign.count * subsindex(w) + int(s)) = box(w, s);
+% 				end
+% 			end
+% 			
+% 			
+% 			ndir = this.lsf(l{:});
+% 			ndir = reshape(ndir, Sign.count, Axis.count);
+% 			ndir = -diff(ndir) ./ dl;			
+% 			
+% 			norm_n = norm(ndir);
+% 
+% 			% Each row of gradF has norm == 1.  If the norm of the average
+% 			% gradient is much smaller than the norm of each gradient (== 1),
+% 			% assume that the average gradient is zero; otherwise the error is
+% 			% amplified by the division by a small number (= norm_n).
+% 			if norm_n < 10*eps
+% 				ndir = [0 0 0];
+% 			else
+% 				ndir = ndir ./ norm_n;
+% 			end
+% 		end
+% 		
+% 		function [rvol, ndir] = smoothing_params1(this, box)
+% 			chkarg(istypesizeof(box, 'real', [Axis.count, Sign.count]), ...
+% 				'"box" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
+% 
+% 			l_probe = cell(1, Axis.count);	
+% 			dl_sub = diff(box.') ./ this.n_subpxls;
+% 			N_subpxls = this.n_subpxls^3;
+% 			
+% 			for w = Axis.elems
+% 				bnd = box(w, :);  % interval in w-direction
+% 
 % 				% Below, probing points are at the centers of subpixels.  One
 % 				% extra subpixel beyond each boundary of the box is considered
 % 				% to discard single-sided differences in gradient().
 % 				l_probe{w} = linspace(bnd(Sign.n) - dl_sub(w)/2, bnd(Sign.p) + dl_sub(w)/2, this.n_subpxls + 2);
-
-				l_probe{w} = linspace(bnd(Sign.n) + dl_sub(w)/2, bnd(Sign.p) - dl_sub(w)/2, this.n_subpxls);
-			end
-			
-			[X, Y, Z] = ndgrid(l_probe{:});
-			F = this.lsf(X, Y, Z);
-			
+% 			end
+% 			
+% 			[X, Y, Z] = ndgrid(l_probe{:});
+% 			F = this.lsf(X, Y, Z);
+% 			
 % 			Fin = F(2:end-1, 2:end-1, 2:end-1);  % values at interior points of box
 % 			is_contained = (Fin > 0);
 % 			at_interface = (Fin == 0);
-
-			is_contained = (F > 0);
-			at_interface = (F == 0);
-			rvol = sum(double(is_contained(:))) + 0.5 * sum(double(at_interface(:)));
-			rvol = rvol / N_subpxls;
-			
+% 			rvol = sum(double(is_contained(:))) + 0.5 * sum(double(at_interface(:)));
+% 			rvol = rvol / N_subpxls;
+% 			
 % 			[Fy, Fx, Fz] = gradient(F, dl_sub(Axis.y), dl_sub(Axis.x), dl_sub(Axis.z));  % x and y are swapped due to MATLAB's definiton of gradient
 % 			Fx = Fx(2:end-1, 2:end-1, 2:end-1);
 % 			Fy = Fy(2:end-1, 2:end-1, 2:end-1);
@@ -331,29 +487,88 @@ classdef Shape < handle & matlab.mixin.Heterogeneous
 % 			normF = sqrt(sum(gradF.^2, 2));
 % 			gradF = bsxfun(@rdivide, gradF, normF);
 % 			
-% 			ndir = sum(gradF) ./ N_subpxls;
-
-			vc = [center - dl_sub/2; center + dl_sub/2];  % vicinity of center
-			lc = mat2cell([center; center], 2, [1 1 1]);
-			
-			ndir = NaN(1, Axis.count);
-			for w = Axis.elems
-				loc = lc;
-				loc{w} = vc(:, w);
-				ndir(w) = -diff(this.lsf(loc{:})) ./ dl_sub(w);  % (-) sign is for outward direction
-			end
-			
-			norm_n = norm(ndir);
-
-			% Each row of gradF has norm == 1.  If the norm of the average
-			% gradient is much smaller than the norm of each gradient (== 1),
-			% assume that the average gradient is zero; otherwise the error is
-			% amplified by the division by a small number (= norm_n).
-			if norm_n < 10*eps
-				ndir = [0 0 0];
-			else
-				ndir = ndir ./ norm_n;
-			end
-		end		
+% 			ndir = -sum(gradF) ./ N_subpxls;  % (-) sign is for outward direction
+% 
+% 			norm_n = norm(ndir);
+% 
+% 			% Each row of gradF has norm == 1.  If the norm of the average
+% 			% gradient is much smaller than the norm of each gradient (== 1),
+% 			% assume that the average gradient is zero; otherwise the error is
+% 			% amplified by the division by a small number (= norm_n).
+% 			if norm_n < 10*eps
+% 				ndir = [0 0 0];
+% 			else
+% 				ndir = ndir ./ norm_n;
+% 			end
+% 		end
+% 		
+% 		function [rvol, ndir] = smoothing_params2(this, box, center)
+% 			chkarg(istypesizeof(box, 'real', [Axis.count, Sign.count]), ...
+% 				'"box" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
+% 			chkarg(istypesizeof(center, 'real', [1 Axis.count]), ...
+% 				'"center" should be length-%d row vector with real elements.', Axis.count);
+% 			chkarg(all(box(:,Sign.n) < center(:)) && all(box(:,Sign.p) > center(:)), ...
+% 				'"center" should be included in "box".');
+% 
+% 			l_probe = cell(1, Axis.count);	
+% 			dl_sub = diff(box.') ./ this.n_subpxls;
+% 			N_subpxls = this.n_subpxls^3;
+% 			
+% 			for w = Axis.elems
+% 				bnd = box(w, :);  % interval in w-direction
+% 
+% % 				% Below, probing points are at the centers of subpixels.  One
+% % 				% extra subpixel beyond each boundary of the box is considered
+% % 				% to discard single-sided differences in gradient().
+% % 				l_probe{w} = linspace(bnd(Sign.n) - dl_sub(w)/2, bnd(Sign.p) + dl_sub(w)/2, this.n_subpxls + 2);
+% 
+% 				l_probe{w} = linspace(bnd(Sign.n) + dl_sub(w)/2, bnd(Sign.p) - dl_sub(w)/2, this.n_subpxls);
+% 			end
+% 			
+% 			[X, Y, Z] = ndgrid(l_probe{:});
+% 			F = this.lsf(X, Y, Z);
+% 			
+% % 			Fin = F(2:end-1, 2:end-1, 2:end-1);  % values at interior points of box
+% % 			is_contained = (Fin > 0);
+% % 			at_interface = (Fin == 0);
+% 
+% 			is_contained = (F > 0);
+% 			at_interface = (F == 0);
+% 			rvol = sum(double(is_contained(:))) + 0.5 * sum(double(at_interface(:)));
+% 			rvol = rvol / N_subpxls;
+% 			
+% % 			[Fy, Fx, Fz] = gradient(F, dl_sub(Axis.y), dl_sub(Axis.x), dl_sub(Axis.z));  % x and y are swapped due to MATLAB's definiton of gradient
+% % 			Fx = Fx(2:end-1, 2:end-1, 2:end-1);
+% % 			Fy = Fy(2:end-1, 2:end-1, 2:end-1);
+% % 			Fz = Fz(2:end-1, 2:end-1, 2:end-1);
+% % 			
+% % 			gradF = [Fx(:), Fy(:), Fz(:)];
+% % 			normF = sqrt(sum(gradF.^2, 2));
+% % 			gradF = bsxfun(@rdivide, gradF, normF);
+% % 			
+% % 			ndir = sum(gradF) ./ N_subpxls;
+% 
+% 			vc = [center - dl_sub/2; center + dl_sub/2];  % vicinity of center
+% 			lc = mat2cell([center; center], 2, [1 1 1]);
+% 			
+% 			ndir = NaN(1, Axis.count);
+% 			for w = Axis.elems
+% 				loc = lc;
+% 				loc{w} = vc(:, w);
+% 				ndir(w) = -diff(this.lsf(loc{:})) ./ dl_sub(w);  % (-) sign is for outward direction
+% 			end
+% 			
+% 			norm_n = norm(ndir);
+% 
+% 			% Each row of gradF has norm == 1.  If the norm of the average
+% 			% gradient is much smaller than the norm of each gradient (== 1),
+% 			% assume that the average gradient is zero; otherwise the error is
+% 			% amplified by the division by a small number (= norm_n).
+% 			if norm_n < 10*eps
+% 				ndir = [0 0 0];
+% 			else
+% 				ndir = ndir ./ norm_n;
+% 			end
+% 		end		
 	end
 end
