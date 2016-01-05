@@ -255,9 +255,11 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 				if istypesizeof(arg, 'TFSFPlaneSrc')
 					isTFSF = true;
 				end
-				src = arg;
-				src.set_gridtype(ge);
-				srcj_array = [srcj_array(1:end), src];
+				srcj_array_curr = arg;
+				for src = srcj_array_curr
+					src.set_gridtype(ge);
+				end
+				srcj_array = [srcj_array(1:end), srcj_array_curr];
 				iarg = iarg + 1; arg = varargin{iarg};
 			end
 			iarg = iarg - 1;
@@ -272,9 +274,11 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 				if istypesizeof(arg, 'TFSFPlaneSrc')
 					isTFSF = true;
 				end
-				src = arg;
-				src.set_gridtype(alter(ge));
-				srcm_array = [srcm_array(1:end), src];
+				srcm_array_curr = arg;
+				for src = srcm_array_curr
+					src.set_gridtype(alter(ge));
+				end
+				srcm_array = [srcm_array(1:end), srcm_array_curr];
 				iarg = iarg + 1; arg = varargin{iarg};
 			end
 			iarg = iarg - 1;
