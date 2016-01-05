@@ -72,28 +72,28 @@ classdef Box < Shape
 			this = this@Shape(super_args{:});
 		end
 		
-		function rvol = fill_factor(this, voxel)
-			chkarg(istypesizeof(voxel, 'real', [Axis.count, Sign.count]), ...
-				'"voxel" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
-			
-			bound = this.bound;
-			if ~isempty(this.domain)
-				% Calculate the intersection between this Box and domain.
-				bound = sort([this.bound, this.domain.bound]);
-				bound = bound(:, 2:3);
-			end
-			
-			has_no_overlap = any((voxel(:, Sign.n) >= bound(:, Sign.p)) | (voxel(:, Sign.p) <= bound(:, Sign.n)));
-			
-			if has_no_overlap
-				rvol = 0.0;
-			else
-				overlap = sort([bound, voxel], 2);
-				overlap = overlap(:, 2:3);  % take two mid points in each direction
-				
-				rvol = prod(diff(overlap.')) / prod(diff(voxel.'));
-			end
-		end
+% 		function rvol = fill_factor(this, voxel)
+% 			chkarg(istypesizeof(voxel, 'real', [Axis.count, Sign.count]), ...
+% 				'"voxel" should be %d-by-%d array with real elements.', Axis.count, Sign.count);
+% 			
+% 			bound = this.bound;
+% 			if ~isempty(this.domain)
+% 				% Calculate the intersection between this Box and domain.
+% 				bound = sort([this.bound, this.domain.bound]);
+% 				bound = bound(:, 2:3);
+% 			end
+% 			
+% 			has_no_overlap = any((voxel(:, Sign.n) >= bound(:, Sign.p)) | (voxel(:, Sign.p) <= bound(:, Sign.n)));
+% 			
+% 			if has_no_overlap
+% 				rvol = 0.0;
+% 			else
+% 				overlap = sort([bound, voxel], 2);
+% 				overlap = overlap(:, 2:3);  % take two mid points in each direction
+% 				
+% 				rvol = prod(diff(overlap.')) / prod(diff(voxel.'));
+% 			end
+% 		end
 		
 % 		function [n_dir, r_vol] = ndir_and_rvol(this, pixel)
 % 			chkarg(istypesizeof(pixel, 'real', [Axis.count, Sign.count]), '"pixel" should be [xmin xmax; ymin ymax; zmin zmax].');

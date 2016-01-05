@@ -1,5 +1,5 @@
-function [eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] = ...
-	assign_mat_ind(grid3d, ge, obj_array, eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array)
+function [eps_imat_cell, mu_imat_cell, eps_ishape_cell, mu_ishape_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] = ...
+	assign_mat_ind(grid3d, ge, obj_array, eps_imat_cell, mu_imat_cell, eps_ishape_cell, mu_ishape_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array)
 
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid.');
 chkarg(istypesizeof(ge, 'GT'), '"ge" should be instance of GT.');
@@ -7,31 +7,31 @@ chkarg(istypesizeof(obj_array, 'Object', [1 0]), ...
 	'"obj_array" should be row vector of instances of Object.');
 
 if nargin < 4  % no eps_ind_cell
-	eps_ind_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
+	eps_imat_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
 end
-chkarg(istypesizeof(eps_ind_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
-	'"eps_ind_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
+chkarg(istypesizeof(eps_imat_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
+	'"eps_imat_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
 	Axis.count, grid3d.Ncell{:});
 
 if nargin < 5  % no mu_ind_cell
-	mu_ind_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
+	mu_imat_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
 end
-chkarg(istypesizeof(mu_ind_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
-	'"mu_ind_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
+chkarg(istypesizeof(mu_imat_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
+	'"mu_imat_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
 	Axis.count, grid3d.Ncell{:});
 
 if nargin < 6  % no eps_shape_ind_cell
-	eps_shape_ind_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
+	eps_ishape_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
 end
-chkarg(istypesizeof(eps_shape_ind_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
-	'"eps_shape_ind_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
+chkarg(istypesizeof(eps_ishape_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
+	'"eps_ishape_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
 	Axis.count, grid3d.Ncell{:});
 
 if nargin < 7  % no mu_shape_ind_cell
-	mu_shape_ind_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
+	mu_ishape_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};
 end
-chkarg(istypesizeof(mu_shape_ind_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
-	'"mu_shape_ind_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
+chkarg(istypesizeof(mu_ishape_cell, 'intcell', [1, 1+Axis.count], grid3d.N), ...
+	'"mu_ishape_cell" should be length-%d cell array whose each element is %d-by-%d-by-%d array with integer elements.', ...
 	Axis.count, grid3d.Ncell{:});
 
 if nargin < 8  % no ind2eps_array
@@ -65,25 +65,29 @@ chkarg(istypesizeof(mu_array, 'complex', [Axis.count Axis.count grid3d.N]), ...
 	'"mu_array" should be %d-by-%d-by-%d-by-%d-by-%d array with complex elements.', Axis.count, Axis.count, grid3d.Ncell{:});
 
 ind_bound = cell(1, Axis.count);  % indices
-eps_ind = size(ind2eps_array, 3);
-mu_ind = size(ind2mu_array, 3);
-shape_ind = numel(ind2shape_array);
+i_eps = size(ind2eps_array, 3);
+i_mu = size(ind2mu_array, 3);
+i_shape = numel(ind2shape_array);
 for obj = obj_array
 	shape = obj.shape;
 	material = obj.material;
 
+	% Below, even if the current material has been used before, treat it as a
+	% different material and assign a different material index to it if other
+	% material was used between these two same materials.  This mimicks the way
+	% we use materials in 'OBJ' parameter group in maxwell_run().
 	if ~isequal(ind2eps_array(:,:,end), material.eps)
 		ind2eps_array = cat(3, ind2eps_array, material.eps);
-		eps_ind = eps_ind + 1;  % eps_ind == size(ind2eps_cell, 3)
+		i_eps = i_eps + 1;  % i_eps == size(ind2eps_cell, 3)
 	end
 	
 	if ~isequal(ind2mu_array(:,:,end), material.mu)
 		ind2mu_array = cat(3, ind2mu_array, material.mu);
-		mu_ind = mu_ind + 1;  % mu_ind = size(ind2mu_cell, 3);
+		i_mu = i_mu + 1;  % i_mu = size(ind2mu_cell, 3);
 	end
 	
 	ind2shape_array = [ind2shape_array(1:end), shape];
-	shape_ind = shape_ind + 1;
+	i_shape = i_shape + 1;
 	
 	for ft = FT.elems  % E or H
 		if ft == FT.e
@@ -124,8 +128,8 @@ for obj = obj_array
 					end
 					
 					% Ew locations are examined for smoothing mu.
-					mu_ind_cell{w}(ind_bound{:}) = mu_ind;
-					mu_shape_ind_cell{w}(ind_bound{:}) = shape_ind;
+					mu_imat_cell{w}(ind_bound{:}) = i_mu;
+					mu_ishape_cell{w}(ind_bound{:}) = i_shape;
 				else  % ft == FT.h
 					if w == 1+Axis.count  % set off-diagonal entries of mu
 						for r = Axis.elems
@@ -140,8 +144,8 @@ for obj = obj_array
 					end
 					
 					% Hw locations are examined for smoothing eps.
-					eps_ind_cell{w}(ind_bound{:}) = eps_ind;
-					eps_shape_ind_cell{w}(ind_bound{:}) = shape_ind;
+					eps_imat_cell{w}(ind_bound{:}) = i_eps;
+					eps_ishape_cell{w}(ind_bound{:}) = i_shape;
 				end
 			else  % shape is not a Box
 				[X, Y, Z] = ndgrid(l_Fw{Axis.x}(ind_bound{Axis.x}), l_Fw{Axis.y}(ind_bound{Axis.y}), l_Fw{Axis.z}(ind_bound{Axis.z}));
@@ -164,8 +168,8 @@ for obj = obj_array
 					end
 					
 					% Ew locations are examined for smoothing mu.
-					mu_ind_cell{w}(ind_logical) = mu_ind;
-					mu_shape_ind_cell{w}(ind_logical) = shape_ind;
+					mu_imat_cell{w}(ind_logical) = i_mu;
+					mu_ishape_cell{w}(ind_logical) = i_shape;
 				else  % ft == FT.h
 					if w == 1+Axis.count  % set off-diagonal entries of mu
 						for r = Axis.elems
@@ -180,8 +184,8 @@ for obj = obj_array
 					end
 					
 					% Hw locations are examined for smoothing eps.
-					eps_ind_cell{w}(ind_logical) = eps_ind;
-					eps_shape_ind_cell{w}(ind_logical) = shape_ind;
+					eps_imat_cell{w}(ind_logical) = i_eps;
+					eps_ishape_cell{w}(ind_logical) = i_shape;
 				end				
 			end
 		end
@@ -191,7 +195,7 @@ end
 % Check if eps_shape_cell{w} and mu_shape_cell{w} have the correct size; they
 % were initially empty arrays.
 for w = Axis.elems
-	assert((grid3d.N(Axis.z)==1 && isequal(size(eps_shape_ind_cell{w}), grid3d.N([Axis.x Axis.y]))) ...
-		|| isequal(size(eps_shape_ind_cell{w}), grid3d.N));
-	assert(isequal(size(eps_shape_ind_cell{w}), size(mu_shape_ind_cell{w})));
+	assert((grid3d.N(Axis.z)==1 && isequal(size(eps_ishape_cell{w}), grid3d.N([Axis.x Axis.y]))) ...
+		|| isequal(size(eps_ishape_cell{w}), grid3d.N));
+	assert(isequal(size(eps_ishape_cell{w}), size(mu_ishape_cell{w})));
 end
