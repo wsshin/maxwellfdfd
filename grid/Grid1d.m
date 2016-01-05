@@ -24,6 +24,7 @@ classdef Grid1d < handle
 	end
 
 	properties (Dependent, SetAccess = immutable)
+        Ng  % number of grid cells including ghost cell
 		lg  % {l_prim with ghost, l_dual with ghost}: l with ghost vertex (beyond boundary)
 		lall  % {l_prim with ghost, l_dual with extra vertices}: l with vertices to interpolate fields at corners of simulation domain
 		bound  % [lall_prim(1), lall_prim(end)]
@@ -80,6 +81,10 @@ classdef Grid1d < handle
 			
 			% Initialize kBloch
 			this.kBloch = 0;
+		end
+		
+		function Ng = get.Ng(this)
+			Ng = this.N + 1;
 		end
 		
 		function lg = get.lg(this)

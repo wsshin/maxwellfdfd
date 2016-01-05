@@ -1,3 +1,4 @@
+
 classdef Grid3d < handle
     % Grid has all the information related to the 3D Yee grid.
 	% It does not have physical quantities dependent on frequencies, e.g.,
@@ -34,7 +35,9 @@ classdef Grid3d < handle
         dl  % {diff(x_dual), diff(x_prim); diff(y_dual), diff(y_prim); diff(z_dual), diff(z_prim)}
         bc  % [bc_x, bc_y, bc_zp]
         N  % [Nx, Ny, Nz]: # of grid cells in the x, y, z directions
-		Ncell  % {[Nx], [Ny], [Nz]}: to pass as function arguments
+		Ncell  % {Nx, Ny, Nz}: to pass as function arguments
+        Ng  % [Nx+1, Ny+1, Nz+1]: # of grid cells including ghost cells in the x, y, z directions
+		Ngcell  % {Nx+1, Ny+1, Nz+1}: to pass as function arguments
 		Ntot  % Nx*Ny*Nz
 		L  % [Lx, Ly, Lz]: size of the domain
         Npml  % [Npml_xn, Npml_xp; Npml_yn, Npml_yp; Npml_zn, Npml_zp]: # of primary grid cells inside PML
@@ -144,6 +147,17 @@ classdef Grid3d < handle
 
 		function Ncell = get.Ncell(this)
 			Ncell = num2cell(this.N);
+		end
+		
+		function Ng = get.Ng(this)
+			Ng = NaN(1, Axis.count);
+			for w = Axis.elems
+				Ng(w) = this.comp(w).Ng;
+			end
+		end
+		
+		function Ngcell = get.Ngcell(this)
+			Ngcell = num2cell(this.Ng);
 		end
 		
 		function Ntot = get.Ntot(this)
