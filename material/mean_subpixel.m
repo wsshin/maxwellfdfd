@@ -96,16 +96,20 @@ for ft = FT.elems  % eps or mu
 end
 
 % Replace multiple shapes corresponding to the same material in a voxel with a
-% union shape.
-ishape_union_map = containers.Map();
+% union shape, and a map from shape indices to the voxels intersecting the
+% shapes.
+ishape2union_shape_map = containers.Map('KeyType', 'char', 'ValueType', 'uint32');
+ishape2voxel_array_map = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
 for ft = FT.elems  % eps or mu
 	for w = [1+Axis.count int(Axis.elems)]
 		ijk_hetero = ijk_hetero_cell{ft, w};
+		voxel_hetero_array = voxel_hetero_cell{ft, w};
 		imat_hetero_array = imat_hetero_cell{ft, w};
 		ishape_hetero_array = ishape_hetero_cell{ft, w};
 		
 		n_hetero = size(ijk_hetero, 1);  % number of hetero voxels
 		for i_hetero = 1:n_hetero
+			voxel = voxel_hetero_array(:,:,i_hetero);
 			imat_voxel = imat_hetero_array(:,:,:,i_hetero);  % materials inside voxel
 			ishape_voxel = ishape_hetero_array(:,:,:,i_hetero);  % shapes inside voxel
 			
@@ -121,19 +125,27 @@ for ft = FT.elems  % eps or mu
 
 				unique_ishapes = unique(ishape_fg(:));  % column and sorted
 				unique_ishapes = unique_ishapes.';  % row and sorted
-				if length(unique_ishapes) >= 2
+				if length(unique_ishapes) == 1
+					ishape_union = unique_ishapes;
+				else  % length(unique_ishapes) >= 2
 					key = mat2str(unique_ishapes);  % generate string as key
-					if ishape_union_map.isKey(key)  % union shape already created
-						ishape_union = ishape_union_map(key);
+					if ishape2union_shape_map.isKey(key)  % union shape already created
+						ishape_union = ishape2union_shape_map(key);
 					else % union shape yet to be created
 						shape_union = UnionShape(ind2shape_array(unique_ishapes));
 						ind2shape_array = [ind2shape_array(1:end), shape_union];
 						ishape_union = length(ind2shape_array);
-						ishape_union_map(key) = ishape_union;
+						ishape2union_shape_map(key) = ishape_union;
 					end
 					
 					ishape_voxel(where_imat_fg) = ishape_union;
 					ishape_hetero_array(:,:,:,i_hetero) = ishape_voxel;
+				end
+				
+				if ishape2voxel_array_map.isKey(ishape_union)
+					ishape2voxel_array_map(ishape_union) = cat(3, ishape2voxel_array_map(ishape_union), voxel);
+				else
+					ishape2voxel_array_map(ishape_union) = voxel;
 				end
 			end
 
@@ -143,45 +155,22 @@ for ft = FT.elems  % eps or mu
 	end
 end
 
-% Construct a cell array mapping shape indices to the voxels intersecting the shapes.
-n_shape = length(ind2shape_array);
-ishape2voxel_cell = cell(1, n_shape);
-for ft = FT.elems  % eps or mu
-	for w = [1+Axis.count int(Axis.elems)]
-		ijk_hetero = ijk_hetero_cell{ft, w};
-		voxel_hetero_array = voxel_hetero_cell{ft, w};
-		ishape_hetero_array = ishape_hetero_cell{ft, w};
-
-		n_hetero = size(ijk_hetero, 1);  % number of hetero voxels
-		ishape_hetero_array = reshape(ishape_hetero_array, Sign.count^Axis.count, n_hetero);
-		
-		for i_shape = 1:n_shape
-			ishape2voxel_array = ishape2voxel_cell{i_shape};
-			
-			has_voxel_shape = any(ishape_hetero_array == i_shape);  % row
-			voxels_with_shape = voxel_hetero_array(:, :, has_voxel_shape);
-			ishape2voxel_array = cat(3, ishape2voxel_array, voxels_with_shape);
-			
-			ishape2voxel_cell{i_shape} = ishape2voxel_array;
-		end
-	end
-end
-
 % Calculate the fill factors and outward normals of the shapes in hetero voxels.
-ishape2rvol_cell = cell(1, n_shape);
-ishape2ndir_cell = cell(1, n_shape);
-for i_shape = 1:n_shape
+key_ishapes = ishape2voxel_array_map.keys;
+ishape2rvol_array_map = containers.Map(key_ishapes, cell(size(key_ishapes)));
+ishape2ndir_array_map = containers.Map(key_ishapes, cell(size(key_ishapes)));
+for i_shape = cell2mat(key_ishapes)
 	shape = ind2shape_array(i_shape);
-	voxel_array = ishape2voxel_cell{i_shape};  % scatter(voxel_array(Axis.x,:), voxel_array(Axis.y,:)) shows voxel distribution
-	if ~isempty(voxel_array)
-		tic; ishape2rvol_cell{i_shape} = shape.fill_factor(voxel_array); toc;
-		tic; ishape2ndir_cell{i_shape} = shape.outward_normal(voxel_array); toc;
-	end
+	voxel_array = ishape2voxel_array_map(i_shape);  % scatter(voxel_array(Axis.x,:), voxel_array(Axis.y,:)) shows voxel distribution
+	
+	assert(~isempty(voxel_array))
+	ishape2rvol_array_map(i_shape) = shape.fill_factor(voxel_array);
+	ishape2ndir_array_map(i_shape) = shape.outward_normal(voxel_array);
 end
 
 % Perform subpixel smoothing using the precalculated fill factors and outward
 % normals.
-shape_voxel_counter = zeros(1, n_shape);
+ishape2voxelcounter_map = containers.Map(key_ishapes, zeros(size(key_ishapes)), 'UniformValues', true);
 for ft = FT.elems  % eps or mu
 	if ft == FT.e  % eps
 		ind2mat_array = ind2eps_array;
@@ -215,14 +204,18 @@ for ft = FT.elems  % eps or mu
 				i_shape = unique(ishape_fg(:));  % column and sorted
 				assert(length(i_shape) == 1);  % union shapes already generated
 				
-				c_shape = shape_voxel_counter(i_shape);  % counter
+				c_shape = ishape2voxelcounter_map(i_shape);  % counter
 				c_shape = c_shape + 1;
-				shape_voxel_counter(i_shape) = c_shape;
+				ishape2voxelcounter_map(i_shape) = c_shape;
 				
-				rvol = ishape2rvol_cell{i_shape}(c_shape);
-				ndir = ishape2ndir_cell{i_shape}(:, c_shape);
+				rvol_array = ishape2rvol_array_map(i_shape);
+				rvol = rvol_array(c_shape);
 				
-% 				voxel = ishape2voxel_cell{i_shape}(:,:,c_shape);
+				ndir_array = ishape2ndir_array_map(i_shape);
+				ndir = ndir_array(:, c_shape);
+				
+% 				voxel_array = ishape2voxel_array_map(i_shape);
+% 				voxel = voxel_array(:,:,c_shape);
 % 				voxel_center = mean(voxel.');
 % 				xyz0 = 'xyz0'; fprintf('%s%s at %s: rvol = %f, ndir = %s\n', char(ft), xyz0(w), mat2str(voxel_center), rvol, mat2str(ndir));
 
