@@ -341,14 +341,14 @@ function [osc, grid3d, s_factor_cell, eps_array, mu_array, J_cell, M_cell, ...
 	% Construct material parameters.
 	if ~isepsgiven
 % 		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, obj_array);  % Nx x Ny x Nz
-		[eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] ...
+		[eps_imat_cell, mu_imat_cell, eps_ishape_cell, mu_ishape_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] ...
 			= assign_mat_ind(grid3d, ge, obj_array);
 	end
 	pm.mark('eps and mu assignment');
 
 % 	eps_cell = mean_material_node(grid3d, ge, eps_node_cell);
 % 	mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);
-	[eps_array, mu_array] = mean_subpixel(grid3d, ge, domain, eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
+	[eps_array, mu_array] = mean_subpixel(grid3d, ge, domain, eps_imat_cell, mu_imat_cell, eps_ishape_cell, mu_ishape_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
 	pm.mark('eps and mu smoothing');
 
 	if ~isTFSF
@@ -413,9 +413,9 @@ function [osc, grid3d, s_factor_cell, eps_array, mu_array, J_cell, M_cell, ...
 % 		[eps_node_cell, mu_node_cell] = assign_material_node(grid3d, sobj_array, eps_node_cell, mu_node_cell);  % Nx x Ny x Nz
 % 		eps_cell = mean_material_node(grid3d, ge, eps_node_cell);  % Nx x Ny x Nz
 % 		mu_cell = mean_material_node(grid3d, alter(ge), mu_node_cell);  % Nx x Ny x Nz
-		[eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] ...
-			= assign_mat_ind(grid3d, ge, sobj_array, eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
-		[eps_array, mu_array] = mean_subpixel(grid3d, ge, domain, eps_ind_cell, mu_ind_cell, eps_shape_ind_cell, mu_shape_ind_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
+		[eps_imat_cell, mu_imat_cell, eps_ishape_cell, mu_ishape_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array] ...
+			= assign_mat_ind(grid3d, ge, sobj_array, eps_imat_cell, mu_imat_cell, eps_ishape_cell, mu_ishape_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
+		[eps_array, mu_array] = mean_subpixel(grid3d, ge, domain, eps_imat_cell, mu_imat_cell, eps_ishape_cell, mu_ishape_cell, ind2eps_array, ind2mu_array, ind2shape_array, eps_array, mu_array);
 
 		pm.mark('TF/SF source assignment');
 	end

@@ -157,98 +157,103 @@ end
 
 % Calculate the fill factors and outward normals of the shapes in hetero voxels.
 key_ishapes = ishape2voxel_array_map.keys;
-ishape2rvol_array_map = containers.Map(key_ishapes, cell(size(key_ishapes)));
-ishape2ndir_array_map = containers.Map(key_ishapes, cell(size(key_ishapes)));
-for i_shape = cell2mat(key_ishapes)
-	shape = ind2shape_array(i_shape);
-	voxel_array = ishape2voxel_array_map(i_shape);  % scatter(voxel_array(Axis.x,:), voxel_array(Axis.y,:)) shows voxel distribution
-	
-	assert(~isempty(voxel_array))
-	ishape2rvol_array_map(i_shape) = shape.fill_factor(voxel_array);
-	ishape2ndir_array_map(i_shape) = shape.outward_normal(voxel_array);
+if ~isempty(key_ishapes)
+	ishape2rvol_array_map = containers.Map(key_ishapes, cell(size(key_ishapes)));
+	ishape2ndir_array_map = containers.Map(key_ishapes, cell(size(key_ishapes)));
+
+	for i_shape = cell2mat(key_ishapes)
+		shape = ind2shape_array(i_shape);
+		voxel_array = ishape2voxel_array_map(i_shape);  % scatter(voxel_array(Axis.x,:), voxel_array(Axis.y,:)) shows voxel distribution
+
+		assert(~isempty(voxel_array))
+		ishape2rvol_array_map(i_shape) = shape.fill_factor(voxel_array);
+		ishape2ndir_array_map(i_shape) = shape.outward_normal(voxel_array);
+	end	
 end
 
 % Perform subpixel smoothing using the precalculated fill factors and outward
 % normals.
-ishape2voxelcounter_map = containers.Map(key_ishapes, zeros(size(key_ishapes)), 'UniformValues', true);
-for ft = FT.elems  % eps or mu
-	if ft == FT.e  % eps
-		ind2mat_array = ind2eps_array;
-	else  % mu
-		ind2mat_array = ind2mu_array;
-	end
+if ~isempty(key_ishapes)
+	ishape2voxelcounter_map = containers.Map(key_ishapes, zeros(size(key_ishapes)), 'UniformValues', true);	
+	for ft = FT.elems  % eps or mu
+		if ft == FT.e  % eps
+			ind2mat_array = ind2eps_array;
+		else  % mu
+			ind2mat_array = ind2mu_array;
+		end
 
-	for w = [1+Axis.count int(Axis.elems)]
-		ijk_hetero = ijk_hetero_cell{ft, w};
-		imat_hetero_array = imat_hetero_cell{ft, w};
-		ishape_hetero_array = ishape_hetero_cell{ft, w};
-		
-		n_hetero = size(ijk_hetero, 1);  % number of hetero voxels
-		for i_hetero = 1:n_hetero
-			imat_voxel = imat_hetero_array(:,:,:,i_hetero);  % materials inside voxel
-			ishape_voxel = ishape_hetero_array(:,:,:,i_hetero);  % shapes inside voxel
-			
-			unique_imat = unique(imat_voxel(:));  % unique and sorted
-			n_imat = length(unique_imat);
-			assert(n_imat >= 2);  % voxel is heterogeneous
+		for w = [1+Axis.count int(Axis.elems)]
+			ijk_hetero = ijk_hetero_cell{ft, w};
+			imat_hetero_array = imat_hetero_cell{ft, w};
+			ishape_hetero_array = ishape_hetero_cell{ft, w};
 
-			imat_bg = unique_imat(1);  % background material
-			mat_bg = ind2mat_array(:, :, imat_bg);
-			for k_imat = 2:n_imat  % 1st material is background material, so ignored
-				imat_fg = unique_imat(k_imat);  % foreground material (which is added later)
-				mat_fg = ind2mat_array(:, :, imat_fg);
+			n_hetero = size(ijk_hetero, 1);  % number of hetero voxels
+			for i_hetero = 1:n_hetero
+				imat_voxel = imat_hetero_array(:,:,:,i_hetero);  % materials inside voxel
+				ishape_voxel = ishape_hetero_array(:,:,:,i_hetero);  % shapes inside voxel
 
-				where_imat_fg = (imat_voxel == imat_fg);
-				ishape_fg = ishape_voxel(where_imat_fg);
+				unique_imat = unique(imat_voxel(:));  % unique and sorted
+				n_imat = length(unique_imat);
+				assert(n_imat >= 2);  % voxel is heterogeneous
 
-				i_shape = unique(ishape_fg(:));  % column and sorted
-				assert(length(i_shape) == 1);  % union shapes already generated
-				
-				c_shape = ishape2voxelcounter_map(i_shape);  % counter
-				c_shape = c_shape + 1;
-				ishape2voxelcounter_map(i_shape) = c_shape;
-				
-				rvol_array = ishape2rvol_array_map(i_shape);
-				rvol = rvol_array(c_shape);
-				
-				ndir_array = ishape2ndir_array_map(i_shape);
-				ndir = ndir_array(:, c_shape);
-				
-% 				voxel_array = ishape2voxel_array_map(i_shape);
-% 				voxel = voxel_array(:,:,c_shape);
-% 				voxel_center = mean(voxel.');
-% 				xyz0 = 'xyz0'; fprintf('%s%s at %s: rvol = %f, ndir = %s\n', char(ft), xyz0(w), mat2str(voxel_center), rvol, mat2str(ndir));
+				imat_bg = unique_imat(1);  % background material
+				mat_bg = ind2mat_array(:, :, imat_bg);
+				for k_imat = 2:n_imat  % 1st material is background material, so ignored
+					imat_fg = unique_imat(k_imat);  % foreground material (which is added later)
+					mat_fg = ind2mat_array(:, :, imat_fg);
 
-				mat_bg = smooth_tensor(mat_fg, mat_bg, rvol, ndir);
-				if any(isnan(mat_bg(:)))  % possible if norm(ndir) = 0
-					exception = MException('Maxwell:subpixel', 'Material parameter tensor has NaN.');
-					throwAsCaller(exception);
+					where_imat_fg = (imat_voxel == imat_fg);
+					ishape_fg = ishape_voxel(where_imat_fg);
+
+					i_shape = unique(ishape_fg(:));  % column and sorted
+					assert(length(i_shape) == 1);  % union shapes already generated
+
+					c_shape = ishape2voxelcounter_map(i_shape);  % counter
+					c_shape = c_shape + 1;
+					ishape2voxelcounter_map(i_shape) = c_shape;
+
+					rvol_array = ishape2rvol_array_map(i_shape);
+					rvol = rvol_array(c_shape);
+
+					ndir_array = ishape2ndir_array_map(i_shape);
+					ndir = ndir_array(:, c_shape);
+
+% 					voxel_array = ishape2voxel_array_map(i_shape);
+% 					voxel = voxel_array(:,:,c_shape);
+% 					voxel_center = mean(voxel.');
+% 					xyz0 = 'xyz0'; fprintf('%s%s at %s: rvol = %f, ndir = %s\n', char(ft), xyz0(w), mat2str(voxel_center), rvol, mat2str(ndir));
+
+					mat_bg = smooth_tensor(mat_fg, mat_bg, rvol, ndir);
+					if any(isnan(mat_bg(:)))  % possible if norm(ndir) = 0
+						exception = MException('Maxwell:subpixel', 'Material parameter tensor has NaN.');
+						throwAsCaller(exception);
+					end
 				end
-			end
-			mat_smoothed = mat_bg;
+				mat_smoothed = mat_bg;
 
-			ijk = num2cell(ijk_hetero(i_hetero, :));
-			if w == 1+Axis.count
-				ind_offdiag = (eye(Axis.count) == 0);
-				if ft == FT.e
-					eps_array(ijk{:}, ind_offdiag) = mat_smoothed(ind_offdiag);
-				else
-					mu_array(ijk{:}, ind_offdiag) = mat_smoothed(ind_offdiag);
-				end
-			else  % w == x, y, z
-				if ft == FT.e
-					eps_array(ijk{:}, w, w) = mat_smoothed(w, w);
-				else
-					mu_array(ijk{:}, w, w) = mat_smoothed(w, w);
+				ijk = num2cell(ijk_hetero(i_hetero, :));
+				if w == 1+Axis.count
+					ind_offdiag = (eye(Axis.count) == 0);
+					if ft == FT.e
+						eps_array(ijk{:}, ind_offdiag) = mat_smoothed(ind_offdiag);
+					else
+						mu_array(ijk{:}, ind_offdiag) = mat_smoothed(ind_offdiag);
+					end
+				else  % w == x, y, z
+					if ft == FT.e
+						eps_array(ijk{:}, w, w) = mat_smoothed(w, w);
+					else
+						mu_array(ijk{:}, w, w) = mat_smoothed(w, w);
+					end
 				end
 			end
 		end
 	end
-end
 
-% Sanity check.
-for i_shape = cell2mat(key_ishapes)
-	assert(ishape2voxelcounter_map(i_shape) == size(ishape2voxel_array_map(i_shape), 3));
+	% Sanity check.
+	for i_shape = cell2mat(key_ishapes)
+		assert(ishape2voxelcounter_map(i_shape) == size(ishape2voxel_array_map(i_shape), 3));
+	end
 end
 
 eps_array = ipermute(eps_array, [3 4 5 1 2]);

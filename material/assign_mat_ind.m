@@ -115,7 +115,7 @@ for obj = obj_array
 			
 			if istypesizeof(shape, 'Box')
 				if ft == FT.e
-					if w == 1+Axis.count  % set off-diagonal entries of eps
+					if w == 1+Axis.count  % set off-diagonal entries of eps using eps at grid cell vertices
 						for r = Axis.elems
 							c = cycle(r);
 							while c ~= r
@@ -123,7 +123,7 @@ for obj = obj_array
 								c = cycle(c);
 							end
 						end
-					else  % w == x, y, z; set diagonal entries of eps
+					else  % w == x, y, z; set diagonal entries of eps using eps at Ew locations
 						eps_array(w, w, ind_bound{:}) = material.eps(w, w);
 					end
 					
@@ -131,7 +131,7 @@ for obj = obj_array
 					mu_imat_cell{w}(ind_bound{:}) = i_mu;
 					mu_ishape_cell{w}(ind_bound{:}) = i_shape;
 				else  % ft == FT.h
-					if w == 1+Axis.count  % set off-diagonal entries of mu
+					if w == 1+Axis.count  % set off-diagonal entries of mu using mu at grid cell vertices
 						for r = Axis.elems
 							c = cycle(r);
 							while c ~= r
@@ -139,7 +139,7 @@ for obj = obj_array
 								c = cycle(c);
 							end
 						end
-					else  % w == x, y, z; set diagonal entries of mu
+					else  % w == x, y, z; set diagonal entries of mu using mu at Hw locations
 						mu_array(w, w, ind_bound{:}) = material.mu(w, w);
 					end
 					
