@@ -66,11 +66,11 @@ for ft = FT.elems  % eps or mu
 		n_hetero = size(ijk_hetero, 1);  % number of hetero voxels
 		voxel_hetero_array = NaN(Axis.count, Sign.count, n_hetero);	
 		for s = Sign.elems
-			i_shape = ijk_hetero(:, Axis.x).' + subsindex(s);  % row
+			is = ijk_hetero(:, Axis.x).' + subsindex(s);  % row
 			js = ijk_hetero(:, Axis.y).' + subsindex(s);  % row
 			ks = ijk_hetero(:, Axis.z).' + subsindex(s);  % row
 					
-			voxel_hetero_array(:, s, :) = [l_voxel{Axis.x}(i_shape); l_voxel{Axis.y}(js); l_voxel{Axis.z}(ks)];  % Axis.count x n_hetero
+			voxel_hetero_array(:, s, :) = [l_voxel{Axis.x}(is); l_voxel{Axis.y}(js); l_voxel{Axis.z}(ks)];  % LHS: Axis.count x 1 x n_hetero, RHS: Axis.count x n_hetero
 		end
 		
 		imat_hetero_array = NaN(Sign.count, Sign.count, Sign.count, n_hetero);
@@ -78,12 +78,12 @@ for ft = FT.elems  % eps or mu
 		for sx = Sign.elems
 			for sy = Sign.elems
 				for sz = Sign.elems
-					i_shape = ijk_hetero(:, Axis.x).' + subsindex(sx);  % row
+					is = ijk_hetero(:, Axis.x).' + subsindex(sx);  % row
 					js = ijk_hetero(:, Axis.y).' + subsindex(sy);  % row
 					ks = ijk_hetero(:, Axis.z).' + subsindex(sz);  % row
 					
-					imat_hetero_array(sx, sy, sz, :) = imat_array(sub2ind(grid3d.Ng, i_shape, js, ks));  % n_hetero x Axis.count
-					ishape_hetero_array(sx, sy, sz, :) = ishape_array(sub2ind(grid3d.Ng, i_shape, js, ks));  % n_hetero x Axis.count
+					imat_hetero_array(sx, sy, sz, :) = imat_array(sub2ind(grid3d.Ng, is, js, ks));  % n_hetero x Axis.count
+					ishape_hetero_array(sx, sy, sz, :) = ishape_array(sub2ind(grid3d.Ng, is, js, ks));  % n_hetero x Axis.count
 				end
 			end
 		end
@@ -95,9 +95,9 @@ for ft = FT.elems  % eps or mu
 	end
 end
 
-% Replace multiple shapes corresponding to the same material in a voxel with a
-% union shape, and a map from shape indices to the voxels intersecting the
-% shapes.
+% Replace multiple shapes corresponding to the same material in a heterogeneous
+% voxel with a union shape, and construct a map from shape indices to the voxels
+% intersecting the shapes.
 ishape2union_shape_map = containers.Map('KeyType', 'char', 'ValueType', 'uint32');
 ishape2voxel_array_map = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
 for ft = FT.elems  % eps or mu
@@ -246,9 +246,10 @@ for ft = FT.elems  % eps or mu
 	end
 end
 
-% for i_shape = 1:n_shape
-% 	assert(shape_voxel_counter{i_shape} == size(ishape2voxel_cell{i_shape}, 3));
-% end
+% Sanity check.
+for i_shape = cell2mat(key_ishapes)
+	assert(ishape2voxelcounter_map(i_shape) == size(ishape2voxel_array_map(i_shape), 3));
+end
 
 eps_array = ipermute(eps_array, [3 4 5 1 2]);
 mu_array = ipermute(mu_array, [3 4 5 1 2]);
