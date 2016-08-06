@@ -78,10 +78,12 @@ classdef MatrixEquation
 			this.omega = omega;
 
 			% Mask elements corresponding to PEC.
-			ind_pec = isinf(abs(this.eps));
-			this.eps(ind_pec) = 1;
-			this.pm = ones(size(ind_pec));  % PEC mask
-			this.pm(ind_pec) = 0;
+			if this.ft == FT.e
+				ind_pec = isinf(abs(this.eps));
+				this.eps(ind_pec) = 1;
+				this.pm = ones(size(ind_pec));  % PEC mask
+				this.pm(ind_pec) = 0;
+			end
 
 			test_vector_identity = false;
 			if test_vector_identity
