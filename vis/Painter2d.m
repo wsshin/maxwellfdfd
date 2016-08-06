@@ -302,7 +302,7 @@ classdef Painter2d < handle
 			
 			% Update the title.
 			str = this.scalar2d.name;
-			if this.withabs
+			if this.withabs && ~(str(1)=='|' && str(end)=='|')
 				str = ['|', str, '|'];
 			end
 			str = [str, ' for \lambda_0 = ', num2str(this.scalar2d.osc.in_L0())];
