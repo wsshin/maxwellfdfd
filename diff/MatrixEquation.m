@@ -76,6 +76,8 @@ classdef MatrixEquation
 			this.m = [M_cell{Axis.x}(:) ; M_cell{Axis.y}(:) ; M_cell{Axis.z}(:)];
 			
 			this.omega = omega;
+			
+			this.ft = eqtype.f;
 
 			% Mask elements corresponding to PEC.
 			if this.ft == FT.e
@@ -91,8 +93,6 @@ classdef MatrixEquation
 				fprintf('norm(Dive * Cm, 1) = %e\n', norm(Dive * this.Cm, 1));
 				fprintf('norm(Divm * Ce, 1) = %e\n', norm(Divm * this.Ce, 1));
 			end
-			
-			this.ft = eqtype.f;
 		end
 		
         function [A, b] = matrix_op(this)

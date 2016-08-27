@@ -34,6 +34,14 @@ Famp = Scalar3d(famp, grid3d, gt_array, osc, physQcell, ['|', name, '|']);
 
 
 function array = attach_extra_Famp(array, w, grid3d)
+% This makes Painter2d.prep_data() estimates the field values at the boundary of
+% the computational domain inaccurate.  For example, suppose that we have Ez on
+% the xy-plane with a PEC boundary at the x-boundaries.  Then, Ez = 0 at x = 0,
+% but for Eamp we have nonzero |Ez| before and after x = 0, leading to a nonzero
+% estimate of |Ez| at x = 0.  We cannot handle this case correctly in the
+% current visualization framework...  It might be better to estimate Eamp and
+% the corners of Yee's cells rather than centers?
+
 ind_n = {':', ':', ':'};
 ind_p = {':', ':', ':'};
 bc_w = grid3d.bc(w);
