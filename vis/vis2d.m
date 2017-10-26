@@ -20,8 +20,8 @@
 % <Scalar2d.html |Scalar2d|>.
 %
 % |vis2d(..., obj_array)| visualizes the objects in |obj_array| with the slice
-% of a field.  The elements of |obj_array| are instances of <Object.html
-% |Object|>.
+% of a field.  The elements of |obj_array| are instances of <EMObject.html
+% |EMObject|>.
 %
 % |vis2d(..., obj_array, src_array)| visualizes the objects and sources in
 % |obj_array| and |src_array| with the slice of a field.  The elements of
@@ -86,8 +86,8 @@ iarg = iarg + 1;
 obj_array = [];
 if iarg <= nargin && ~istypesizeof(varargin{iarg}, 'struct')
 	obj_array = varargin{iarg};
-	chkarg(istypesizeof(obj_array, 'Object', [1 0]), ...
-		'argument %d should be "obj_array" (row vector with Object as elements).', iarg);
+	chkarg(istypesizeof(obj_array, 'EMObject', [1 0]), ...
+		'argument %d should be "obj_array" (row vector with EMObject as elements).', iarg);
 	iarg = iarg + 1;
 end
 

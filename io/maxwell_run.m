@@ -28,7 +28,7 @@
 % <Scalar3d.html Scalar3d>.
 %
 % |[E_cell, H_cell, obj_array, src_array] = maxwell_run(...)| returns arrays of
-% instances of <Object.html |Object|> and <Source.html |Source|>.  The |Object|
+% instances of <EMObject.html |EMObject|> and <Source.html |Source|>.  The |EMObject|
 % and |Source| elements represent the objects and sources placed in the
 % simulation domain, so they can be used to visualize the simulation domain.
 %
@@ -133,8 +133,8 @@
 % shape arguments (i.e., |shape_1, shape_2, ...|).  Each shape is an instance of
 % <Shape.html |Shape|>.
 %
-% |obj_i|: instance or array of instances of <Object.html |Object|>.  Each
-% |Object| is composed of a material and shape.
+% |obj_i|: instance or array of instances of <EMObject.html |EMObject|>.  Each
+% |EMObject| is composed of a material and shape.
 %
 % |eps_node_array| is a 3D array of permittivities defined at the centers of
 % grid cells.  The size of the array should be the same as the number of grid

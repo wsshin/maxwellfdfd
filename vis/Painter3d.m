@@ -183,7 +183,7 @@ classdef Painter3d < handle
 		end
 		
 		function set.obj_array(this, obj_array)
-			chkarg(istypesizeof(obj_array, 'Object', [1, 0]), '"obj_array" should be row vector of instances of Object.');
+			chkarg(istypesizeof(obj_array, 'EMObject', [1, 0]), '"obj_array" should be row vector of instances of EMObject.');
 			this.obj_array = obj_array;
 		end
 		

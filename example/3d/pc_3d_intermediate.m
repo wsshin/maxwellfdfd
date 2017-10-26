@@ -24,10 +24,10 @@ td = 10;  % divider for t
 dd = 10;  % divider for d = 2*r
 
 domain = Domain([-5.5*a, 5.5*a; -3.5*h, 3.5*h; -3*t, 3*t], [a/ad, a/ad, t/td]);
-domain_vac = Object(domain, vac);
+domain_vac = EMObject(domain, vac);
 
 slab = Box([-5.5*a, 5.5*a; -3.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
-slab_Si = Object(slab, Si);
+slab_Si = EMObject(slab, Si);
 
 hole = CircularCylinder(Axis.z, t, [0 0 0], r, [2*r/dd, 2*r/dd, t/td]);
 
@@ -38,7 +38,7 @@ slab_yp = Box([-5.5*a, 5.5*a; 0.5*h, 3.5*h; -t/2, t/2], [a/ad, a/ad, t/td]);
 hole_yp_array = periodize_shape(hole, {[a 0 0], [a/2 h 0], [0 0 t]}, slab_yp);
 
 hole_array = [hole_yn_array, hole_yp_array];
-hole_array_vac = Object(hole_array, vac);
+hole_array_vac = EMObject(hole_array, vac);
 
 %% Create a source.
 src = PointSrc(Axis.y, [0, 0, 0]);

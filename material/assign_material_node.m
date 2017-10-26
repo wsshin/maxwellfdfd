@@ -1,8 +1,8 @@
 function [eps_node_cell, mu_node_cell] = assign_material_node(grid3d, object_array, eps_node_cell, mu_node_cell)
 
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid.');
-chkarg(istypesizeof(object_array, 'Object', [1 0]), ...
-	'"object_array" should be row vector of instances of Object.');
+chkarg(istypesizeof(object_array, 'EMObject', [1 0]), ...
+	'"object_array" should be row vector of instances of EMObject.');
 
 if nargin < 3  % no eps_node_cell
 	eps_node_cell = {NaN(grid3d.N), NaN(grid3d.N), NaN(grid3d.N)};

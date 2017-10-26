@@ -13,16 +13,16 @@ silica = Material.fromtable(osc, 'Palik/SiO2', 'none');
 Ag = Material.fromtable(osc, 'CRC/Ag', [0.5 0.5 0.5]);  % [0.5 0.5 0.5]: gray in RGB
 
 domain = Domain([-700, 700; -600, 600; -200, 1700], 20);
-domain_silica = Object(domain, silica);
+domain_silica = EMObject(domain, silica);
 
 refined_domain = Box([-50, 50; -50, 50; -200, 1700], [2, 2, 20]);
-refined_domain_silica = Object(refined_domain, silica);
+refined_domain_silica = EMObject(refined_domain, silica);
 
 film1 = Box([-700, -25; -25, 25; -200, 1700], 20);
-film1_Ag = Object(film1, Ag);
+film1_Ag = EMObject(film1, Ag);
 
 film2 = Box([25, 700; -25, 25; -200, 1700], 20);
-film2_Ag = Object(film2, Ag);
+film2_Ag = EMObject(film2, Ag);
 
 src = ModalSrc(Axis.z, 200, 2.0);
 

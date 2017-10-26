@@ -39,8 +39,8 @@
 % Mz_array}|
 % 
 % |[..., obj_array, src_array, mat_array] = build_system(...)| returns
-% additionally arrays of instances of <Object.html |Object|>, <Source.html
-% |Source|>, and <Material.html |Material|>.  The |Object| and |Source|
+% additionally arrays of instances of <EMObject.html |EMObject|>, <Source.html
+% |Source|>, and <Material.html |Material|>.  The |EMObject| and |Source|
 % elements represent the objects and sources placed in the simulation
 % domain, so they can be used to visualize the simulation domain.
 %
@@ -98,12 +98,12 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 	end
 
 	osc = Oscillation.empty();
-	obj_dom = Object.empty();
+	obj_dom = EMObject.empty();
 	shape_array = Shape.empty();
 	sshape_array = Shape.empty();
 	mat_array = Material.empty();
-	obj_array = Object.empty();
-	sobj_array = Object.empty();
+	obj_array = EMObject.empty();
+	sobj_array = EMObject.empty();
 	srcj_array = [];
 	srcm_array = [];
 	isepsgiven = false;
@@ -128,12 +128,12 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 		elseif ischar(arg) && strcmpi(arg,'DOM')
 			% Set up DOM.
 			iarg = iarg + 1; arg = varargin{iarg};
-			chkarg(iscell(arg) || istypesizeof(arg, 'Material') || istypesizeof(arg, 'Object'), ...
-				'argument #%d should be cell, instance of Material, or instance of Object.', iarg);
-			if istypesizeof(arg, 'Object')
+			chkarg(iscell(arg) || istypesizeof(arg, 'Material') || istypesizeof(arg, 'EMObject'), ...
+				'argument #%d should be cell, instance of Material, or instance of EMObject.', iarg);
+			if istypesizeof(arg, 'EMObject')
 				obj_dom = arg;
 				domain = obj_dom.shape;
-				chkarg(istypesizeof(domain, 'Domain'), 'argument #%d should be instance of Object with Domain as its shape.', iarg);
+				chkarg(istypesizeof(domain, 'Domain'), 'argument #%d should be instance of EMObject with Domain as its shape.', iarg);
 			else
 				if iscell(arg)
 					mat_dom = create_material(arg{:});
@@ -154,7 +154,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 				else  % arg is instance of Domain
 					domain = arg;
 				end
-				obj_dom = Object(domain, mat_dom);
+				obj_dom = EMObject(domain, mat_dom);
 			end
 			mat_array = [mat_array(1:end), obj_dom.material];
 	
@@ -204,10 +204,10 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 				mu_node_cell = {mu_node_temp, mu_node_temp, mu_node_temp};
 			else
 				% Set up objects.
-				obj_array_temp = Object.empty();
+				obj_array_temp = EMObject.empty();
 				shape_array_temp = Shape.empty();
-				while iscell(arg) || istypesizeof(arg, 'Material') || istypesizeof(arg, 'Object', [1 0])
-					if istypesizeof(arg, 'Object', [1 0])
+				while iscell(arg) || istypesizeof(arg, 'Material') || istypesizeof(arg, 'EMObject', [1 0])
+					if istypesizeof(arg, 'EMObject', [1 0])
 						objs = arg;
 						obj_array_temp = [obj_array_temp(1:end), objs];
 						for obj = objs
@@ -228,7 +228,7 @@ function [osc, grid3d, s_factor_cell, eps_cell, mu_cell, J_cell, M_cell, ...
 						while istypesizeof(arg, 'Shape', [1 0])
 							shapes = arg;
 							shape_array_temp = [shape_array_temp(1:end), shapes];
-							objs = Object(shapes, mat);
+							objs = EMObject(shapes, mat);
 							obj_array_temp = [obj_array_temp(1:end), objs];
 							iarg = iarg + 1; arg = varargin{iarg};
 						end

@@ -1,7 +1,7 @@
 function patch_handle_array = draw_objsrc(obj_array, src_array, grid3d, withinterp, withpml)
 
-chkarg(istypesizeof(obj_array, 'Object', [1 0]), ...
-	'"obj_array" should be row vector with Object as elements.');
+chkarg(istypesizeof(obj_array, 'EMObject', [1 0]), ...
+	'"obj_array" should be row vector with EMObject as elements.');
 chkarg(istypesizeof(grid3d, 'Grid3d'), '"grid3d" should be instance of Grid3d.');
 chkarg(istypesizeof(withinterp, 'logical'), '"withinterp" should be logical.');
 chkarg(istypesizeof(withpml, 'logical'), '"withpml" should be logical.');
@@ -18,7 +18,7 @@ for w = Axis.elems
 	end
 end
 
-boxes_pml = Object.empty(0,0);
+boxes_pml = EMObject.empty(0,0);
 gray = [0.5 0.5 0.5];
 if withpml
 	for w = Axis.elems
@@ -28,20 +28,20 @@ if withpml
 				bound(w, alter(s)) = grid3d.lpml(w,s);
 				box = Box(bound);
 				pml = Material('PML', gray, 1.0);
-				box_pml = Object(box, pml);
+				box_pml = EMObject(box, pml);
 				boxes_pml = [boxes_pml(1:end), box_pml];
 			end
 		end
 	end
 end
 
-srcobj_array = Object.empty(0, length(src_array));
+srcobj_array = EMObject.empty(0, length(src_array));
 i = 0;
 for src = src_array
 	i = i+1;
 	green = 'g';  % green
 	srcmat = Material('Source', green, 1.0);
-	srcobj_array(i) = Object(src.shape, srcmat);
+	srcobj_array(i) = EMObject(src.shape, srcmat);
 end
 
 patch_handle_array = [];

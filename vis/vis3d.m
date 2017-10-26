@@ -25,8 +25,8 @@
 % locations are automatically set at the most prominent locations.
 %
 % |vis3d(..., obj_array)| visualizes the objects in |obj_array| with the
-% slices.  The elements of |obj_array| are instances of <Object.html
-% |Object|>.
+% slices.  The elements of |obj_array| are instances of <EMObject.html
+% |EMObject|>.
 %
 % |vis3d(..., obj_array, src_array)| visualizes the objects and sources in
 % |obj_array| and |src_array| with the slices.  The elements of |src_array|
@@ -89,8 +89,8 @@ end
 obj_array = [];
 if iarg <= nargin && ~istypesizeof(arg, 'struct')
 	obj_array = varargin{iarg};
-	chkarg(istypesizeof(obj_array, 'Object', [1 0]), ...
-		'argument %d should be "obj_array" (row vector with Object as elements).', iarg);
+	chkarg(istypesizeof(obj_array, 'EMObject', [1 0]), ...
+		'argument %d should be "obj_array" (row vector with EMObject as elements).', iarg);
 	iarg = iarg + 1;
 	arg = varargin{iarg};
 end
