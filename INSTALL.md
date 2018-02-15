@@ -24,19 +24,8 @@ How to install MaxwellFDFD
 4. In `startup.m` file opened in Step 3, copy and paste the following lines:
 
 		maxwellfdfd_root = 'INSTALLATION DIRECTORY'
-		addpath(maxwellfdfd_root);
-		addpath([maxwellfdfd_root, filesep, 'base']);
-		addpath([maxwellfdfd_root, filesep, 'diff']);
-		addpath([maxwellfdfd_root, filesep, 'dielconst']);
-		addpath([maxwellfdfd_root, filesep, 'grid']);
-		addpath([maxwellfdfd_root, filesep, 'integ']);
-		addpath([maxwellfdfd_root, filesep, 'io']);
-		addpath([maxwellfdfd_root, filesep, 'material']);
-		addpath([maxwellfdfd_root, filesep, 'modesolver']);
-		addpath([maxwellfdfd_root, filesep, 'petsc']);
-		addpath([maxwellfdfd_root, filesep, 'shape']);
-		addpath([maxwellfdfd_root, filesep, 'source']);
-		addpath([maxwellfdfd_root, filesep, 'vis']);
+		addpath(genpath(maxwellfdfd_root));
+
 
 	and change `INSTALLATION DIRECTORY` in the first line to the directory path you chose in Step 2.  (Make sure that the directory path is enclosed by single quotes.)
 
