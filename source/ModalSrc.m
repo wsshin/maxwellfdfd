@@ -55,7 +55,7 @@
 % dynamic grid generation in <moxwell_run.html |maxwell_run|> will fail.
 
 %%% Example
-%   % Create an instance of PointSrc.
+%   % Create an instance of ModalSrc.
 %   modeopts.clue = 'order';
 %   modeopts.order = 1;
 %   src =  ModalSrc(Axis.y, -1000, modeopts);  % y = -1000 should not be primary grid point

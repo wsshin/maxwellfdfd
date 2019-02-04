@@ -23,7 +23,7 @@ How to install MaxwellFDFD
 
 4. In `startup.m` file opened in Step 3, copy and paste the following lines:
 
-		maxwellfdfd_root = 'INSTALLATION DIRECTORY'
+		maxwellfdfd_root = 'INSTALLATION DIRECTORY';
 		addpath(maxwellfdfd_root);
 		addpath([maxwellfdfd_root, filesep, 'base']);
 		addpath([maxwellfdfd_root, filesep, 'diff']);

@@ -14,7 +14,7 @@ classdef PhysUnit < handle
 			this.va(PhysQ.mu) = PhysC.mu0;  % permeability in mu0
 			this.va(PhysQ.E) = 1;  % E-field in V/m
 			this.va(PhysQ.H) = this.va(PhysQ.E) / PhysC.eta0;  % H-field in A/m
-			this.va(PhysQ.J) = this.va(PhysQ.H) / this.va(PhysQ.L);  % electric current density in A/m^2 (L0-dependent)
+			this.va(PhysQ.J) = this.va(	PhysQ.H) / this.va(PhysQ.L);  % electric current density in A/m^2 (L0-dependent)
 			this.va(PhysQ.M) = this.va(PhysQ.E) / this.va(PhysQ.L);  % magnetic current density in A/m^2 (L0-dependent)
 			this.va(PhysQ.I) = this.va(PhysQ.J) * this.va(PhysQ.L)^2;  % electric current in Amperes (L0-dependent)
 			this.va(PhysQ.V) = this.va(PhysQ.E) * this.va(PhysQ.L);  % voltage in Volts (L0-dependent)
