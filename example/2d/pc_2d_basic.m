@@ -61,12 +61,12 @@ if ~inspect_only
 	fprintf('left = %s\n', num2str(power_left));
 	fprintf('error = %s%%\n',num2str((power_left-power_right)/power_right*100));
 	
-	%%
-	Sx = poynting(Axis.x, E{Axis.y}, E{Axis.z}, H{Axis.y}, H{Axis.z}, Axis.y, 0);
-	[array, l] = Sx.data_original;
-	figure(3)
-	plot(l{2}, abs(array))
-	mx*a - 10*a
+	% %%
+	% Sx = poynting(Axis.x, E{Axis.y}, E{Axis.z}, H{Axis.y}, H{Axis.z}, Axis.y, 0);
+	% [array, l] = Sx.data_original;
+	% figure(3)
+	% plot(l{2}, abs(array))
+	% mx*a - 10*a
 	
 % 	%%
 % 	xs = E{Axis.z}.grid3d.l{Axis.x,GT.prim};
